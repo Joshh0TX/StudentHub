@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import './Login.css';
 
 
@@ -34,7 +34,7 @@ const Login = () => {
     if (isLogin) {
       navigate("/profile");
     } else {
-      navigate("/onboarding");
+      navigate("/Onboard");
     }
   };
 
@@ -84,7 +84,6 @@ const Login = () => {
               required
             />
           )}
-
           <button type="submit">
             {isLogin ? "Login" : "Sign Up"}
           </button>
