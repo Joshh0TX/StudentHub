@@ -5,11 +5,19 @@ import StudyMaterials from "./pages/Academic/StudyMaterials";
 import StudyGroups from "./pages/Academic/StudyGroups";
 import ExamSchedule from "./pages/Academic/ExamSchedule";
 import Resources from "./pages/Academic/Resources";
-
+import { Routes, Route } from "react-router-dom";
+import Login from './pages/Login/Login.jsx'
+import Onboard from "./pages/Onboarding/Onboard.jsx";
+import MarketHome from './pages/Marketplace/MarketHome.jsx';
 function App() {
+
+
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Login />}/>
+        <Route path="/Onboard" element={<Onboard />} />
+        <Route path="/marketplace" element={<MarketHome />} />
         <Route path="/academy" element={<AcademicHome />}>
           <Route index element={<StudyMaterials />} />
           <Route path="study-materials" element={<StudyMaterials />} />
