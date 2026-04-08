@@ -58,18 +58,31 @@ body {
   color: #6b7280;
 }
 
-.program-badge {
+.program-selects {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.program-select {
   padding: 8px 14px;
   font-size: 14px;
   font-weight: 500;
   color: #374151;
+  background-color: #ffffff;
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
-  background: #fff;
   cursor: pointer;
+  appearance: auto;
+  transition: border-color 0.15s ease;
+}
+
+.program-select:hover {
+  border-color: #9ca3af;
+}
+.program-select:focus {
+  outline: none;
+  border-color: #3b82f6;
 }
 
 /* ── Tab Nav ── */
@@ -110,4 +123,10 @@ body {
   flex: 1;
   padding: 32px;
   overflow-y: auto;
+}
+select {
+  border-style: none;
+}
+select :focus {
+  border-style: none;
 }
