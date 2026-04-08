@@ -65,7 +65,26 @@ export default function MarketHome() {
             />
           </label>
         </form>
-        {/* rest */}
+        <section className="markettopGird">
+            <div className="marketCard">
+                <p className="cardTitle">BGH delivery</p>
+                <p className="itemDesc">Delivery from BGH to rooms.</p>
+                <p className="marketPrice">N1200</p>
+                <p className="placeText">Diamond, Sapphire, Crystal and Platinum Halls</p>
+            </div>
+            <div className="marketCard">
+                <p className="cardTitle">Rice and Chicken</p>
+                <p className="itemDesc">One plate of jollof rice with one piece of chicken.</p>
+                <p className="marketPrice">N4000</p>
+                <p className="placeText">Emerald Hall</p>
+            </div>
+            <div className="marketCard">
+                <p className="cardTitle">Drinks</p>
+                <p className="itemDesc">Fanta, Sprite, Schweppes and Coke</p>
+                <p className="marketPrice">N500</p>
+                <p className="placeText">Queen Esther Hall</p>
+            </div>
+        </section>
       </main>
     </div>
   );
