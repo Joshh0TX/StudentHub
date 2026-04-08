@@ -1,0 +1,113 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: #f8f9fb;
+}
+
+.academic-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 44px;
+  height: 44px;
+  background-color: #3b82f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.program-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* ── Tab Nav ── */
+.tab-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 32px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-nav a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #6b7280;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease;
+}
+
+.tab-nav a:hover {
+  color: #111827;
+}
+
+.tab-nav a.active {
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+  font-weight: 500;
+}
+
+/* ── Page Content ── */
+.page-content {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+}
