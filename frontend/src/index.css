@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap");
+
 :root {
   --font-size: 16px;
   --background: #ffffff;
@@ -20,6 +22,7 @@
   --input: transparent;
   --input-background: #f3f3f5;
   --switch-background: #cbced4;
+  --font: "Space Grotesk", sans-serif;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: oklch(0.708 0 0);
@@ -39,10 +42,80 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+button,
+.btn,
+input[type="submit"],
+input[type="button"] {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #4f46e5;
+  color: var(--primary-foreground);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease,
+    color 150ms ease, border-color 150ms ease;
+}
+
+button:hover,
+.btn:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+button:active,
+.btn:active,
+input[type="submit"]:active,
+input[type="button"]:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+button:disabled,
+.btn:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+button:focus-visible,
+.btn:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="button"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
+}
+
+.btnSecondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.btnOutline {
+  background: transparent;
+  color: var(--primary);
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+}
+
+.btnDanger {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  border-color: color-mix(in oklch, var(--destructive) 60%, transparent);
+}
+
 .marketPage {
   background: var(--background);
   color: var(--foreground);
   padding: 24px 32px 64px;
+  font-family: var(--font);
 }
 
 .markettopGird {
@@ -53,10 +126,11 @@
 }
 
 .marketCard {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--switch-background);
+  color: var(--card-foreground);
   border-radius: 18px;
   padding: 18px 18px 22px;
+  font-family: var(--font);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   position: relative;
@@ -71,22 +145,35 @@
 }
 
 .itemDesc {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--card-foreground);
   font-size: 0.92rem;
   line-height: 1.4;
   margin-bottom: 12px;
 }
 
 .marketPrice {
-  color: var(--chart-2);
+  color: var(--chart-3);
   font-size: 1.35rem;
   font-weight: 700;
   margin: 6px 0 12px;
 }
 
-.placeText {
-  color: rgba(255, 255, 255, 0.7);
+.mTime {
+  color: var(--card-foreground);
   font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.placeText {
+  color: var(--card-foreground);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.sellerName {
+  color: var(--card-foreground);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
 }
 
 .marketCard img {
@@ -95,6 +182,15 @@
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 10px;
+}
+
+.itemNumber {
+  color: var(--card-foreground);
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 14px;
+  margin-bottom: 8px;
 }
 
 .marketForm {
@@ -148,4 +244,28 @@
   .marketForm {
     padding: 14px;
   }
+}
+
+.marketToggle {
+  margin-top: 12px;
+  width: fit-content;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #4f46e5;
+  color: var(--primary-foreground);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.marketToggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.marketToggle:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
