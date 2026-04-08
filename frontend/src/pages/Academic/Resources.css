@@ -1,5 +1,6 @@
 .resources-page {
   max-width: 860px;
+  width: 100%;
 }
 
 .resources-header {
@@ -127,4 +128,63 @@
 
 .resource-external:hover {
   color: #3b82f6;
+}
+
+/* ── Tablet (max 768px) ── */
+@media (max-width: 768px) {
+  .resources-header h1 {
+    font-size: 20px;
+  }
+
+  .resource-item {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .resource-card-header {
+    padding: 14px 16px;
+  }
+
+  .resource-name {
+    font-size: 14px;
+  }
+
+  .resource-desc {
+    font-size: 12px;
+  }
+}
+
+/* ── Mobile (max 480px) ── */
+@media (max-width: 480px) {
+  .resources-header {
+    margin-bottom: 20px;
+  }
+
+  .resources-header h1 {
+    font-size: 18px;
+  }
+
+  .resource-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+  }
+
+  .resource-desc {
+    display: none; /* hide description on very small screens */
+  }
+
+  .resource-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .resource-name {
+    font-size: 13px;
+  }
+
+  .resource-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
 }
