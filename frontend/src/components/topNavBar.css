@@ -1,0 +1,23 @@
+.top-navbar {
+  position: sticky; /* stays at top */
+  top: 0;
+  width: 100%;
+  background-color: #ffffff; /* white background */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+  z-index: 100; /* stay on top of other content */
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
