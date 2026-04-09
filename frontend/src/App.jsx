@@ -8,6 +8,7 @@ import Resources from "./pages/Academic/Resources";
 import Login from "./pages/Login/Login.jsx";
 import Onboard from "./pages/Onboarding/Onboard.jsx";
 import MarketHome from "./pages/Marketplace/MarketHome.jsx";
+import ProfilePage from "./pages/Profile/Profile.jsx";
 function App() {
   return (
     <Routes>
@@ -20,6 +21,7 @@ function App() {
         <Route path="study-groups" element={<StudyGroups />} />
         <Route path="exam-schedule" element={<ExamSchedule />} />
         <Route path="resources" element={<Resources />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );
