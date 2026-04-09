@@ -11,56 +11,107 @@ model User {
   id         String   @id @default(uuid())
   email      String   @unique
   password   String
+  name       String?
+  profilePic String?
+  bio        String?
   department String
   level      Int
   createdAt  DateTime @default(now())
 
-  groupMemberships GroupMember[]
-  resources        Resource[]
-  pastQuestions    PastQuestion[]
-  createdGroups    StudyGroup[]   @relation("GroupCreator")
-  quizzes          Quiz[]
+  // Academic
+  courseMemberships CourseMember[]
+
+  // Social
+  posts     Post[]
+  followers Follow[] @relation("followers")
+  following Follow[] @relation("following")
+
+  // Existing features
+  resources     Resource[]
+  pastQuestions PastQuestion[]
+  quizzes       Quiz[]
 }
 
-model StudyGroup {
+model Course {
+  id         String   @id @default(uuid())
+  name       String
+  courseCode String
+  classCode  String   @unique
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  creator     User           @relation(fields: [createdBy], references: [id])
+  members     CourseMember[]
+  assignments Assignment[]
+  timetable   TimetableEntry[]
+}
+
+model CourseMember {
+  id       String @id @default(uuid())
+  userId   String
+  courseId String
+  role     String @default("student") // "rep" | "student"
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Assignment {
   id          String   @id @default(uuid())
-  name        String
-  department  String
-  level       Int
+  title       String
   description String?
+  dueDate     DateTime
+  courseId    String
   createdBy   String
-  creator     User     @relation("GroupCreator", fields: [createdBy], references: [id])
   createdAt   DateTime @default(now())
 
-  members   GroupMember[]
-  resources Resource[]
+  course Course @relation(fields: [courseId], references: [id])
 }
 
-model GroupMember {
-  id      String @id @default(uuid())
-  groupId String
-  userId  String
-  role    String @default("member")  // "admin" | "member"
+model TimetableEntry {
+  id        String @id @default(uuid())
+  courseId  String
+  day       String
+  startTime String
+  endTime   String
+  location  String?
 
-  group StudyGroup @relation(fields: [groupId], references: [id])
-  user  User       @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+}
 
-  @@unique([groupId, userId])
+model Post {
+  id        String   @id @default(uuid())
+  content   String
+  image     String?
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Follow {
+  id          String @id @default(uuid())
+  followerId  String
+  followingId String
+
+  follower  User @relation("followers", fields: [followerId], references: [id])
+  following User @relation("following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
 }
 
 model Resource {
   id         String   @id @default(uuid())
   title      String
-  type       String   // "pdf" | "link" | "video"
+  type       String
   url        String
-  department String
   courseCode String
-  groupId    String?
   uploadedBy String
   createdAt  DateTime @default(now())
 
-  group    StudyGroup? @relation(fields: [groupId], references: [id])
-  uploader User        @relation(fields: [uploadedBy], references: [id])
+  uploader User @relation(fields: [uploadedBy], references: [id])
 }
 
 model PastQuestion {
@@ -72,25 +123,6 @@ model PastQuestion {
   createdAt  DateTime @default(now())
 
   uploader User @relation(fields: [uploadedBy], references: [id])
-}
-
-model Timetable {
-  id         String           @id @default(uuid())
-  department String
-  level      Int
-  semester   String
-  entries    TimetableEntry[]
-}
-
-model TimetableEntry {
-  id          String    @id @default(uuid())
-  timetableId String
-  courseCode  String
-  date        DateTime
-  startTime   String
-  endTime     String
-
-  timetable Timetable @relation(fields: [timetableId], references: [id])
 }
 
 model Quiz {
