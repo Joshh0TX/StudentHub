@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import './Login.css';
-
+import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,69 +28,109 @@ const Login = () => {
       return;
     }
 
-    console.log(formData);
-
     if (isLogin) {
-      navigate("/profile");
+      navigate("/academy");
     } else {
-      navigate("/Onboard");
+      navigate("/onboard");
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-left">
-        <h1>StudentHub</h1>
-      </div>
+    <div className="auth-wrapper">
+      <div className="auth-card">
+        <h1 className="logo">🎓 Students Hub</h1>
 
-      <div className="auth-right">
-        <h2>{isLogin ? "Login" : "Create Account"}</h2>
+        {/* Toggle Tabs */}
+        <div className="tabs">
+          <button
+            className={isLogin ? "tab active" : "tab"}
+            onClick={() => setIsLogin(true)}
+            style={{margin:'5px',borderRadius:'10px', boxShadow:'none'}}
+          >
+            Sign In
+          </button>
+          <button
+            className={!isLogin ? "tab active" : "tab"}
+            onClick={() => setIsLogin(false)}
+            style={{margin:'5px', borderRadius:'10px', boxShadow:'none'}}
+          >
+            Register
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit}>
           {!isLogin && (
+            <div className="input-group">
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                onChange={handleChange}
+                required
+              />
+            </div>
+          )}
+
+          <div className="input-group">
             <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
+              type="email"
+              name="email"
+              placeholder="you@school.edu"
               onChange={handleChange}
               required
             />
-          )}
+          </div>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-            required
-          />
-
-          {!isLogin && (
+          <div className="input-group">
             <input
               type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
+              name="password"
+              placeholder="Enter your password"
               onChange={handleChange}
               required
             />
+          </div>
+
+          {!isLogin && (
+            <div className="input-group">
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm password"
+                onChange={handleChange}
+                required
+              />
+            </div>
           )}
-          <button type="submit">
-            {isLogin ? "Login" : "Sign Up"}
+
+          {isLogin && (
+            <div className="options">
+              <label>
+                <input type="checkbox" /> Remember me
+              </label>
+              <span className="forgot">Forgot password?</span>
+            </div>
+          )}
+
+          <button type="submit" className="submit-btn">
+            {isLogin ? "Sign In →" : "Create Account"}
           </button>
         </form>
 
-        <p onClick={() => setIsLogin(!isLogin)} className="toggle-text">
-          {isLogin
-            ? "Don't have an account? Sign Up"
-            : "Already have an account? Login"}
+        <p className="bottom-text">
+          {isLogin ? (
+            <>
+              New to Students Hub?{" "}
+              <span onClick={() => setIsLogin(false)} style={{color:'#3B82F6'}}>
+                Create an account
+              </span>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <span onClick={() => setIsLogin(true)}>Sign In</span>
+            </>
+          )}
         </p>
       </div>
     </div>

@@ -1,50 +1,104 @@
-.auth-container {
-  display: flex;
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f6f8;
+}
+
+.auth-wrapper {
   height: 100vh;
-  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.auth-left {
-  flex: 1;
-  background: #4f46e5;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.auth-card {
+  background: white;
   padding: 40px;
+  width: 380px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
-.auth-right {
+.logo {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 30px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: #c2c7e0;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.tab {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px;
-}
-
-.auth-right form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.auth-right input {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.auth-right button {
-  padding: 12px;
-  background: #4f46e5;
-  color: white;
+  padding: 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+
+}
+
+.tab.active {
+  background: white;
+  color: #0b0b23;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Inputs */
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+/* Options row */
+.options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.forgot {
+  color: #555;
   cursor: pointer;
 }
 
-.toggle-text {
+/* Button */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Bottom text */
+.bottom-text {
+  text-align: center;
   margin-top: 15px;
-  color: #4f46e5;
+  font-size: 14px;
+}
+
+.bottom-text span {
+  color: #000;
+  font-weight: 600;
   cursor: pointer;
 }
