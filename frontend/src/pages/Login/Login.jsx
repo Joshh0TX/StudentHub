@@ -29,7 +29,7 @@ const Login = () => {
     }
 
     if (isLogin) {
-      navigate("/academy");
+      navigate("/newsroom");
     } else {
       navigate("/onboard");
     }
@@ -38,7 +38,7 @@ const Login = () => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <h1 className="logo">🎓 Students Hub</h1>
+        <h1 className="logo">🎓 Student<span style={{color:'#3B82F6'}}>Hub</span></h1>
 
         {/* Toggle Tabs */}
         <div className="tabs">
