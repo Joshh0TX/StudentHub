@@ -41,8 +41,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-left">
-        <h1>Student Hub</h1>
-        <p>Find opportunities that match you</p>
+        <h1>StudentHub</h1>
       </div>
 
       <div className="auth-right">
