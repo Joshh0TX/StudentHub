@@ -128,7 +128,7 @@ const Login = () => {
           ) : (
             <>
               Already have an account?{" "}
-              <span onClick={() => setIsLogin(true)}>Sign In</span>
+              <span onClick={() => setIsLogin(true)} style={{color:'#3B82F6'}}>Sign In</span>
             </>
           )}
         </p>
