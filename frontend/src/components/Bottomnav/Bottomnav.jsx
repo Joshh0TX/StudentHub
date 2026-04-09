@@ -5,7 +5,7 @@ import './Bottomnav.css';
 export default function BottomNav() {
   return (
     <nav className="bottom-nav">
-      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+      <NavLink to="/newsroom" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
         <Home size={22} />
         <span>Home</span>
       </NavLink>

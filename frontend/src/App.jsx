@@ -10,6 +10,7 @@ import Login from "./pages/Login/Login.jsx";
 import Onboard from "./pages/Onboarding/Onboard.jsx";
 import MarketHome from "./pages/Marketplace/MarketHome.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
+import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="resources" element={<Resources />} />
         </Route>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/newsroom" element={<NewsHome />} />
         
       </Route>
     </Routes>
