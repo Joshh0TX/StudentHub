@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './profile.css';
-import { Edit, Award, Trophy, Star, Zap, Users, Heart, MessageCircle } from 'lucide-react';
+import { Edit, Award, Trophy, Star, Zap, Users } from 'lucide-react';
 
 export default function ProfilePage() {
   const [user] = useState({
@@ -37,19 +37,16 @@ export default function ProfilePage() {
 
   const recentActivities = [
     {
-      icon: <MessageCircle size={20} />,
       name: "Henry",
       time: "2 hours ago",
       content: "Just completed the new dashboard UI for Campus Connect. Feedback welcome!",
     },
     {
-      icon: <Trophy size={20} />,
       name: "Henry",
       time: "Yesterday",
       content: "Participated in the monthly code review session with the team.",
     },
     {
-      icon: <Heart size={20} />,
       name: "Henry",
       time: "3 days ago",
       content: "Liked and commented on Sarah's new portfolio redesign.",
@@ -264,15 +261,21 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Recent Activity - Updated with Profile Image + Edit Button */}
           <div className="info-box activity-box">
             <div className="box-header">
               <h2>Recent Activity</h2>
+              <button className="edit-rect-btn"><Edit size={18} /> Edit</button>
             </div>
             <div className="activity-list">
               {recentActivities.map((activity, i) => (
                 <div key={i} className="activity-item">
-                  <div className="activity-icon">{activity.icon}</div>
+                  <div className="activity-avatar">
+                    <img 
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" 
+                      alt="Henry" 
+                    />
+                  </div>
                   <div className="activity-content">
                     <div className="activity-header">
                       <strong>{activity.name}</strong>
