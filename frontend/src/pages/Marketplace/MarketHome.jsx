@@ -1,5 +1,12 @@
 import "./MarketHome.css";
 import { useState } from "react";
+import calcTextImg from "../../assets/marketplace/calctext.jpg";
+import drinksImg from "../../assets/marketplace/drinks.jpg";
+import fabImg from "../../assets/marketplace/fab.jpg";
+import fanImg from "../../assets/marketplace/fan.jpg";
+import perfumeImg from "../../assets/marketplace/perfume.jpg";
+import rancImg from "../../assets/marketplace/ranc.jpg";
+import sneakersImg from "../../assets/marketplace/sneakers.jpg";
 
 export default function MarketHome() {
   const [showForm, setShowForm] = useState(false);
@@ -89,6 +96,7 @@ export default function MarketHome() {
       seller: "Casey Luo",
       type: "services",
       category: "Delivery",
+      image: null,
     },
     {
       title: "Rice and Chicken",
@@ -99,6 +107,7 @@ export default function MarketHome() {
       seller: "Gbemi Oduselu",
       type: "goods",
       category: "Food",
+      image: rancImg,
     },
     {
       title: "Drinks",
@@ -109,6 +118,7 @@ export default function MarketHome() {
       seller: "Titi Akinyemi",
       type: "goods",
       category: "Food",
+      image: drinksImg,
     },
     {
       title: "Calculus Textbook Bundle",
@@ -119,6 +129,7 @@ export default function MarketHome() {
       seller: "Mike R.",
       type: "goods",
       category: "Educational Materials",
+      image: calcTextImg,
     },
     {
       title: "Room Fan",
@@ -129,6 +140,7 @@ export default function MarketHome() {
       seller: "Sade A.",
       type: "goods",
       category: "Appliances",
+      image: fanImg,
     },
     {
       title: "Laptop Cleanup",
@@ -139,6 +151,7 @@ export default function MarketHome() {
       seller: "Josh T.",
       type: "services",
       category: "Repairs",
+      image: null,
     },
     {
       title: "Hair Braiding",
@@ -149,6 +162,7 @@ export default function MarketHome() {
       seller: "Titi Akinyemi",
       type: "services",
       category: "Hair",
+      image: null,
     },
     {
       title: "Sneakers",
@@ -159,6 +173,7 @@ export default function MarketHome() {
       seller: "Kemi Adebayo",
       type: "goods",
       category: "Clothing",
+      image: sneakersImg,
     },
     {
       title: "BUSA Delivery",
@@ -169,6 +184,7 @@ export default function MarketHome() {
       seller: "Simi Folami",
       type: "services",
       category: "Delivery",
+      image: null,
     },
     {
       title: "Fab Biscuit",
@@ -179,6 +195,7 @@ export default function MarketHome() {
       seller: "Tunde Alabi",
       type: "goods",
       category: "Food",
+      image: fabImg,
     },
     {
       title: "Perfume",
@@ -189,6 +206,7 @@ export default function MarketHome() {
       seller: "Kemi Adebayo",
       type: "goods",
       category: "Beauty",
+      image: perfumeImg,
     },
   ];
 
@@ -360,6 +378,9 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={`${item.title}-${item.seller}`}>
+              {item.image && (
+                <img src={item.image} alt={item.title} className="marketImage" />
+              )}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>
