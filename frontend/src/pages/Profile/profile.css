@@ -1,0 +1,332 @@
+.container {
+  width: 100%;
+  background-color: #f8fafc;   /* Light gray background for the whole page */
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.profile-section {
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;            /* Keep profile header white */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Cover, Profile Image, Profile Main, Stats */
+.cover-wrapper { position: relative; width: 100%; }
+
+.coverimg {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.profileImg {
+  position: absolute;
+  bottom: -75px;
+  left: 30px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background-color: #08c4f8f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.profileImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==================== IMPROVED PROFILE MAIN ==================== */
+.profile-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-top: 30px;           /* Better balance with avatar */
+  padding-left: 195px;
+  gap: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+.profile-text h1 {
+  margin: 0 0 8px 0;
+  font-size: 2.15rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.profile-course {
+  margin: 0 0 12px 0;
+  font-size: 1.22rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.profile-bio {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: #444;
+  max-width: 520px;
+}
+
+/* More appealing action buttons */
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.profile-actions button {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.6rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
+
+.edit-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.message-btn {
+  background-color: #f1f5f9;
+  color: #1e2937;
+  border: 2px solid #e2e8f0;
+  margin-right: 0.5rem;
+}
+
+.message-btn:hover {
+  background-color: #e0e7ff;
+  border-color: #6366f1;
+}
+
+/* More appealing stats */
+.profile-stats {
+  display: flex;
+  justify-content: flex-start;
+  gap: 4.5rem;
+  padding-left: 195px;
+  margin-top: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+}
+/* ==================== BOTTOM SECTION ==================== */
+.info-grid {
+  width: 90%;
+  max-width: 1000px;
+  margin: 2.5rem auto 5rem;    /* ← Changed: smaller top margin + centered */
+  display: grid;
+  grid-template-columns: 1.1fr 1.9fr;
+  gap: 2rem;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.info-box {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+
+.box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.box-header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Rectangular Edit Button */
+.edit-rect-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-rect-btn:hover {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* About Box */
+.about-text {
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 1.8rem;
+  font-size: 1.02rem;
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detail-item {
+  font-size: 1.02rem;
+  color: #444;
+}
+
+/* Badges - Strict 2x2 Grid with lively colors */
+.badges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* Exactly 2 by 2 */
+  gap: 1.2rem;
+}
+
+.badge-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 1.4rem 1rem;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #111;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Lively colored badges */
+.badge-btn:nth-child(1) { background: #fef3c7; border-color: #fcd34d; }   /* Gold */
+.badge-btn:nth-child(2) { background: #dbeafe; border-color: #60a5fa; }   /* Blue */
+.badge-btn:nth-child(3) { background: #ecfdf5; border-color: #34d399; }   /* Green */
+.badge-btn:nth-child(4) { background: #fce7f3; border-color: #f472b6; }   /* Pink */
+
+.badge-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.badge-btn svg {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+/* Projects Section */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  transition: all 0.2s;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.project-card img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.project-content {
+  padding: 1.25rem;
+}
+
+.project-content h3 {
+  margin: 0 0 0.6rem 0;
+  font-size: 1.22rem;
+}
+
+.project-intro {
+  color: #555;
+  line-height: 1.55;
+  margin-bottom: 1.1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.82rem;
+  padding: 5px 13px;
+  border-radius: 9999px;
+  font-weight: 500;
+}

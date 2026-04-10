@@ -5,7 +5,7 @@ import './Layout.css';
 export default function Layout() {
   return (
     <div className="layout">
-      <Outlet />
+        <Outlet />
       <BottomNav />
     </div>
   );

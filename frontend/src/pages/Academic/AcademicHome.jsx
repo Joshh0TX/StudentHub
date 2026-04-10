@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./AcademicHome.css";
 import { Outlet, NavLink } from "react-router-dom";
 import { BookText, Users, BookOpen, Link } from "lucide-react";
-import TopNavbar from "../../components/topNavBar";
+
 
 const programs = {
   Accounting: { years: [1, 2, 3] },
@@ -64,7 +64,7 @@ export default function AcademicHome() {
   return (
     <>
       <div className="academic-layout">
-        <TopNavbar />
+     
         {/* ── Top Header ── */}
         <header className="header">
           <div className="brand">
