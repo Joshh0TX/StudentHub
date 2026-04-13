@@ -65,7 +65,7 @@ export default function MarketHome() {
   };
 
   const locations = [
-    "All",
+    "All Locations",
     "Diamond Hall",
     "Sapphire Hall",
     "Crystal Hall",
@@ -211,6 +211,9 @@ export default function MarketHome() {
   ];
 
   const categoryOptions = categoriesByType[form.type] || [];
+  const allCategories = Array.from(
+    new Set([...categoriesByType.goods, ...categoriesByType.services])
+  );
 
   const handleFormTypeChange = (e) => {
     const nextType = e.target.value;
@@ -269,15 +272,16 @@ export default function MarketHome() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                disabled={typeFilter === "all"}
               >
                 <option value="all">All Categories</option>
-                {typeFilter !== "all" &&
-                  categoriesByType[typeFilter].map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
+                {(typeFilter === "all"
+                  ? allCategories
+                  : categoriesByType[typeFilter]
+                ).map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
               <select
                 value={locationFilter}
@@ -286,7 +290,7 @@ export default function MarketHome() {
                 {locations.map((loc) => (
                   <option
                     key={loc}
-                    value={loc === "All" ? "all" : loc}
+                    value={loc === "All Locations" ? "all" : loc}
                   >
                     {loc}
                   </option>
