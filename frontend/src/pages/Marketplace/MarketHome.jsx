@@ -1,15 +1,14 @@
 import "./MarketHome.css";
 import { useState } from "react";
-import calcTextImg from "../../assets/marketplace/calctext.jpg";
-import drinksImg from "../../assets/marketplace/drinks.jpg";
-import fabImg from "../../assets/marketplace/fab.jpg";
-import fanImg from "../../assets/marketplace/fan.jpg";
-import perfumeImg from "../../assets/marketplace/perfume.jpg";
-import rancImg from "../../assets/marketplace/ranc.jpg";
-import sneakersImg from "../../assets/marketplace/sneakers.jpg";
+import { Link, useNavigate } from "react-router-dom";
+import { categoriesByType, marketplaceItems } from "./marketplaceData";
 
 export default function MarketHome() {
+  const formEnabled = false;
+  const isSeller = false;
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const [showStoreForm, setShowStoreForm] = useState(false);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -22,46 +21,26 @@ export default function MarketHome() {
     type: "goods",
     category: "Food",
   });
+  const [storeForm, setStoreForm] = useState({
+    storeName: "",
+    storeDesc: "",
+    storeType: "goods",
+    contact: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleStoreChange = (e) => {
+    const { name, value } = e.target;
+    setStoreForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form data:", form);
-  };
-
-  const categoriesByType = {
-    goods: [
-      "Food",
-      "Educational Materials",
-      "Appliances",
-      "Beauty",
-      "Clothing",
-      "Tech",
-      "Accessories",
-      "Health",
-      "Home & Decor",
-      "Sports",
-      "Stationery",
-      "Other",
-    ],
-    services: [
-      "Delivery",
-      "Hair",
-      "Lashes",
-      "Tutoring",
-      "Laundry",
-      "Cleaning",
-      "Photography",
-      "Design",
-      "Repairs",
-      "Transport",
-      "Events",
-      "Other",
-    ],
   };
 
   const locations = [
@@ -86,129 +65,7 @@ export default function MarketHome() {
     "Nelson Mandela Hall",
   ];
 
-  const items = [
-    {
-      title: "BGH delivery",
-      desc: "Delivery from BGH to rooms.",
-      price: "N1200",
-      time: "50 mins ago",
-      locations: ["Diamond Hall", "Sapphire Hall", "Crystal Hall", "Platinum Hall"],
-      seller: "Casey Luo",
-      type: "services",
-      category: "Delivery",
-      image: null,
-    },
-    {
-      title: "Rice and Chicken",
-      desc: "One plate of jollof rice with one piece of chicken.",
-      price: "N4000",
-      time: "2 hours ago",
-      locations: ["Emerald Hall"],
-      seller: "Gbemi Oduselu",
-      type: "goods",
-      category: "Food",
-      image: rancImg,
-    },
-    {
-      title: "Drinks",
-      desc: "Fanta, Sprite, Schweppes and Coke",
-      price: "N500",
-      time: "Yesterday",
-      locations: ["Queen Esther Hall", "FAD Hall"],
-      seller: "Titi Akinyemi",
-      type: "goods",
-      category: "Food",
-      image: drinksImg,
-    },
-    {
-      title: "Calculus Textbook Bundle",
-      desc: "3 books, good condition. Includes worked examples.",
-      price: "N8500",
-      time: "3 hours ago",
-      locations: ["Nyberg Hall", "Winslow Hall"],
-      seller: "Mike R.",
-      type: "goods",
-      category: "Educational Materials",
-      image: calcTextImg,
-    },
-    {
-      title: "Room Fan",
-      desc: "Standing fan, barely used.",
-      price: "N18000",
-      time: "1 day ago",
-      locations: ["Platinum Hall"],
-      seller: "Sade A.",
-      type: "goods",
-      category: "Appliances",
-      image: fanImg,
-    },
-    {
-      title: "Laptop Cleanup",
-      desc: "PC cleanup, antivirus, and speed boost.",
-      price: "N3000",
-      time: "5 hours ago",
-      locations: ["Ogden Hall", "Gideon Troopers Hall"],
-      seller: "Josh T.",
-      type: "services",
-      category: "Repairs",
-      image: null,
-    },
-    {
-      title: "Hair Braiding",
-      desc: "Neat braids with extensions. Book ahead.",
-      price: "N8000",
-      time: "Yesterday",
-      locations: ["Queen Esther Hall", "Welch Hall"],
-      seller: "Titi Akinyemi",
-      type: "services",
-      category: "Hair",
-      image: null,
-    },
-    {
-      title: "Sneakers",
-      desc: "Size 42, clean and comfy.",
-      price: "N15000",
-      time: "2 days ago",
-      locations: ["White Hall", "Nelson Mandela Hall"],
-      seller: "Kemi Adebayo",
-      type: "goods",
-      category: "Clothing",
-      image: sneakersImg,
-    },
-    {
-      title: "BUSA Delivery",
-      desc: "Delivery from BUSA to rooms.",
-      price: "N700",
-      time: "1 hour ago",
-      locations: ["FAD Hall", "Queen Esther Hall"],
-      seller: "Simi Folami",
-      type: "services",
-      category: "Delivery",
-      image: null,
-    },
-    {
-      title: "Fab Biscuit",
-      desc: "Chocolate fab",
-      price: "N650",
-      time: "2 days ago",
-      locations: ["Samuel Akande Hall", "Ameyo Hall"],
-      seller: "Tunde Alabi",
-      type: "goods",
-      category: "Food",
-      image: fabImg,
-    },
-    {
-      title: "Perfume",
-      desc: "1 bottle of perfume 100ml, top notes coffee and vanilla",
-      price: "N25000",
-      time: "8 hours ago",
-      locations: ["White Hall", "Neal Wilson Hall"],
-      seller: "Kemi Adebayo",
-      type: "goods",
-      category: "Beauty",
-      image: perfumeImg,
-    },
-  ];
+  const items = marketplaceItems;
 
   const categoryOptions = categoriesByType[form.type] || [];
   const allCategories = Array.from(
@@ -238,6 +95,21 @@ export default function MarketHome() {
     return matchesQuery && matchesType && matchesCategory && matchesLocation;
   });
 
+  const favoriteStores = Array.from(
+    new Map(
+      items
+        .filter((item) => item.frequent)
+        .map((item) => [
+          item.storeName,
+          {
+            storeName: item.storeName,
+            category: item.category,
+            locations: item.locations,
+          },
+        ])
+    ).values()
+  );
+
   return (
     <div>
       <header></header>
@@ -247,66 +119,156 @@ export default function MarketHome() {
           <p className="marketSubheading">
             Welcome to the marketplace! Advertise your business or browse available items.
           </p>
-          <div className="marketControls">
-            <div className="marketSearch">
-              <input
-                type="text"
-                placeholder="Search items, locations..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-            <div className="marketFilters">
-              <select
-                value={typeFilter}
-                onChange={(e) => {
-                  const nextType = e.target.value;
-                  setTypeFilter(nextType);
-                  setCategoryFilter("all");
-                }}
-              >
-                <option value="all">All Types</option>
-                <option value="goods">Goods</option>
-                <option value="services">Services</option>
-              </select>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                {(typeFilter === "all"
-                  ? allCategories
-                  : categoriesByType[typeFilter]
-                ).map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-              >
-                {locations.map((loc) => (
-                  <option
-                    key={loc}
-                    value={loc === "All Locations" ? "all" : loc}
-                  >
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
           <button
             type="button"
             className="marketToggle"
-            onClick={() => setShowForm((prev) => !prev)}
+            onClick={() => {
+              if (isSeller) {
+                navigate("/storefront");
+                return;
+              }
+              setShowStoreForm((prev) => !prev);
+            }}
           >
-            {showForm ? "Hide Form" : "Post an Item"}
+            {isSeller ? "Storefront" : "Create My Store"}
           </button>
         </div>
-        {showForm && (
+        {showStoreForm && (
+          <form className="storeForm" onSubmit={(e) => e.preventDefault()}>
+            <label>
+              Store Name
+              <input
+                name="storeName"
+                type="text"
+                value={storeForm.storeName}
+                onChange={handleStoreChange}
+                required
+              />
+            </label>
+            <label>
+              Store Description
+              <textarea
+                name="storeDesc"
+                rows="3"
+                value={storeForm.storeDesc}
+                onChange={handleStoreChange}
+                required
+              />
+            </label>
+            <label>
+              Store Type
+              <select
+                name="storeType"
+                value={storeForm.storeType}
+                onChange={handleStoreChange}
+                required
+              >
+                <option value="goods">Goods</option>
+                <option value="services">Services</option>
+                <option value="both">Both</option>
+              </select>
+            </label>
+            <label>
+              Contact (Phone/WhatsApp/IG)
+              <input
+                name="contact"
+                type="text"
+                value={storeForm.contact}
+                onChange={handleStoreChange}
+                required
+              />
+            </label>
+            <button className="submitButton" type="submit">
+              Create Store
+            </button>
+          </form>
+        )}
+        <section className="storeRow">
+          <section className="favoriteStores">
+            <div className="favoriteHeader">
+              <h2>Favourite Stores</h2>
+              <p>Your starred spots and quick buy-again picks.</p>
+            </div>
+            <div className="favoriteGrid">
+              {favoriteStores.map((store) => (
+                <div className="favoriteCard" key={store.storeName}>
+                  <div className="favoriteTitle">{store.storeName}</div>
+                  <div className="favoriteMeta">
+                    {store.category} · {store.locations.join(", ")}
+                  </div>
+                  <button className="favoriteBtn">Buy Again</button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="popularStores">
+            <div className="popularHeader">
+              <h2>Popular Stores</h2>
+              <p>More trusted sellers you might like.</p>
+            </div>
+            <div className="popularGrid">
+              {favoriteStores.map((store) => (
+                <div className="popularCard" key={`popular-${store.storeName}`}>
+                  <div className="popularTitle">{store.storeName}</div>
+                  <div className="popularMeta">
+                    {store.category} · {store.locations.join(", ")}
+                  </div>
+                  <button className="favoriteBtn">Visit Store</button>
+                </div>
+              ))}
+            </div>
+          </section>
+        </section>
+        <div className="marketControls">
+          <div className="marketSearch">
+            <input
+              type="text"
+              placeholder="Search items, locations..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+          <div className="marketFilters">
+            <select
+              value={typeFilter}
+              onChange={(e) => {
+                const nextType = e.target.value;
+                setTypeFilter(nextType);
+                setCategoryFilter("all");
+              }}
+            >
+              <option value="all">All Types</option>
+              <option value="goods">Goods</option>
+              <option value="services">Services</option>
+            </select>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {(typeFilter === "all"
+                ? allCategories
+                : categoriesByType[typeFilter]
+              ).map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            >
+              {locations.map((loc) => (
+                <option key={loc} value={loc === "All Locations" ? "all" : loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {formEnabled && showForm && (
           <form className="marketForm" onSubmit={handleSubmit}>
             <label>
               Item Name
@@ -381,15 +343,20 @@ export default function MarketHome() {
         <p className="itemNumber">{filteredItems.length} items available</p>
         <section className="markettopGird">
           {filteredItems.map((item) => (
-            <div className="marketCard" key={`${item.title}-${item.seller}`}>
+            <div className="marketCard" key={`${item.title}-${item.storeName}`}>
               {item.image && (
                 <img src={item.image} alt={item.title} className="marketImage" />
               )}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>
+                {item.frequent && <span className="marketTag hot">Frequently Bought</span>}
               </div>
-              <p className="cardTitle">{item.title}</p>
+              <p className="cardTitle">
+                <Link to={`/marketplace/${item.id}`} className="productLink">
+                  {item.title}
+                </Link>
+              </p>
               <p className="itemDesc">{item.desc}</p>
               <p className="marketPrice">{item.price}</p>
               <p className="mTime">{item.time}</p>
@@ -400,7 +367,7 @@ export default function MarketHome() {
                   </span>
                 ))}
               </div>
-              <p className="sellerName">{item.seller}</p>
+              <p className="sellerName">{item.storeName}</p>
               <button className="mButton">Contact Seller</button>
             </div>
           ))}

@@ -9,6 +9,8 @@ import Resources from "./pages/Academic/Resources";
 import Login from "./pages/Login/Login.jsx";
 import Onboard from "./pages/Onboarding/Onboard.jsx";
 import MarketHome from "./pages/Marketplace/MarketHome.jsx";
+import Storefront from "./pages/Marketplace/Storefront.jsx";
+import ProductDetail from "./pages/Marketplace/ProductDetail.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 
@@ -22,6 +24,8 @@ function App() {
       {/* Everything inside Layout gets the bottom nav */}
       <Route element={<Layout />}>
         <Route path="/marketplace" element={<MarketHome />} />
+        <Route path="/marketplace/:productId" element={<ProductDetail />} />
+        <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>
           <Route index element={<StudyMaterials />} />
           <Route path="study-materials" element={<StudyMaterials />} />

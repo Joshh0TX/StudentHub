@@ -118,6 +118,26 @@ input[type="button"]:focus-visible {
   font-family: var(--font);
 }
 
+.marketHeadings {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 20px;
+  background: color-mix(in oklch, var(--chart-2) 8%, var(--card));
+  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.marketHeading {
+  font-size: 1.8rem;
+  letter-spacing: 0.2px;
+}
+
+.marketSubheading {
+  color: var(--muted-foreground);
+  max-width: 720px;
+}
+
 .markettopGird {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -126,16 +146,30 @@ input[type="button"]:focus-visible {
 }
 
 .marketCard {
-  background: var(--switch-background);
-  color: var(--card-foreground);
-  border-radius: 18px;
+  background: color-mix(in oklch, var(--chart-2) 6%, var(--card));
+  color: var(--foreground);
+  border-radius: 20px;
   padding: 18px 18px 22px;
   font-family: var(--font);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
   min-height: 260px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.marketCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16);
+}
+
+.marketImage {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-bottom: 10px;
 }
 
 .cardTitle {
@@ -144,28 +178,37 @@ input[type="button"]:focus-visible {
   margin: 8px 0 6px;
 }
 
+.productLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.productLink:hover {
+  text-decoration: underline;
+}
+
 .itemDesc {
-  color: var(--card-foreground);
+  color: var(--muted-foreground);
   font-size: 0.92rem;
   line-height: 1.4;
   margin-bottom: 12px;
 }
 
 .marketPrice {
-  color: var(--chart-3);
+  color: color-mix(in oklch, var(--chart-2) 70%, #0b5ed7);
   font-size: 1.35rem;
   font-weight: 700;
   margin: 6px 0 12px;
 }
 
 .mTime {
-  color: var(--card-foreground);
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 8px;
 }
 
 .placeText {
-  color: var(--card-foreground);
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 8px;
 }
@@ -178,7 +221,7 @@ input[type="button"]:focus-visible {
 }
 
 .locationChip {
-  background: var(--accent);
+  background: color-mix(in oklch, var(--chart-2) 20%, var(--accent));
   color: var(--accent-foreground);
   border-radius: 999px;
   padding: 4px 10px;
@@ -192,6 +235,147 @@ input[type="button"]:focus-visible {
   font-weight: 700;
   margin-bottom: 10px;
   letter-spacing: 0.2px;
+}
+
+.favoriteStores {
+  margin-top: 22px;
+  margin-bottom: 10px;
+  background: color-mix(in oklch, var(--chart-2) 8%, var(--card));
+  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.favoriteHeader h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.favoriteHeader p {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.favoriteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-content: start;
+  flex: 1;
+}
+
+.favoriteCard {
+  background: var(--secondary);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+}
+
+.favoriteTitle {
+  font-weight: 700;
+}
+
+.favoriteMeta {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.favoriteBtn {
+  width: fit-content;
+  padding: 8px 12px;
+  background: #4f46e5;
+  color: var(--primary-foreground);
+}
+
+.storeRow {
+  display: grid;
+  gap: 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  align-items: stretch;
+}
+
+.storeRow > section {
+  height: 100%;
+  min-height: 320px;
+  padding-bottom: 16px;
+}
+
+.favoriteStores {
+  display: flex;
+  flex-direction: column;
+}
+
+.popularStores {
+  display: flex;
+  flex-direction: column;
+}
+
+.storeRow .favoriteStores,
+.storeRow .popularStores {
+  margin-top: 0;
+}
+
+@media (min-width: 980px) {
+  .storeRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+.popularStores {
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.popularHeader h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.popularHeader p {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.popularGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-content: start;
+  flex: 1;
+}
+
+.favoriteCard,
+.popularCard {
+  min-height: 130px;
+}
+
+.popularCard {
+  background: var(--secondary);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+}
+
+.popularTitle {
+  font-weight: 700;
+}
+
+.popularMeta {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
 }
 
 .marketCard img {
@@ -241,6 +425,52 @@ input[type="button"]:focus-visible {
   font-size: 0.95rem;
   outline: none;
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.storeForm {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  max-width: 720px;
+}
+
+.storeForm label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.storeForm input,
+.storeForm select,
+.storeForm textarea {
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.storeForm textarea {
+  resize: vertical;
+}
+
+.storeForm input:focus,
+.storeForm select:focus,
+.storeForm textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
+  background: #fff;
 }
 
 .marketForm select {
@@ -311,11 +541,12 @@ input[type="button"]:focus-visible {
   height: 44px;
   padding: 0 14px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--input-background);
+  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+  background: color-mix(in oklch, var(--chart-2) 6%, var(--input-background));
   color: var(--foreground);
   font-size: 0.95rem;
   outline: none;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
 }
 
 .marketSearch input:focus {
@@ -334,11 +565,12 @@ input[type="button"]:focus-visible {
   height: 42px;
   padding: 0 12px;
   border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+  background: color-mix(in oklch, var(--chart-2) 6%, var(--card));
   color: var(--foreground);
   font-size: 0.95rem;
   outline: none;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
 }
 
 .marketFilters select:disabled {
@@ -353,7 +585,7 @@ input[type="button"]:focus-visible {
 }
 
 .marketTag {
-  background: var(--accent);
+  background: color-mix(in oklch, var(--chart-2) 18%, var(--accent));
   color: var(--accent-foreground);
   border-radius: 999px;
   padding: 4px 10px;
@@ -365,6 +597,12 @@ input[type="button"]:focus-visible {
 .marketTag.muted {
   background: var(--muted);
   color: var(--muted-foreground);
+}
+
+.marketTag.hot {
+  background: color-mix(in oklch, var(--chart-4) 25%, #fff);
+  color: #553500;
+  border: 1px solid color-mix(in oklch, var(--chart-4) 55%, transparent);
 }
 
 .mButton {

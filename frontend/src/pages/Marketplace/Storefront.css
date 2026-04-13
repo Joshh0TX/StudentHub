@@ -1,0 +1,206 @@
+.storefrontPage {
+  padding: 24px 32px 64px;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font);
+}
+
+.storefrontHeader h1 {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.storefrontHeader p {
+  color: var(--muted-foreground);
+  margin-bottom: 18px;
+}
+
+.storefrontStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background: var(--secondary);
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.statLabel {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.storefrontGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.storefrontCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  max-width: 720px;
+}
+
+.storefrontCard h2 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.storefrontCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.addProductBtn {
+  background: #4f46e5;
+  color: var(--primary-foreground);
+}
+
+.storefrontForm {
+  display: grid;
+  gap: 12px;
+}
+
+.storefrontForm label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.storefrontForm input,
+.storefrontForm select,
+.storefrontForm textarea {
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.storefrontForm textarea {
+  resize: vertical;
+}
+
+.storefrontForm input:focus,
+.storefrontForm select:focus,
+.storefrontForm textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
+  background: #fff;
+}
+
+.productList,
+.orderList,
+.noteList {
+  display: grid;
+  gap: 12px;
+}
+
+.productRow,
+.orderRow,
+.noteRow {
+  background: var(--secondary);
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 8px;
+}
+
+.productRow {
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+}
+
+.productName {
+  font-weight: 700;
+}
+
+.productMeta {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.productStats {
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--muted-foreground);
+  text-align: right;
+}
+
+.productActions {
+  display: grid;
+  gap: 6px;
+}
+
+.productActions button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.productStatus {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.orderTitle {
+  font-weight: 700;
+}
+
+.orderMeta {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.orderStatus {
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.noteBuyer {
+  font-weight: 700;
+}
+
+.noteText {
+  color: var(--foreground);
+}
+
+.noteMeta {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+@media (min-width: 980px) {
+  .storefrontGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .storefrontCard {
+    max-width: 100%;
+  }
+}
