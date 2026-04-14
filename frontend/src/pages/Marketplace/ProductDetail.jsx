@@ -1,7 +1,7 @@
 import "./ProductDetail.css";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useState } from "react";
-import { marketplaceItems } from "./marketplaceData";
+import { marketplaceItems, storeContacts } from "./marketplaceData";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -11,10 +11,13 @@ export default function ProductDetail() {
   const [orderQty, setOrderQty] = useState(1);
   const [orderTime, setOrderTime] = useState("");
   const [orderLocation, setOrderLocation] = useState("");
+  const [showContacts, setShowContacts] = useState(false);
 
   if (!item) {
     return <Navigate to="/marketplace" replace />;
   }
+
+  const galleryImages = item.image ? [item.image, item.image, item.image] : [];
 
   return (
     <main className="productDetailPage">
@@ -31,6 +34,24 @@ export default function ProductDetail() {
           ) : (
             <div className="productDetailPlaceholder">No image</div>
           )}
+          <div className="productDetailGallery">
+            {galleryImages.length
+              ? galleryImages.map((img, idx) => (
+                  <img
+                    src={img}
+                    alt={`${item.title} view ${idx + 1}`}
+                    key={`${item.id}-gallery-${idx}`}
+                  />
+                ))
+              : Array.from({ length: 3 }).map((_, idx) => (
+                  <div
+                    className="productDetailThumbPlaceholder"
+                    key={`${item.id}-gallery-placeholder-${idx}`}
+                  >
+                    Image
+                  </div>
+                ))}
+          </div>
         </div>
         <div className="productDetailInfo">
           <div className="productDetailTags">
@@ -66,13 +87,39 @@ export default function ProductDetail() {
               </span>
             ))}
           </div>
-          <button
-            className="mButton"
-            type="button"
-            onClick={() => setShowOrderForm((prev) => !prev)}
-          >
-            {showOrderForm ? "Close Order Form" : "Place Order"}
-          </button>
+          <div className="productDetailActions">
+            <button
+              className="mButton"
+              type="button"
+              onClick={() => setShowOrderForm((prev) => !prev)}
+            >
+              {showOrderForm ? "Close Order Form" : "Place Order"}
+            </button>
+            <button
+              className="btnOutline"
+              type="button"
+              onClick={() => setShowContacts((prev) => !prev)}
+            >
+              {showContacts ? "Hide Contacts" : "Contact Seller"}
+            </button>
+          </div>
+          {showContacts && (
+            <div className="contactPanel">
+              {storeContacts[item.storeName]?.length ? (
+                storeContacts[item.storeName].map((contact) => (
+                  <div
+                    className="contactRow"
+                    key={`${item.storeName}-${contact.type}-${contact.value}`}
+                  >
+                    <span className="contactType">{contact.type}</span>
+                    <span className="contactValue">{contact.value}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="contactEmpty">No contact info posted yet.</p>
+              )}
+            </div>
+          )}
           {showOrderForm && (
             <form className="orderForm" onSubmit={(e) => e.preventDefault()}>
               <label>

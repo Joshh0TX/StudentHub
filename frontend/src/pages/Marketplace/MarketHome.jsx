@@ -60,6 +60,8 @@ export default function MarketHome() {
     }));
   };
 
+  const closeStoreForm = () => setShowStoreForm(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form data:", form);
@@ -176,6 +178,19 @@ export default function MarketHome() {
     <div>
       <header></header>
       <main className="marketPage">
+        <div className="marketHeaderBar">
+          <Link to="/marketplace" className="marketLogo">
+            <div className="marketLogoMark">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
+              </svg>
+            </div>
+            <span className="marketLogoText">
+              Student<span>Hub</span>
+            </span>
+          </Link>
+        </div>
         <div className="marketHeadings">
           <h1 className="marketHeading">Marketplace</h1>
           <p className="marketSubheading">
@@ -197,95 +212,135 @@ export default function MarketHome() {
         </div>
 
         {showStoreForm && (
-          <form className="storeForm" onSubmit={(e) => e.preventDefault()}>
-            <label>
-              Store Name
-              <input
-                name="storeName"
-                type="text"
-                value={storeForm.storeName}
-                onChange={handleStoreChange}
-                required
-              />
-            </label>
-            <label>
-              Store Description
-              <textarea
-                name="storeDesc"
-                rows="3"
-                value={storeForm.storeDesc}
-                onChange={handleStoreChange}
-                required
-              />
-            </label>
-            <label>
-              Store Type
-              <select
-                name="storeType"
-                value={storeForm.storeType}
-                onChange={handleStoreChange}
-                required
+          <div
+            className="storeModal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create store"
+          >
+            <button
+              className="storeModalBackdrop"
+              type="button"
+              aria-label="Close create store form"
+              onClick={closeStoreForm}
+            />
+            <div className="storeModalCard" role="document">
+              <button
+                className="storeModalClose"
+                type="button"
+                aria-label="Close"
+                onClick={closeStoreForm}
               >
-                <option value="goods">Goods</option>
-                <option value="services">Services</option>
-                <option value="both">Both</option>
-              </select>
-            </label>
-            <label>
-              Contact Methods
-              <div className="storeContactRow">
-                <select
-                  name="contactType"
-                  value={storeForm.contactType}
-                  onChange={handleStoreChange}
-                >
-                  {contactOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  name="contactValue"
-                  type="text"
-                  placeholder="Add handle, number, or email"
-                  value={storeForm.contactValue}
-                  onChange={handleStoreChange}
-                />
-                <button
-                  type="button"
-                  className="btnSecondary"
-                  onClick={handleAddContact}
-                  disabled={!storeForm.contactValue.trim()}
-                >
-                  Add
-                </button>
-              </div>
-              {storeForm.contacts.length > 0 ? (
-                <div className="storeContactList">
-                  {storeForm.contacts.map((contact, index) => (
-                    <div className="contactChip" key={`${contact.type}-${index}`}>
-                      <span className="contactChipLabel">
-                        {contact.type}: {contact.value}
-                      </span>
+                ×
+              </button>
+              <h3 className="storeModalTitle">Create Your Store</h3>
+              <p className="storeModalSubtitle">
+                Add your details and the best ways buyers can reach you.
+              </p>
+              <div className="storeModalBody">
+                <form className="storeForm" onSubmit={(e) => e.preventDefault()}>
+                  <label>
+                    Store Name
+                    <input
+                      name="storeName"
+                      type="text"
+                      value={storeForm.storeName}
+                      onChange={handleStoreChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Store Description
+                    <textarea
+                      name="storeDesc"
+                      rows="3"
+                      value={storeForm.storeDesc}
+                      onChange={handleStoreChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Store Type
+                    <select
+                      name="storeType"
+                      value={storeForm.storeType}
+                      onChange={handleStoreChange}
+                      required
+                    >
+                      <option value="goods">Goods</option>
+                      <option value="services">Services</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </label>
+                  <label>
+                    Contact Methods
+                    <div className="storeContactRow">
+                      <select
+                        name="contactType"
+                        value={storeForm.contactType}
+                        onChange={handleStoreChange}
+                      >
+                        {contactOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        name="contactValue"
+                        type="text"
+                        placeholder="Add handle, number, or email"
+                        value={storeForm.contactValue}
+                        onChange={handleStoreChange}
+                      />
                       <button
                         type="button"
-                        className="contactRemove"
-                        onClick={() => handleRemoveContact(index)}
+                        className="btnSecondary"
+                        onClick={handleAddContact}
+                        disabled={!storeForm.contactValue.trim()}
                       >
-                        Remove
+                        Add
                       </button>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="contactHint">Add at least one way buyers can reach you.</p>
-              )}
-            </label>
-            <button className="submitButton" type="submit">
-              Create Store
-            </button>
-          </form>
+                    {storeForm.contacts.length > 0 ? (
+                      <div className="storeContactList">
+                        {storeForm.contacts.map((contact, index) => (
+                          <div className="contactChip" key={`${contact.type}-${index}`}>
+                            <span className="contactChipLabel">
+                              {contact.type}: {contact.value}
+                            </span>
+                            <button
+                              type="button"
+                              className="contactRemove"
+                              onClick={() => handleRemoveContact(index)}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="contactHint">
+                        Add at least one way buyers can reach you.
+                      </p>
+                    )}
+                  </label>
+                  <div className="storeModalActions">
+                    <button className="submitButton" type="submit">
+                      Create Store
+                    </button>
+                    <button
+                      className="btnOutline"
+                      type="button"
+                      onClick={closeStoreForm}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         )}
 
         <section className="storeRow">
@@ -297,10 +352,15 @@ export default function MarketHome() {
             <div className="storeIconGrid">
               {favoriteList.map((store) => (
                 <div className="storeIconItem" key={store.storeName}>
-                  <div className="storeIconCircle">
-                    {getInitials(store.storeName)}
-                  </div>
-                  <div className="storeIconName">{store.storeName}</div>
+                  <Link
+                    to={`/store/${encodeURIComponent(store.storeName)}`}
+                    className="storeIconLink"
+                  >
+                    <div className="storeIconCircle">
+                      {getInitials(store.storeName)}
+                    </div>
+                    <div className="storeIconName">{store.storeName}</div>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -314,10 +374,15 @@ export default function MarketHome() {
             <div className="storeIconGrid">
               {favoriteStores.map((store) => (
                 <div className="storeIconItem" key={`popular-${store.storeName}`}>
-                  <div className="storeIconCircle">
-                    {getInitials(store.storeName)}
-                  </div>
-                  <div className="storeIconName">{store.storeName}</div>
+                  <Link
+                    to={`/store/${encodeURIComponent(store.storeName)}`}
+                    className="storeIconLink"
+                  >
+                    <div className="storeIconCircle">
+                      {getInitials(store.storeName)}
+                    </div>
+                    <div className="storeIconName">{store.storeName}</div>
+                  </Link>
                   <button
                     type="button"
                     className="favoriteBtn"

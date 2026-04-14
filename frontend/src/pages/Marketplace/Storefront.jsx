@@ -1,5 +1,6 @@
 import "./Storefront.css";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Storefront() {
   const [showProductForm, setShowProductForm] = useState(false);
@@ -89,6 +90,11 @@ export default function Storefront() {
     setShowProductForm(false);
   };
 
+  const closeProductForm = () => {
+    setShowProductForm(false);
+    setEditingId(null);
+  };
+
   const handleEdit = (item) => {
     setEditingId(item.id);
     setProduct((prev) => ({
@@ -157,6 +163,11 @@ export default function Storefront() {
   return (
     <main className="storefrontPage">
       <header className="storefrontHeader">
+        <div className="storefrontBreadcrumb">
+          <Link to="/marketplace">Marketplace</Link>
+          <span>/</span>
+          <span>Storefront</span>
+        </div>
         <h1>Storefront</h1>
         <p>Post products and manage your listings.</p>
       </header>
@@ -178,9 +189,10 @@ export default function Storefront() {
               type="button"
               className="addProductBtn"
               onClick={() => {
-                setShowProductForm((prev) => !prev);
                 if (showProductForm) {
-                  setEditingId(null);
+                  closeProductForm();
+                } else {
+                  setShowProductForm(true);
                 }
               }}
             >
@@ -223,71 +235,107 @@ export default function Storefront() {
         </section>
 
         {showProductForm && (
-          <section className="storefrontCard">
-            <h2>{editingId ? "Edit Product" : "Create a Product"}</h2>
-            <form className="storefrontForm" onSubmit={handleSubmit}>
-              <label>
-                Product Name
-                <input
-                  name="name"
-                  type="text"
-                  value={product.name}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Description
-                <textarea
-                  name="desc"
-                  rows="3"
-                  value={product.desc}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Price
-                <input
-                  name="price"
-                  type="text"
-                  value={product.price}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Type
-                <select name="type" value={product.type} onChange={handleChange}>
-                  <option value="goods">Goods</option>
-                  <option value="services">Services</option>
-                </select>
-              </label>
-              <label>
-                Category
-                <input
-                  name="category"
-                  type="text"
-                  value={product.category}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Locations (comma separated)
-                <input
-                  name="locations"
-                  type="text"
-                  value={product.locations}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <button type="submit">
-                {editingId ? "Save Changes" : "Post Product"}
+          <div
+            className="storefrontModal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={editingId ? "Edit product" : "Create product"}
+          >
+            <button
+              className="storefrontModalBackdrop"
+              type="button"
+              aria-label="Close product form"
+              onClick={closeProductForm}
+            />
+            <div className="storefrontModalCard" role="document">
+              <button
+                className="storefrontModalClose"
+                type="button"
+                aria-label="Close"
+                onClick={closeProductForm}
+              >
+                ×
               </button>
-            </form>
-          </section>
+              <h2>{editingId ? "Edit Product" : "Create a Product"}</h2>
+              <div className="storefrontModalBody">
+                <form className="storefrontForm" onSubmit={handleSubmit}>
+                  <label>
+                    Product Name
+                    <input
+                      name="name"
+                      type="text"
+                      value={product.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Description
+                    <textarea
+                      name="desc"
+                      rows="3"
+                      value={product.desc}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      name="price"
+                      type="text"
+                      value={product.price}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Type
+                    <select
+                      name="type"
+                      value={product.type}
+                      onChange={handleChange}
+                    >
+                      <option value="goods">Goods</option>
+                      <option value="services">Services</option>
+                    </select>
+                  </label>
+                  <label>
+                    Category
+                    <input
+                      name="category"
+                      type="text"
+                      value={product.category}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Locations (comma separated)
+                    <input
+                      name="locations"
+                      type="text"
+                      value={product.locations}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <div className="storefrontModalActions">
+                    <button type="submit" className="submitButton">
+                      {editingId ? "Save Changes" : "Post Product"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btnOutline"
+                      onClick={closeProductForm}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         )}
 
         <section className="storefrontCard">

@@ -118,6 +118,54 @@ input[type="button"]:focus-visible {
   font-family: var(--font);
 }
 
+.marketHeaderBar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.marketLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.marketLogoMark {
+  width: 36px;
+  height: 36px;
+  background: #3b82f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+
+.marketLogoMark svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+}
+
+.marketLogoText {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--foreground);
+}
+
+.marketLogoText span {
+  color: #3b82f6;
+}
+
 .marketHeadings {
   display: grid;
   gap: 8px;
@@ -280,6 +328,14 @@ input[type="button"]:focus-visible {
   padding: 6px 4px;
 }
 
+.storeIconLink {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
 .storeIconCircle {
   width: 64px;
   height: 64px;
@@ -290,6 +346,7 @@ input[type="button"]:focus-visible {
   place-items: center;
   font-weight: 700;
   font-size: 1rem;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .storeIconName {
@@ -297,6 +354,26 @@ input[type="button"]:focus-visible {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--foreground);
+  transition: color 180ms ease;
+}
+
+.storeIconLink:hover .storeIconCircle {
+  transform: translateY(-2px) scale(1.03);
+  background: color-mix(in oklch, var(--chart-2) 55%, var(--secondary));
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.14);
+}
+
+.storeIconLink:hover .storeIconName {
+  color: var(--primary);
+}
+
+.storeIconLink:focus-visible {
+  outline: none;
+}
+
+.storeIconLink:focus-visible .storeIconCircle {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent),
+    0 10px 18px rgba(0, 0, 0, 0.14);
 }
 
 .favoriteBtn {
@@ -527,6 +604,107 @@ input[type="button"]:focus-visible {
   min-height: 90px;
   height: auto;
   padding-top: 10px;
+}
+
+.storeModal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+
+.storeModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent !important;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+}
+
+.storeModalBackdrop:hover,
+.storeModalBackdrop:active {
+  transform: none;
+  box-shadow: none;
+  background: transparent !important;
+}
+
+.storeModalBackdrop:focus,
+.storeModalBackdrop:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.storeModalCard {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 92vw);
+  max-height: 90vh;
+  overflow: hidden;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 22px;
+  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+
+.storeModalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 1.2rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.storeModalTitle {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.storeModalSubtitle {
+  margin: 6px 0 16px;
+  color: var(--muted-foreground);
+}
+
+.storeModalBody {
+  max-height: calc(90vh - 150px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.storeModalActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.storeModalActions button {
+  flex: 1 1 160px;
+  height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+}
+
+.storeModalActions .submitButton {
+  margin-top: 0;
 }
 
 .storeContactRow {

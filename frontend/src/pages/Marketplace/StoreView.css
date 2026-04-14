@@ -21,12 +21,20 @@
 .storeViewHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 14px;
   background: color-mix(in oklch, var(--chart-2) 8%, var(--card));
   border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
   border-radius: 18px;
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.storeViewHeaderMain {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .storeViewAvatar {

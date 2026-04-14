@@ -1,10 +1,12 @@
 import "./StoreView.css";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { marketplaceItems } from "./marketplaceData";
 
 export default function StoreView() {
   const { storeId } = useParams();
   const decodedStore = decodeURIComponent(storeId || "");
+  const [isFavourited, setIsFavourited] = useState(false);
 
   const items = marketplaceItems.filter(
     (item) => item.storeName.toLowerCase() === decodedStore.toLowerCase()
@@ -27,20 +29,29 @@ export default function StoreView() {
       </div>
 
       <header className="storeViewHeader">
-        <div className="storeViewAvatar">
-          {storeName
-            .split(" ")
-            .slice(0, 2)
-            .map((p) => p[0])
-            .join("")
-            .toUpperCase()}
+        <div className="storeViewHeaderMain">
+          <div className="storeViewAvatar">
+            {storeName
+              .split(" ")
+              .slice(0, 2)
+              .map((p) => p[0])
+              .join("")
+              .toUpperCase()}
+          </div>
+          <div>
+            <h1>{storeName}</h1>
+            <p className="storeViewSub">
+              Trusted campus seller · Fast delivery · Great reviews
+            </p>
+          </div>
         </div>
-        <div>
-          <h1>{storeName}</h1>
-          <p className="storeViewSub">
-            Trusted campus seller · Fast delivery · Great reviews
-          </p>
-        </div>
+        <button
+          type="button"
+          className={isFavourited ? "btnSecondary" : "btnOutline"}
+          onClick={() => setIsFavourited((prev) => !prev)}
+        >
+          {isFavourited ? "Favourited" : "Favourite Store"}
+        </button>
       </header>
 
       <section className="storeViewStats">
