@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './profile.css';
 import { Edit, Award, Trophy, Star, Zap, Users } from 'lucide-react';
 
 export default function ProfilePage() {
-  const [user] = useState({
+  const [user, setUser] = useState({
     name: '', 
     course: '', 
     profileImage: '',
@@ -12,6 +12,48 @@ export default function ProfilePage() {
     joinedDate: '',
     email: '',
   });
+
+  const [stats, setStats] = useState({
+    posts: 0,
+    followers: 0,
+    following: 0,
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Assuming token is stored here
+        const response = await fetch('http://localhost:5000/api/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUser({
+            name: data.name || '',
+            course: data.department || '',
+            profileImage: data.profilePic || '',
+            bio: data.bio || '',
+            location: '', // Not in schema
+            joinedDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString() : '',
+            email: data.email || '',
+          });
+          setStats({
+            posts: data.posts?.length || 0,
+            followers: data.followers?.length || 0,
+            following: data.following?.length || 0,
+          });
+        } else {
+          console.error('Failed to fetch profile');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Fallback data (ready for backend)
   const skills = [
@@ -95,15 +137,15 @@ export default function ProfilePage() {
 
         <div className="profile-stats">
           <div className="stat">
-            <p className="stat-number">182</p>
+            <p className="stat-number">{stats.posts}</p>
             <p className="stat-label">Posts</p>
           </div>
           <div className="stat">
-            <p className="stat-number">299</p>
+            <p className="stat-number">{stats.followers}</p>
             <p className="stat-label">Followers</p>
           </div>
           <div className="stat">
-            <p className="stat-number">150</p>
+            <p className="stat-number">{stats.following}</p>
             <p className="stat-label">Following</p>
           </div>
         </div>

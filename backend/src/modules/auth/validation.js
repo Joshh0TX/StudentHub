@@ -4,7 +4,7 @@ exports.validateRegister = ({ email, password, name }) => {
         throw new Error("Email and password are required");
     }
 
-    // Basic email check
+    // email check
     if (!email.includes("@")) {
         throw new Error("Invalid email format");
     }
@@ -22,5 +22,10 @@ exports.validateRegister = ({ email, password, name }) => {
         throw new Error("Password must contain at least one number");
     }
 
+    if (!name) {
+        throw new Error("Input your name");
+    }
+
     return true;
 };
+
