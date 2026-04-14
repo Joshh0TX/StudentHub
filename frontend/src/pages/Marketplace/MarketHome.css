@@ -235,60 +235,74 @@ input[type="button"]:focus-visible {
   font-weight: 700;
   margin-bottom: 10px;
   letter-spacing: 0.2px;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.favoriteStores {
-  margin-top: 22px;
-  margin-bottom: 10px;
-  background: color-mix(in oklch, var(--chart-2) 8%, var(--card));
-  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+.sellerName:hover {
+  text-decoration: underline;
+}
+
+.favoriteStores,
+.popularStores {
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
-.favoriteHeader h2 {
+.favoriteHeader h2,
+.popularHeader h2 {
   font-size: 1.1rem;
   margin-bottom: 4px;
 }
 
-.favoriteHeader p {
+.favoriteHeader p,
+.popularHeader p {
   color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 12px;
 }
 
-.favoriteGrid {
+.storeIconGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 14px;
   align-content: start;
   flex: 1;
 }
 
-.favoriteCard {
-  background: var(--secondary);
-  border-radius: 14px;
-  padding: 12px;
+.storeIconItem {
   display: grid;
-  gap: 6px;
-  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
+  justify-items: center;
+  gap: 10px;
+  padding: 6px 4px;
 }
 
-.favoriteTitle {
+.storeIconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--chart-2) 40%, var(--secondary));
+  color: var(--primary);
+  display: grid;
+  place-items: center;
   font-weight: 700;
+  font-size: 1rem;
 }
 
-.favoriteMeta {
+.storeIconName {
+  text-align: center;
   font-size: 0.85rem;
-  color: var(--muted-foreground);
+  font-weight: 600;
+  color: var(--foreground);
 }
 
 .favoriteBtn {
-  width: fit-content;
-  padding: 8px 12px;
-  background: #4f46e5;
-  color: var(--primary-foreground);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background: color-mix(in oklch, var(--chart-2) 35%, #4f46e5);
 }
 
 .storeRow {
@@ -305,19 +319,11 @@ input[type="button"]:focus-visible {
   padding-bottom: 16px;
 }
 
-.favoriteStores {
-  display: flex;
-  flex-direction: column;
-}
-
-.popularStores {
-  display: flex;
-  flex-direction: column;
-}
-
 .storeRow .favoriteStores,
 .storeRow .popularStores {
   margin-top: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 980px) {
@@ -325,208 +331,6 @@ input[type="button"]:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
   }
-}
-
-.popularStores {
-  margin-top: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-}
-
-.popularHeader h2 {
-  font-size: 1.1rem;
-  margin-bottom: 4px;
-}
-
-.popularHeader p {
-  color: var(--muted-foreground);
-  font-size: 0.9rem;
-  margin-bottom: 12px;
-}
-
-.popularGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  align-content: start;
-  flex: 1;
-}
-
-.favoriteCard,
-.popularCard {
-  min-height: 130px;
-}
-
-.popularCard {
-  background: var(--secondary);
-  border-radius: 14px;
-  padding: 12px;
-  display: grid;
-  gap: 6px;
-  border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
-}
-
-.popularTitle {
-  font-weight: 700;
-}
-
-.popularMeta {
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
-}
-
-.marketCard img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-
-.itemNumber {
-  color: var(--card-foreground);
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 500;
-  margin-top: 14px;
-  margin-bottom: 8px;
-}
-
-.marketForm {
-  display: grid;
-  gap: 14px;
-  padding: 18px;
-  margin-top: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  max-width: 720px;
-}
-
-.marketForm label {
-  display: grid;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: var(--foreground);
-  font-weight: 500;
-}
-
-.marketForm input {
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--input-background);
-  color: var(--foreground);
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-}
-
-.storeForm {
-  display: grid;
-  gap: 14px;
-  padding: 18px;
-  margin-top: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  max-width: 720px;
-}
-
-.storeForm label {
-  display: grid;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: var(--foreground);
-  font-weight: 500;
-}
-
-.storeForm input,
-.storeForm select,
-.storeForm textarea {
-  min-height: 42px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--input-background);
-  color: var(--foreground);
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-}
-
-.storeForm textarea {
-  resize: vertical;
-}
-
-.storeForm input:focus,
-.storeForm select:focus,
-.storeForm textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
-  background: #fff;
-}
-
-.marketForm select {
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--foreground);
-  font-size: 0.95rem;
-  outline: none;
-}
-
-.marketForm input::placeholder {
-  color: var(--muted-foreground);
-}
-
-.marketForm input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
-  background: #fff;
-}
-
-.marketForm input:invalid:focus {
-  border-color: var(--chart-3);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--chart-3) 25%, transparent);
-}
-
-@media (max-width: 640px) {
-  .marketForm {
-    padding: 14px;
-  }
-}
-
-.marketToggle {
-  margin-top: 12px;
-  width: fit-content;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #4f46e5;
-  color: var(--primary-foreground);
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
-}
-
-.marketToggle:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-}
-
-.marketToggle:active {
-  transform: translateY(0);
-  box-shadow: none;
 }
 
 .marketControls {
@@ -618,8 +422,236 @@ input[type="button"]:focus-visible {
   margin-top: 6px;
 }
 
+.itemNumber {
+  color: var(--card-foreground);
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.marketForm {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  max-width: 720px;
+}
+
+.marketForm label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.marketForm input {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.marketForm select {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.marketForm input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.marketForm input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
+  background: #fff;
+}
+
+.marketForm input:invalid:focus {
+  border-color: var(--chart-3);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--chart-3) 25%, transparent);
+}
+
+.storeForm {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  max-width: 720px;
+}
+
+.storeForm label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.storeForm input,
+.storeForm select,
+.storeForm textarea {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-background);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.storeForm textarea {
+  min-height: 90px;
+  height: auto;
+  padding-top: 10px;
+}
+
+.storeContactRow {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.storeContactRow button {
+  height: 42px;
+  padding: 0 18px;
+}
+
+.storeContactList {
+  display: grid;
+  gap: 8px;
+}
+
+.contactChip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+  background: color-mix(in oklch, var(--chart-2) 6%, var(--card));
+}
+
+.contactChipLabel {
+  font-size: 0.9rem;
+}
+
+.contactRemove {
+  background: transparent;
+  border-color: color-mix(in oklch, var(--destructive) 55%, var(--border));
+  color: var(--destructive);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.contactHint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.contactPanel {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklch, var(--chart-2) 18%, var(--border));
+  background: color-mix(in oklch, var(--chart-2) 4%, var(--card));
+  display: grid;
+  gap: 8px;
+}
+
+.contactRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.contactType {
+  font-weight: 600;
+}
+
+.contactValue {
+  color: var(--muted-foreground);
+}
+
+.contactEmpty {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.storeForm textarea {
+  resize: vertical;
+}
+
+.storeForm input:focus,
+.storeForm select:focus,
+.storeForm textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);
+  background: #fff;
+}
+
+.marketToggle {
+  margin-top: 12px;
+  width: fit-content;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #4f46e5;
+  color: var(--primary-foreground);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.marketToggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.marketToggle:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 @media (max-width: 720px) {
   .marketFilters {
     grid-template-columns: 1fr;
+  }
+
+  .storeContactRow {
+    grid-template-columns: 1fr;
+  }
+
+  .storeContactRow button {
+    width: 100%;
   }
 }

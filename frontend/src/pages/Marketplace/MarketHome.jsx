@@ -1,7 +1,7 @@
 import "./MarketHome.css";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { categoriesByType, marketplaceItems } from "./marketplaceData";
+import { categoriesByType, marketplaceItems, storeContacts } from "./marketplaceData";
 
 export default function MarketHome() {
   const formEnabled = false;
@@ -13,6 +13,7 @@ export default function MarketHome() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [activeContactStore, setActiveContactStore] = useState(null);
   const [form, setForm] = useState({
     name: "",
     desc: "",
@@ -25,7 +26,9 @@ export default function MarketHome() {
     storeName: "",
     storeDesc: "",
     storeType: "goods",
-    contact: "",
+    contactType: "WhatsApp",
+    contactValue: "",
+    contacts: [],
   });
 
   const handleChange = (e) => {
@@ -36,6 +39,25 @@ export default function MarketHome() {
   const handleStoreChange = (e) => {
     const { name, value } = e.target;
     setStoreForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddContact = () => {
+    const nextValue = storeForm.contactValue.trim();
+    if (!nextValue) {
+      return;
+    }
+    setStoreForm((prev) => ({
+      ...prev,
+      contacts: [...prev.contacts, { type: prev.contactType, value: nextValue }],
+      contactValue: "",
+    }));
+  };
+
+  const handleRemoveContact = (index) => {
+    setStoreForm((prev) => ({
+      ...prev,
+      contacts: prev.contacts.filter((_, idx) => idx !== index),
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -105,10 +127,50 @@ export default function MarketHome() {
             storeName: item.storeName,
             category: item.category,
             locations: item.locations,
+            storeRating: item.storeRating,
+            storeReviews: item.storeReviews,
           },
         ])
     ).values()
   );
+
+  const [favoriteSet, setFavoriteSet] = useState(
+    new Set(favoriteStores.map((s) => s.storeName))
+  );
+
+  const toggleFavorite = (storeName) => {
+    setFavoriteSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(storeName)) {
+        next.delete(storeName);
+      } else {
+        next.add(storeName);
+      }
+      return next;
+    });
+  };
+
+  const favoriteList = favoriteStores.filter((s) =>
+    favoriteSet.has(s.storeName)
+  );
+
+  const contactOptions = [
+    "WhatsApp",
+    "Phone",
+    "Instagram",
+    "Snapchat",
+    "Telegram",
+    "Email",
+    "X",
+  ];
+
+  const getInitials = (name) =>
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase();
 
   return (
     <div>
@@ -133,6 +195,7 @@ export default function MarketHome() {
             {isSeller ? "Storefront" : "Create My Store"}
           </button>
         </div>
+
         {showStoreForm && (
           <form className="storeForm" onSubmit={(e) => e.preventDefault()}>
             <label>
@@ -169,34 +232,75 @@ export default function MarketHome() {
               </select>
             </label>
             <label>
-              Contact (Phone/WhatsApp/IG)
-              <input
-                name="contact"
-                type="text"
-                value={storeForm.contact}
-                onChange={handleStoreChange}
-                required
-              />
+              Contact Methods
+              <div className="storeContactRow">
+                <select
+                  name="contactType"
+                  value={storeForm.contactType}
+                  onChange={handleStoreChange}
+                >
+                  {contactOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  name="contactValue"
+                  type="text"
+                  placeholder="Add handle, number, or email"
+                  value={storeForm.contactValue}
+                  onChange={handleStoreChange}
+                />
+                <button
+                  type="button"
+                  className="btnSecondary"
+                  onClick={handleAddContact}
+                  disabled={!storeForm.contactValue.trim()}
+                >
+                  Add
+                </button>
+              </div>
+              {storeForm.contacts.length > 0 ? (
+                <div className="storeContactList">
+                  {storeForm.contacts.map((contact, index) => (
+                    <div className="contactChip" key={`${contact.type}-${index}`}>
+                      <span className="contactChipLabel">
+                        {contact.type}: {contact.value}
+                      </span>
+                      <button
+                        type="button"
+                        className="contactRemove"
+                        onClick={() => handleRemoveContact(index)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="contactHint">Add at least one way buyers can reach you.</p>
+              )}
             </label>
             <button className="submitButton" type="submit">
               Create Store
             </button>
           </form>
         )}
+
         <section className="storeRow">
           <section className="favoriteStores">
             <div className="favoriteHeader">
               <h2>Favourite Stores</h2>
               <p>Your starred spots and quick buy-again picks.</p>
             </div>
-            <div className="favoriteGrid">
-              {favoriteStores.map((store) => (
-                <div className="favoriteCard" key={store.storeName}>
-                  <div className="favoriteTitle">{store.storeName}</div>
-                  <div className="favoriteMeta">
-                    {store.category} · {store.locations.join(", ")}
+            <div className="storeIconGrid">
+              {favoriteList.map((store) => (
+                <div className="storeIconItem" key={store.storeName}>
+                  <div className="storeIconCircle">
+                    {getInitials(store.storeName)}
                   </div>
-                  <button className="favoriteBtn">Buy Again</button>
+                  <div className="storeIconName">{store.storeName}</div>
                 </div>
               ))}
             </div>
@@ -207,19 +311,28 @@ export default function MarketHome() {
               <h2>Popular Stores</h2>
               <p>More trusted sellers you might like.</p>
             </div>
-            <div className="popularGrid">
+            <div className="storeIconGrid">
               {favoriteStores.map((store) => (
-                <div className="popularCard" key={`popular-${store.storeName}`}>
-                  <div className="popularTitle">{store.storeName}</div>
-                  <div className="popularMeta">
-                    {store.category} · {store.locations.join(", ")}
+                <div className="storeIconItem" key={`popular-${store.storeName}`}>
+                  <div className="storeIconCircle">
+                    {getInitials(store.storeName)}
                   </div>
-                  <button className="favoriteBtn">Visit Store</button>
+                  <div className="storeIconName">{store.storeName}</div>
+                  <button
+                    type="button"
+                    className="favoriteBtn"
+                    onClick={() => toggleFavorite(store.storeName)}
+                  >
+                    {favoriteSet.has(store.storeName)
+                      ? "Favourited"
+                      : "Favourite"}
+                  </button>
                 </div>
               ))}
             </div>
           </section>
         </section>
+
         <div className="marketControls">
           <div className="marketSearch">
             <input
@@ -268,6 +381,7 @@ export default function MarketHome() {
             </select>
           </div>
         </div>
+
         {formEnabled && showForm && (
           <form className="marketForm" onSubmit={handleSubmit}>
             <label>
@@ -337,9 +451,12 @@ export default function MarketHome() {
                 ))}
               </select>
             </label>
-            <button className="submitButton" type="submit" onClick={() => setShowForm((prev) => !prev)}>Submit</button>
+            <button className="submitButton" type="submit">
+              Submit
+            </button>
           </form>
         )}
+
         <p className="itemNumber">{filteredItems.length} items available</p>
         <section className="markettopGird">
           {filteredItems.map((item) => (
@@ -367,8 +484,43 @@ export default function MarketHome() {
                   </span>
                 ))}
               </div>
-              <p className="sellerName">{item.storeName}</p>
-              <button className="mButton">Contact Seller</button>
+              <Link
+                to={`/store/${encodeURIComponent(item.storeName)}`}
+                className="sellerName"
+              >
+                {item.storeName}
+              </Link>
+              <button
+                className="mButton"
+                type="button"
+                onClick={() =>
+                  setActiveContactStore((prev) =>
+                    prev === item.storeName ? null : item.storeName
+                  )
+                }
+                aria-expanded={activeContactStore === item.storeName}
+              >
+                {activeContactStore === item.storeName
+                  ? "Hide Contacts"
+                  : "Contact Seller"}
+              </button>
+              {activeContactStore === item.storeName && (
+                <div className="contactPanel">
+                  {storeContacts[item.storeName]?.length ? (
+                    storeContacts[item.storeName].map((contact) => (
+                      <div
+                        className="contactRow"
+                        key={`${item.storeName}-${contact.type}-${contact.value}`}
+                      >
+                        <span className="contactType">{contact.type}</span>
+                        <span className="contactValue">{contact.value}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="contactEmpty">No contact info posted yet.</p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </section>

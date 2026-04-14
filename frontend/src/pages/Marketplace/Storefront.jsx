@@ -151,6 +151,7 @@ export default function Storefront() {
     { label: "Orders This Week", value: "36" },
     { label: "Repeat Buyers", value: "18" },
     { label: "Avg Rating", value: "4.7" },
+    { label: "Favourites", value: "214" },
   ];
 
   return (
@@ -196,7 +197,7 @@ export default function Storefront() {
                   </div>
                 </div>
                 <div className="productStats">
-                  <span>{item.visits} visits</span>
+                  <span>{item.visits} views</span>
                   <span>{item.orders} orders</span>
                   <span className="productStatus">{item.status}</span>
                 </div>

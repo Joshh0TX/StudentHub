@@ -37,6 +37,56 @@ export const categoriesByType = {
   ],
 };
 
+export const storeContacts = {
+  "Caseyâ€™s Store": [
+    { type: "WhatsApp", value: "+234 803 111 2200" },
+    { type: "Phone", value: "0703 111 2200" },
+    { type: "Instagram", value: "@caseys_store" },
+  ],
+  "Gbemiâ€™s Kitchen": [
+    { type: "WhatsApp", value: "+234 806 445 9001" },
+    { type: "Phone", value: "0810 445 9001" },
+    { type: "Instagram", value: "@gbemiskitchen" },
+  ],
+  "Titiâ€™s Mini Mart": [
+    { type: "Phone", value: "0902 330 5566" },
+    { type: "WhatsApp", value: "+234 902 330 5566" },
+  ],
+  "Mikeâ€™s Bookshop": [
+    { type: "WhatsApp", value: "+234 815 002 7788" },
+    { type: "Instagram", value: "@mikesbooks" },
+  ],
+  "Sadeâ€™s Appliances": [
+    { type: "Phone", value: "0807 880 1144" },
+    { type: "WhatsApp", value: "+234 807 880 1144" },
+  ],
+  "Joshâ€™s Tech Desk": [
+    { type: "WhatsApp", value: "+234 812 442 3300" },
+    { type: "Email", value: "joshtechdesk@studenthub.ng" },
+    { type: "Instagram", value: "@joshtechdesk" },
+  ],
+  "Titiâ€™s Braids": [
+    { type: "WhatsApp", value: "+234 706 551 7788" },
+    { type: "Snapchat", value: "titi.braids" },
+  ],
+  "Kemiâ€™s Kicks": [
+    { type: "Instagram", value: "@kemiskicks" },
+    { type: "Phone", value: "0815 662 0099" },
+  ],
+  "Simiâ€™s Dispatch": [
+    { type: "WhatsApp", value: "+234 813 900 2211" },
+    { type: "Phone", value: "0813 900 2211" },
+  ],
+  "Tundeâ€™s Treats": [
+    { type: "Instagram", value: "@tundestreats" },
+    { type: "Phone", value: "0704 112 3344" },
+  ],
+  "Kemiâ€™s Beauty Bar": [
+    { type: "WhatsApp", value: "+234 809 500 7788" },
+    { type: "Instagram", value: "@kemisbeautybar" },
+  ],
+};
+
 export const marketplaceItems = [
   {
     id: "bgh-delivery",
@@ -53,6 +103,12 @@ export const marketplaceItems = [
     type: "services",
     category: "Delivery",
     image: null,
+    storeRating: 4.4,
+    storeFavorites: 86,
+    storeReviews: [
+      { name: "Jesse L.", text: "Quick and reliable delivery." },
+      { name: "Tomi J.", text: "Always on time." },
+    ],
   },
   {
     id: "rice-and-chicken",
@@ -70,6 +126,12 @@ export const marketplaceItems = [
     category: "Food",
     image: rancImg,
     frequent: true,
+    storeRating: 4.8,
+    storeFavorites: 214,
+    storeReviews: [
+      { name: "Mira K.", text: "Best jollof on campus." },
+      { name: "Ayo O.", text: "Tasty and consistent." },
+    ],
     reviews: [
       { name: "Mira K.", text: "Tastes great, will order again." },
       { name: "Tomi J.", text: "Portion size is solid for the price." },
@@ -90,6 +152,9 @@ export const marketplaceItems = [
     type: "goods",
     category: "Food",
     image: drinksImg,
+    storeRating: 4.5,
+    storeFavorites: 142,
+    storeReviews: [{ name: "Ruth A.", text: "Fast delivery and cold drinks." }],
     reviews: [{ name: "Ayo O.", text: "Cold and quick delivery." }],
   },
   {
@@ -108,6 +173,9 @@ export const marketplaceItems = [
     category: "Educational Materials",
     image: calcTextImg,
     frequent: true,
+    storeRating: 4.6,
+    storeFavorites: 97,
+    storeReviews: [{ name: "Sade A.", text: "Great deals on textbooks." }],
     reviews: [{ name: "Sade A.", text: "Very helpful for exam prep." }],
   },
   {
@@ -125,6 +193,9 @@ export const marketplaceItems = [
     type: "goods",
     category: "Appliances",
     image: fanImg,
+    storeRating: 4.2,
+    storeFavorites: 54,
+    storeReviews: [{ name: "Kunle P.", text: "Fan was clean and works well." }],
   },
   {
     id: "laptop-cleanup",
@@ -141,6 +212,9 @@ export const marketplaceItems = [
     type: "services",
     category: "Repairs",
     image: null,
+    storeRating: 4.7,
+    storeFavorites: 121,
+    storeReviews: [{ name: "Zara T.", text: "Laptop is much faster now." }],
   },
   {
     id: "hair-braiding",
@@ -157,6 +231,9 @@ export const marketplaceItems = [
     type: "services",
     category: "Hair",
     image: null,
+    storeRating: 4.6,
+    storeFavorites: 88,
+    storeReviews: [{ name: "Lola S.", text: "Neat braids, nice service." }],
   },
   {
     id: "sneakers",
@@ -173,6 +250,9 @@ export const marketplaceItems = [
     type: "goods",
     category: "Clothing",
     image: sneakersImg,
+    storeRating: 4.3,
+    storeFavorites: 73,
+    storeReviews: [{ name: "Ola M.", text: "Sneakers are clean and comfy." }],
   },
   {
     id: "busa-delivery",
@@ -190,6 +270,9 @@ export const marketplaceItems = [
     category: "Delivery",
     image: null,
     frequent: true,
+    storeRating: 4.8,
+    storeFavorites: 190,
+    storeReviews: [{ name: "Teni A.", text: "Super fast delivery." }],
   },
   {
     id: "fab-biscuit",
@@ -206,6 +289,9 @@ export const marketplaceItems = [
     type: "goods",
     category: "Food",
     image: fabImg,
+    storeRating: 4.1,
+    storeFavorites: 46,
+    storeReviews: [{ name: "Nora I.", text: "Tasty and affordable." }],
   },
   {
     id: "perfume",
@@ -223,5 +309,8 @@ export const marketplaceItems = [
     category: "Beauty",
     image: perfumeImg,
     frequent: true,
+    storeRating: 4.5,
+    storeFavorites: 132,
+    storeReviews: [{ name: "Ife B.", text: "Smells amazing, lasting scent." }],
   },
 ];
