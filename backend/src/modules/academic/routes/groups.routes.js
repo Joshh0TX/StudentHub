@@ -1,16 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../../../middleware/auth.middleware');
 const {
-  createGroup,
   getGroups,
   getGroupById,
-  joinGroup
+  createGroup,
+  deleteGroup,
 } = require('../controllers/groups.controller');
 
-router.post('/', createGroup);
+// Uncomment when auth middleware is ready:
+// const { protect } = require('../../middleware/auth');
+
+// GET  /api/groups?department=CSC&year=300
 router.get('/', getGroups);
+
+// GET  /api/groups/:id
 router.get('/:id', getGroupById);
-router.post('/:id/join', joinGroup);
+
+// POST /api/groups
+router.post('/', /* protect, */ createGroup);
+
+// DELETE /api/groups/:id
+router.delete('/:id', /* protect, */ deleteGroup);
 
 module.exports = router;
