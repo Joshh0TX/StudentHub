@@ -204,7 +204,7 @@ const StudyGroups = () => {
         const data = await res.json();
         setGroups(data);
       } catch (err) {
-        console.error("Fetch error:", err);
+        // console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
