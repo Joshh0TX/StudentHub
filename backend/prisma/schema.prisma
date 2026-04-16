@@ -106,13 +106,16 @@ model Follow {
 
 // ── Study Groups ──────────────────────────────────────────────
 model StudyGroup {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  department  String
-  createdBy   String
-  createdAt   DateTime @default(now())
-
+  id            String   @id @default(cuid())
+  name          String
+  course_code   String
+  course_title  String
+  description   String?
+  max_members   Int
+  department    String
+  year          Int      // ✅ ADD THIS
+  createdBy     String
+  createdAt     DateTime @default(now())
   creator   User       @relation(fields: [createdBy], references: [id])
   resources Resource[]
 }
