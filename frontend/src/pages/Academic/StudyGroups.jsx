@@ -194,10 +194,17 @@ const StudyGroups = () => {
         const res = await fetch(
           `${API}/api/groups?department=${selectedProgram}&year=${selectedYear}`,
         );
-        if (!res.ok) throw new Error("Failed to fetch groups");
+
+        // Check if response is ok BEFORE parsing JSON
+        if (!res.ok) {
+          const text = await res.text(); // read as text first
+          throw new Error(`Server error ${res.status}: ${text.slice(0, 100)}`);
+        }
+
         const data = await res.json();
         setGroups(data);
       } catch (err) {
+        console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
