@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './profile.css';
-import { Edit, Award, Trophy, Star, Zap, Users } from 'lucide-react';
+import { Edit, Award, Trophy, Star, Zap, Users, X, Camera } from 'lucide-react';
 
 export default function ProfilePage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [user, setUser] = useState({
     name: '', 
     course: '', 
@@ -12,6 +14,27 @@ export default function ProfilePage() {
     joinedDate: '',
     email: '',
   });
+
+const handleCoverUpdate = () => {
+    document.getElementById('coverInput').click();
+  };
+  // Add these right after your handleCoverUpdate function
+const onCoverChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const imageUrl = URL.createObjectURL(file);
+    setUser(prev => ({ ...prev, coverImage: imageUrl }));
+  }
+};
+
+const onProfileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const imageUrl = URL.createObjectURL(file);
+    setUser(prev => ({ ...prev, profileImage: imageUrl }));
+    setIsProfileMenuOpen(false); // Closes the "Upload" tooltip after selection
+  }
+};
 
   const [stats, setStats] = useState({
     posts: 0,
@@ -98,58 +121,92 @@ export default function ProfilePage() {
   return (
     <div className="container">
       <section className="profile-section">
-        <div className="cover-wrapper">
+        {/* COVER WRAPPER */}
+        <div className="cover-wrapper" onClick={() => setIsModalOpen(true)} style={{ cursor: 'pointer' }}>
           <img 
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=300&fit=crop" 
+            src={user.coverImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=300&fit=crop"} 
             alt="Cover" 
             className="coverimg"
           />
+          <div className="cover-overlay">Click to expand</div>
 
-          <div className="profileImg">
-            {user.profileImage ? (
-              <img src={user.profileImage} alt="Profile" />
-            ) : (
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" 
-                alt="Henry Profile" 
-              />
+          {/* PROFILE IMAGE */}
+          <div 
+            className="profileImg" 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents opening the cover modal
+              setIsProfileMenuOpen(!isProfileMenuOpen);
+            }}
+          >
+            <img 
+              src={user.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"} 
+              alt="Profile" 
+            />
+            
+            {/* 4. UPDATED: Tooltip logic */}
+            {isProfileMenuOpen && (
+              <div className="profile-upload-tooltip">
+                <button onClick={() => document.getElementById('profileInput').click()}>
+                  <Camera size={16} />
+                  <span>Upload Photo</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
+
+        {/* 5. UPDATED: Hidden inputs with onChange handlers */}
+        <input 
+          type="file" 
+          id="coverInput" 
+          accept="image/*"
+          style={{ display: 'none' }} 
+          onChange={onCoverChange} 
+        />
+        <input 
+          type="file" 
+          id="profileInput" 
+          accept="image/*"
+          style={{ display: 'none' }} 
+          onChange={onProfileChange} 
+        />
         
         <div className="profile-main">
           <div className="profile-text">
             <h1>{user.name || 'Henry'}</h1>
             <p className="profile-course">{user.course || 'Computer Science'}</p>
-            <p className="profile-bio">
-              {user.bio || "Passionate full-stack developer and UI designer crafting delightful digital experiences from Lagos."}
-            </p>
+            <p className="profile-bio">{user.bio || "Passionate full-stack developer."}</p>
           </div>
-
           <div className="profile-actions">
-            <button className="edit-btn">
-              <Edit size={18} style={{ marginRight: '8px' }} />
-              Edit Profile
-            </button>
-            <button className="message-btn">Messages</button>
+            <button className="edit-btn"><Edit size={18} style={{ marginRight: '8px' }} /> View Request</button>
           </div>
         </div>
 
         <div className="profile-stats">
-          <div className="stat">
-            <p className="stat-number">{stats.posts}</p>
-            <p className="stat-label">Posts</p>
-          </div>
-          <div className="stat">
-            <p className="stat-number">{stats.followers}</p>
-            <p className="stat-label">Followers</p>
-          </div>
-          <div className="stat">
-            <p className="stat-number">{stats.following}</p>
-            <p className="stat-label">Following</p>
-          </div>
+          <div className="stat"><p className="stat-number">{stats.posts}</p><p className="stat-label">Posts</p></div>
+          <div className="stat"><p className="stat-number">{stats.followers}</p><p className="stat-label">Followers</p></div>
+          <div className="stat"><p className="stat-number">{stats.following}</p><p className="stat-label">Following</p></div>
         </div>
       </section>
+
+      {/* FULL SCREEN MODAL */}
+      {isModalOpen && (
+        <div className="full-screen-modal">
+          <div className="modal-content">
+            <button className="close-modal" onClick={() => setIsModalOpen(false)}><X size={30} /></button>
+            <img 
+              src={user.coverImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=300&fit=crop"} 
+              alt="Full Cover" 
+              className="full-img" 
+            />
+            <div className="modal-actions">
+              <button className="change-photo-btn" onClick={handleCoverUpdate}>
+                <Camera size={20} /> Change Cover Photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="info-grid">
