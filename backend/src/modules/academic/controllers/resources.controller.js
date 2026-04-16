@@ -11,7 +11,9 @@ const getResources = async (req, res) => {
   const { department, year } = req.query;
 
   if (!department) {
-    return res.status(400).json({ error: "department query param is required" });
+    return res
+      .status(400)
+      .json({ error: "department query param is required" });
   }
 
   try {
@@ -30,17 +32,17 @@ const getResources = async (req, res) => {
 
     // Shape each row to match what Resources.jsx expects
     const shaped = resources.map((r) => ({
-      id:           r.id,
-      course_code:  r.courseCode,
+      id: r.id,
+      course_code: r.courseCode,
       course_title: r.courseTitle ?? r.courseCode, // fallback if title missing
-      title:        r.title,
-      type:         r.type,         // "pdf" | "link" | "video" | "notes"
-      url:          r.url,
-      description:  r.description,
-      department:   r.department,
-      year:         r.year,
-      uploadedBy:   r.uploader,
-      createdAt:    r.createdAt,
+      title: r.title,
+      type: r.type, // "pdf" | "link" | "video" | "notes"
+      url: r.url,
+      description: r.description,
+      department: r.department,
+      year: r.year,
+      uploadedBy: r.uploader,
+      createdAt: r.createdAt,
     }));
 
     return res.json(shaped);
@@ -70,17 +72,28 @@ const getResources = async (req, res) => {
  * During development without auth, falls back to a placeholder.
  */
 const createResource = async (req, res) => {
-  const uploadedBy = req.user?.id ?? "test-user-123"; // swap when auth is live
+  const uploadedBy = req.user?.id ?? "user-unique-id-002"; // swap when auth is live
 
-  const { title, type, url, description, department, courseCode, courseTitle, year, groupId } =
-    req.body;
+  const {
+    title,
+    type,
+    url,
+    description,
+    department,
+    courseCode,
+    courseTitle,
+    year,
+    groupId,
+  } = req.body;
 
   // Basic validation
   const missing = ["title", "type", "url", "department", "courseCode"].filter(
-    (f) => !req.body[f]
+    (f) => !req.body[f],
   );
   if (missing.length) {
-    return res.status(400).json({ error: `Missing required fields: ${missing.join(", ")}` });
+    return res
+      .status(400)
+      .json({ error: `Missing required fields: ${missing.join(", ")}` });
   }
 
   const validTypes = ["pdf", "link", "video", "notes"];
@@ -99,9 +112,9 @@ const createResource = async (req, res) => {
         description: description ?? null,
         department,
         courseCode,
-        courseTitle:  courseTitle  ?? null,
-        year:         year         ? parseInt(year, 10) : null,
-        groupId:      groupId      ?? null,
+        courseTitle: courseTitle ?? null,
+        year: year ? parseInt(year, 10) : null,
+        groupId: groupId ?? null,
         uploadedBy,
       },
       include: {
@@ -110,17 +123,17 @@ const createResource = async (req, res) => {
     });
 
     return res.status(201).json({
-      id:           resource.id,
-      course_code:  resource.courseCode,
+      id: resource.id,
+      course_code: resource.courseCode,
       course_title: resource.courseTitle ?? resource.courseCode,
-      title:        resource.title,
-      type:         resource.type,
-      url:          resource.url,
-      description:  resource.description,
-      department:   resource.department,
-      year:         resource.year,
-      uploadedBy:   resource.uploader,
-      createdAt:    resource.createdAt,
+      title: resource.title,
+      type: resource.type,
+      url: resource.url,
+      description: resource.description,
+      department: resource.department,
+      year: resource.year,
+      uploadedBy: resource.uploader,
+      createdAt: resource.createdAt,
     });
   } catch (err) {
     console.error("[createResource]", err);
@@ -142,7 +155,9 @@ const deleteResource = async (req, res) => {
 
     if (!resource) return res.status(404).json({ error: "Resource not found" });
     if (resource.uploadedBy !== requesterId) {
-      return res.status(403).json({ error: "Not authorised to delete this resource" });
+      return res
+        .status(403)
+        .json({ error: "Not authorised to delete this resource" });
     }
 
     await prisma.resource.delete({ where: { id } });
