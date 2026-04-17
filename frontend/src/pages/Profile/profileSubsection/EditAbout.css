@@ -1,0 +1,98 @@
+/* Container for each input label + field */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Modern Label - small, uppercase, and slightly spaced */
+.form-group label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #94a3b8; /* Slate-400 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-left: 2px;
+}
+
+/* The actual Input and Textarea */
+.form-group input, 
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #f8fafc; /* Very light gray background */
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+/* Interaction: Focus State */
+.form-group input:focus, 
+.form-group textarea:focus {
+  background-color: #ffffff;
+  border-color: #3b82f6; /* Your primary blue */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Soft blue outer glow */
+  transform: translateY(-1px); /* Subtle lift effect */
+}
+
+/* Interaction: Hover State (before clicking) */
+.form-group input:hover, 
+.form-group textarea:hover {
+  border-color: #cbd5e1;
+}
+
+/* Specific styling for Textarea to handle resizing better */
+.form-group textarea {
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 100px;
+}
+.edit-about-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9; /* Subtle divider */
+}
+
+.btn-cancel-link {
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-save-bio {
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  transition: all 0.2s;
+}
+
+.btn-save-bio:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+.btn-save-bio:active {
+  transform: translateY(0);
+}
