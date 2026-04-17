@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import "./NewsHome.css";
 
 const ME = { name: "Adeola Obi", handle: "@adeola_o", initials: "AO", color: "#3B82F6" };
@@ -66,7 +66,6 @@ const INITIAL_POSTS = [
   },
 ];
 
-// ── Icons ──────────────────────────────────────────────────────────
 const Icon = {
   Book: () => (
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -178,7 +177,6 @@ const Icon = {
   ),
 };
 
-// ── Avatar ─────────────────────────────────────────────────────────
 function Avatar({ initials, color, size = "md" }) {
   return (
     <div className={`avatar avatar-${size}`} style={{ background: color }}>
@@ -187,22 +185,12 @@ function Avatar({ initials, color, size = "md" }) {
   );
 }
 
-// ── Toast ──────────────────────────────────────────────────────────
-function Toast({ message, visible }) {
-  return <div className={`toast ${visible ? "show" : ""}`}>{message}</div>;
-}
-
-// ── Post Card ──────────────────────────────────────────────────────
-function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendComment }) {
+function PostCard({ post, onLike, onToggleComments, onRepost, onSendComment }) {
   const [commentText, setCommentText] = useState("");
 
   const processText = (text) =>
     text.split(/(\s)/g).map((word, i) =>
-      word.startsWith("#") ? (
-        <span key={i} className="hashtag">{word}</span>
-      ) : (
-        word
-      )
+      word.startsWith("#") ? <span key={i} className="hashtag">{word}</span> : word
     );
 
   const handleKeyDown = (e) => {
@@ -223,7 +211,7 @@ function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendCom
   };
 
   return (
-    <div className="newsmain" style={{width:'100%'}}>
+    <div className="newsmain">
       {post.repostedByName && (
         <div className="repost-label">
           <Icon.Repost />
@@ -239,21 +227,14 @@ function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendCom
             <span className="meta-dot">·</span>
             <span className="post-time">{post.time}</span>
             {post.audience === "public" ? (
-              <span className="audience-pill pill-public">
-                <Icon.Globe />Public
-              </span>
+              <span className="audience-pill pill-public"><Icon.Globe />Public</span>
             ) : (
-              <span className="audience-pill pill-school">
-                <Icon.Home />School Only
-              </span>
+              <span className="audience-pill pill-school"><Icon.Home />School Only</span>
             )}
           </div>
           <p className="post-text">{processText(post.text)}</p>
           <div className="post-actions">
-            <button
-              className={`action-btn like ${post.liked ? "on" : ""}`}
-              onClick={() => onLike(post.id)}
-            >
+            <button className={`action-btn like ${post.liked ? "on" : ""}`} onClick={() => onLike(post.id)}>
               <Icon.Heart filled={post.liked} />
               <span className="action-count">{post.likes}</span>
             </button>
@@ -261,20 +242,17 @@ function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendCom
               <Icon.Comment />
               <span className="action-count">{post.comments}</span>
             </button>
-            <button
-              className={`action-btn repost ${post.reposted ? "on" : ""}`}
-              onClick={() => onRepost(post.id)}
-            >
+            <button className={`action-btn repost ${post.reposted ? "on" : ""}`} onClick={() => onRepost(post.id)}>
               <Icon.Repost />
               <span className="action-count">{post.reposts}</span>
             </button>
-            <button className="action-btn share" onClick={() => onShare()}>
+            <button className="action-btn share">
               <Icon.Share />
             </button>
           </div>
 
           {post.showComments && (
-            <div className="comment-box open">
+            <div className="comment-box">
               <Avatar initials={ME.initials} color={ME.color} size="sm" />
               <input
                 className="comment-input"
@@ -291,7 +269,7 @@ function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendCom
           {post.showComments &&
             post.commentList.map((c, i) => (
               <div key={i} className="comment-row">
-                <div className="avatar avatar-sm" style={{ background: "var(--blue)" }} />
+                <div className="avatar avatar-sm" style={{ background: "#3B82F6" }} />
                 <p className="comment-text">{c}</p>
               </div>
             ))}
@@ -301,13 +279,12 @@ function PostCard({ post, onLike, onToggleComments, onRepost, onShare, onSendCom
   );
 }
 
-// ── Repost Modal ───────────────────────────────────────────────────
 function RepostModal({ post, onClose, onConfirm }) {
   const [quoteText, setQuoteText] = useState("");
   if (!post) return null;
 
   return (
-    <div className="modal-overlay open" onClick={(e) => e.target.classList.contains("modal-overlay") && onClose()}>
+    <div className="modal-overlay" onClick={(e) => e.target.classList.contains("modal-overlay") && onClose()}>
       <div className="modal">
         <div className="modal-header">
           <span className="modal-title">Repost to your followers</span>
@@ -342,7 +319,6 @@ function RepostModal({ post, onClose, onConfirm }) {
   );
 }
 
-// ── Main App ───────────────────────────────────────────────────────
 export default function StudentHub() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [currentTab, setCurrentTab] = useState("all");
@@ -351,15 +327,7 @@ export default function StudentHub() {
   const [repostPost, setRepostPost] = useState(null);
   const [activePage, setActivePage] = useState("newsroom");
   const [following, setFollowing] = useState({});
-  const [toast, setToast] = useState({ message: "", visible: false });
-  const toastTimer = useRef(null);
   const composerRef = useRef(null);
-
-  const showToast = (msg) => {
-    clearTimeout(toastTimer.current);
-    setToast({ message: msg, visible: true });
-    toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), 2500);
-  };
 
   const filteredPosts =
     currentTab === "school" ? posts.filter((p) => p.audience === "school") :
@@ -373,18 +341,13 @@ export default function StudentHub() {
   };
 
   const handleToggleComments = (id) => {
-    setPosts((prev) =>
-      prev.map((p) => p.id === id ? { ...p, showComments: !p.showComments } : p)
-    );
+    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, showComments: !p.showComments } : p));
   };
 
   const handleSendComment = (id, text) => {
     setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, commentList: [text, ...p.commentList], comments: p.comments + 1 } : p
-      )
+      prev.map((p) => p.id === id ? { ...p, commentList: [text, ...p.commentList], comments: p.comments + 1 } : p)
     );
-    showToast("Reply posted!");
   };
 
   const handleRepostOpen = (id) => {
@@ -407,7 +370,6 @@ export default function StudentHub() {
       };
       setPosts((prev) => [newPost, ...prev]);
     }
-    showToast(quoteText ? "Quote post shared!" : "Reposted successfully!");
   };
 
   const handleSubmitPost = () => {
@@ -422,7 +384,6 @@ export default function StudentHub() {
     };
     setPosts((prev) => [newPost, ...prev]);
     setComposerText("");
-    showToast(`Post shared ${currentAudience === "school" ? "with your school" : "publicly"}!`);
   };
 
   const handleKeyDown = (e) => {
@@ -430,11 +391,7 @@ export default function StudentHub() {
   };
 
   const toggleFollow = (key) => {
-    setFollowing((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      showToast(next[key] ? "Now following!" : "Unfollowed");
-      return next;
-    });
+    setFollowing((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const navItems = [
@@ -462,8 +419,6 @@ export default function StudentHub() {
 
   return (
     <>
-      <Toast message={toast.message} visible={toast.visible} />
-
       {repostPost && (
         <RepostModal
           post={repostPost}
@@ -473,7 +428,7 @@ export default function StudentHub() {
       )}
 
       <div className="app-shell">
-        {/* ── Sidebar ── */}
+        {/* Sidebar */}
         <aside className="sidebar">
           <a href="#" className="logo">
             <div className="logo-mark"><Icon.Book /></div>
@@ -491,10 +446,7 @@ export default function StudentHub() {
             <button
               key={key}
               className={`nav-link ${activePage === key ? "active" : ""}`}
-              onClick={() => {
-                setActivePage(key);
-                if (key !== "newsroom") showToast(`${label} page coming soon`);
-              }}
+              onClick={() => setActivePage(key)}
             >
               <NavIcon />
               {label}
@@ -504,16 +456,10 @@ export default function StudentHub() {
 
           <hr className="sidebar-divider" />
 
-          <button
-            className={`nav-link ${activePage === "profile" ? "active" : ""}`}
-            onClick={() => { setActivePage("profile"); showToast("Profile page coming soon"); }}
-          >
+          <button className={`nav-link ${activePage === "profile" ? "active" : ""}`} onClick={() => setActivePage("profile")}>
             <Icon.User />Profile
           </button>
-          <button
-            className={`nav-link ${activePage === "settings" ? "active" : ""}`}
-            onClick={() => { setActivePage("settings"); showToast("Settings page coming soon"); }}
-          >
+          <button className={`nav-link ${activePage === "settings" ? "active" : ""}`} onClick={() => setActivePage("settings")}>
             <Icon.Settings />Settings
           </button>
 
@@ -531,12 +477,12 @@ export default function StudentHub() {
           </div>
         </aside>
 
-        {/* ── Feed ── */}
+        {/* Feed */}
         <main className="feed-col">
           <div className="feed-header">
             <div className="feed-title-row">
               <h1 className="feed-title">Newsroom</h1>
-              <button className="feed-icon-btn" onClick={() => showToast("Feed refreshed")}>
+              <button className="feed-icon-btn">
                 <Icon.Refresh />
               </button>
             </div>
@@ -546,7 +492,6 @@ export default function StudentHub() {
                   key={val}
                   className={`tab-btn ${currentTab === val ? "active" : ""}`}
                   onClick={() => setCurrentTab(val)}
-                  style={{borderRadius:'none', textDecoration:'none'}}
                 >
                   {label}
                 </button>
@@ -569,15 +514,9 @@ export default function StudentHub() {
               />
               <div className="composer-divider" />
               <div className="composer-toolbar">
-                <button className="toolbar-btn" onClick={() => showToast("Image upload coming soon")}>
-                  <Icon.Image />
-                </button>
-                <button className="toolbar-btn" onClick={() => showToast("GIF support coming soon")}>
-                  <Icon.Gif />
-                </button>
-                <button className="toolbar-btn" onClick={() => showToast("Polls coming soon")}>
-                  <Icon.Chart />
-                </button>
+                <button className="toolbar-btn"><Icon.Image /></button>
+                <button className="toolbar-btn"><Icon.Gif /></button>
+                <button className="toolbar-btn"><Icon.Chart /></button>
                 <div className="composer-actions">
                   <div className="audience-picker">
                     <button
@@ -593,11 +532,7 @@ export default function StudentHub() {
                       <Icon.Home />School Only
                     </button>
                   </div>
-                  <button
-                    className="submit-btn"
-                    onClick={handleSubmitPost}
-                    disabled={!composerText.trim()}
-                  >
+                  <button className="submit-btn" onClick={handleSubmitPost} disabled={!composerText.trim()}>
                     Post
                   </button>
                 </div>
@@ -621,7 +556,6 @@ export default function StudentHub() {
                   onLike={handleLike}
                   onToggleComments={handleToggleComments}
                   onRepost={handleRepostOpen}
-                  onShare={() => showToast("Link copied to clipboard!")}
                   onSendComment={handleSendComment}
                 />
               ))
@@ -629,7 +563,7 @@ export default function StudentHub() {
           </div>
         </main>
 
-        {/* ── Right Panel ── */}
+        {/* Right Panel */}
         <aside className="right-col">
           <div className="search-bar">
             <Icon.Search />
@@ -639,7 +573,7 @@ export default function StudentHub() {
           <div className="widget">
             <p className="widget-heading">Trending at School</p>
             {trends.map((t) => (
-              <div key={t.tag} className="trend-row" onClick={() => showToast(t.tag)}>
+              <div key={t.tag} className="trend-row">
                 <div className="trend-cat">{t.cat}</div>
                 <div className="trend-tag"><span>{t.tag}</span></div>
                 <div className="trend-volume">{t.vol}</div>
