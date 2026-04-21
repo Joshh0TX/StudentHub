@@ -5,6 +5,7 @@ const {
   getGroupById,
   createGroup,
   deleteGroup,
+  joinGroup,
 } = require('../controllers/groups.controller');
 
 // Uncomment when auth middleware is ready:
@@ -18,6 +19,9 @@ router.get('/:id', getGroupById);
 
 // POST /api/groups
 router.post('/', /* protect, */ createGroup);
+
+//POST /api/groups/:id
+router.post("/:id/join", joinGroup);
 
 // DELETE /api/groups/:id
 router.delete('/:id', /* protect, */ deleteGroup);
