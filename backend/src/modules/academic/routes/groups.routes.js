@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getGroups,
   getGroupById,
+  getMyGroups,
   createGroup,
   deleteGroup,
   joinGroup,
@@ -15,7 +16,8 @@ const {
 router.get('/', getGroups);
 
 // GET  /api/groups/:id
-router.get('/:id', getGroupById);
+router.get("/my-groups", getMyGroups);
+router.get("/:id", getGroupById);
 
 // POST /api/groups
 router.post('/', /* protect, */ createGroup);

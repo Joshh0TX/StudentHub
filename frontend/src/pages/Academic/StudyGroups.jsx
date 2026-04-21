@@ -79,7 +79,7 @@ const CreateGroupModal = ({
           description: form.description.trim(),
           max_members: maxMembers,
           year: Number(selectedYear),
-          department_id: departmentId,
+          department: selectedProgram, //change when auth is complete
         }),
       });
       onCreated(data);
