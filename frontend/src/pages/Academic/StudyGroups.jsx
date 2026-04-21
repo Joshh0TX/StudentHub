@@ -42,7 +42,7 @@ const CreateGroupModal = ({
           ...form,
           max_members: Number(form.max_members),
           year: selectedYear,
-          department_id: 1, // replace with real dept id from auth later
+          department: selectedProgram, // replace with real dept id from auth later
         }),
       });
       if (!res.ok) throw new Error("Failed to create group");
@@ -139,7 +139,7 @@ const CreateGroupModal = ({
 // ── Group Card ────────────────────────────────────────────────────
 const GroupCard = ({ group, onJoin }) => {
   const navigate = useNavigate();
-  const isFull = group.member_count >= group.max_members;
+  const isFull = (group.member_count ?? 0) >= (group.max_members ?? 8);
 
   return (
     <div className="group-card">
@@ -148,7 +148,7 @@ const GroupCard = ({ group, onJoin }) => {
         <div className="group-members">
           <Users size={15} />
           <span>
-            {group.member_count}/{group.max_members}
+            {group.member_count ?? 0}/{group.max_members ?? 8}
           </span>
         </div>
       </div>
