@@ -1,23 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './profile.css';
 import * as Icons from 'lucide-react';
 import BadgeManager from './profileSubsection/BadgeManager';
 import EditAbout from './profileSubsection/EditAbout';
 import RequestOverlay from './profileSubsection/RequestOverlay';
 import { Edit, Award, Trophy, Star, Zap, Users, X, Camera } from 'lucide-react';
-import {
-  FaAward,
-  FaTrophy,
-  FaStar,
-  FaBolt,
-  FaMedal,
-  FaGithub,
-  FaCode,
-  FaUsers as FaUsersIcon,
-  FaBook,
-  FaReact,
-  FaShieldHalved,
-} from 'react-icons/fa6';
 
 // ============================================================================
 // SECTION 1: CUSTOM HOOKS - Modal and State Management
@@ -54,19 +41,19 @@ function useModalManager() {
  */
 function useProfileData() {
   const [user, setUser] = useState({
-    name: 'Henry Ade',
-    course: 'Computer Science',
+    name: '',
+    course: '',
     profileImage: '',
-    bio: 'Passionate full-stack developer building clean and practical web experiences.',
-    location: 'Lagos, Nigeria',
-    joinedDate: 'Joined 2025',
-    email: 'henry.ade@example.com',
+    bio: '',
+    location: '',
+    joinedDate: '',
+    email: '',
     coverImage: '',
     badges: [
-      { id: 1, name: 'Top Contributor', icon: 'FaAward', color: '#f59e0b', selected: true },
-      { id: 2, name: 'Hackathon Winner', icon: 'FaTrophy', color: '#3b82f6', selected: true },
-      { id: 3, name: 'Best UI Design', icon: 'FaStar', color: '#10b981', selected: true },
-      { id: 4, name: 'Fastest Learner', icon: 'FaBolt', color: '#ef4444', selected: true },
+      { id: 1, name: 'Top Contributor', icon: 'Award', selected: true },
+      { id: 2, name: 'Hackathon Winner', icon: 'Trophy', selected: true },
+      { id: 3, name: 'Best UI Design', icon: 'Star', selected: true },
+      { id: 4, name: 'Fastest Learner', icon: 'Zap', selected: true },
     ],
   });
 
@@ -78,7 +65,40 @@ function useProfileData() {
  * Follows Dependency Inversion by abstracting API calls
  */
 function useProfileFetch(setUser) {
-  return setUser;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser((prev) => ({
+            ...prev,
+            name: data.name || '',
+            course: data.department || '',
+            profileImage: data.profilePic || '',
+            bio: data.bio || '',
+            location: '',
+            joinedDate: data.createdAt
+              ? new Date(data.createdAt).toLocaleDateString()
+              : '',
+            email: data.email || '',
+          }));
+        } else {
+          console.error('Failed to fetch profile');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [setUser]);
 }
 
 /**
@@ -194,39 +214,6 @@ const ACTIVITIES_DATA = [
     content: "Liked and commented on Sarah's new portfolio redesign.",
   },
 ];
-
-const BADGE_ICON_MAP = {
-  FaAward,
-  FaTrophy,
-  FaStar,
-  FaBolt,
-  FaMedal,
-  FaGithub,
-  FaCode,
-  FaUsers: FaUsersIcon,
-  FaBook,
-  FaReact,
-  FaShieldHalved,
-};
-
-const BADGE_ICON_OPTIONS = [
-  { key: 'FaAward', label: 'Award', color: '#f59e0b' },
-  { key: 'FaTrophy', label: 'Trophy', color: '#3b82f6' },
-  { key: 'FaStar', label: 'Star', color: '#10b981' },
-  { key: 'FaBolt', label: 'Bolt', color: '#ef4444' },
-  { key: 'FaMedal', label: 'Medal', color: '#8b5cf6' },
-  { key: 'FaGithub', label: 'GitHub', color: '#111827' },
-  { key: 'FaCode', label: 'Code', color: '#14b8a6' },
-  { key: 'FaUsers', label: 'Community', color: '#f97316' },
-  { key: 'FaBook', label: 'Book', color: '#0ea5e9' },
-  { key: 'FaReact', label: 'React', color: '#06b6d4' },
-  { key: 'FaShieldHalved', label: 'Shield', color: '#6366f1' },
-];
-
-function renderBadgeIcon(iconName, color = '#3b82f6') {
-  const BadgeIcon = BADGE_ICON_MAP[iconName] || FaAward;
-  return <BadgeIcon style={{ color }} />;
-}
 
 // ============================================================================
 // SECTION 3: UTILITY FUNCTIONS - Reusable helpers
@@ -499,36 +486,55 @@ function AboutSection({ user, setUser, isEditingAbout, setIsEditingAbout }) {
 
 /**
  * COMPONENT: BadgesSection
- * Responsibility: Display badges and trigger the editor modal
+ * Responsibility: Display badges and manage badge modal
  */
-function BadgesSection({ user, onEdit }) {
-  const badgesToShow = Array.isArray(user.badges) ? user.badges.slice(0, 4) : [];
+function BadgesSection({ user, setUser, isBadgeManagerOpen, setIsBadgeManagerOpen }) {
+  const handleSaveBadges = (updatedBadges) => {
+    setUser((prev) => ({
+      ...prev,
+      badges: updatedBadges,
+    }));
+    setIsBadgeManagerOpen(false);
+  };
+
+  const handleCancelBadges = () => {
+    setIsBadgeManagerOpen(false);
+  };
 
   return (
-    <div className="info-box badges-box">
-      <div className="box-header">
-        <h2>Achievements</h2>
-        <button
-          className="edit-rect-btn"
-          type="button"
-          onClick={onEdit}
-          aria-label="Edit badges"
-          title="Edit badges"
-        >
-          <Edit size={18} /> Edit
-        </button>
+    <>
+      <div className="info-box badges-box">
+        <div className="box-header">
+          <h2>Achievements</h2>
+          <button
+            className="edit-rect-btn"
+            onClick={() => setIsBadgeManagerOpen(true)}
+          >
+            <Edit size={18} /> Edit
+          </button>
+        </div>
+        <div className="badges-grid">
+          {Array.isArray(user.badges) && user.badges.map((badge) => (
+            <div key={badge.id} className="badge-btn">
+              {Icons[badge.icon] ? (
+                React.createElement(Icons[badge.icon], { size: 28 })
+              ) : (
+                <Icons.Award size={28} />
+              )}
+              <span>{badge.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="badges-grid">
-        {badgesToShow.map((badge) => (
-          <div key={badge.id} className="badge-btn" style={{ borderColor: badge.color || '#e2e8f0' }}>
-            <span className="badge-icon" style={{ color: badge.color || '#3b82f6' }}>
-              {renderBadgeIcon(badge.icon, badge.color)}
-            </span>
-            <span>{badge.name}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+
+      {isBadgeManagerOpen && (
+        <BadgeManager
+          badges={user.badges || []}
+          onSave={handleSaveBadges}
+          onCancel={handleCancelBadges}
+        />
+      )}
+    </>
   );
 }
 
@@ -730,14 +736,6 @@ function ProfilePage() {
   const handleOnProfileChange = (e) =>
     imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
 
-  const handleSaveBadges = (updatedBadges) => {
-    setUser((prev) => ({
-      ...prev,
-      badges: updatedBadges,
-    }));
-    modals.setIsBadgeManagerOpen(false);
-  };
-
   // ========================================================================
   // RENDER - Organized by sections
   // ========================================================================
@@ -756,22 +754,20 @@ function ProfilePage() {
             coverInputRef={imageUpload.coverInputRef}
           />
 
-          <div className="profile-intro-row">
-            <ProfileImageSection
-              user={user}
-              isProfileMenuOpen={modals.isProfileMenuOpen}
-              setIsProfileMenuOpen={modals.setIsProfileMenuOpen}
-              onProfileChange={handleOnProfileChange}
-              profileInputRef={imageUpload.profileInputRef}
-            />
+          <ProfileImageSection
+            user={user}
+            isProfileMenuOpen={modals.isProfileMenuOpen}
+            setIsProfileMenuOpen={modals.setIsProfileMenuOpen}
+            onProfileChange={handleOnProfileChange}
+            profileInputRef={imageUpload.profileInputRef}
+          />
 
-            {/* ===== PROFILE HEADER ===== */}
-            <ProfileHeader
-              user={user}
-              setIsRequestOpen={modals.setIsRequestOpen}
-              socials={SOCIALS_DATA}
-            />
-          </div>
+          {/* ===== PROFILE HEADER ===== */}
+          <ProfileHeader
+            user={user}
+            setIsRequestOpen={modals.setIsRequestOpen}
+            socials={SOCIALS_DATA}
+          />
         </section>
 
         {/* ===== MAIN CONTENT GRID ===== */}
@@ -787,7 +783,9 @@ function ProfilePage() {
 
             <BadgesSection
               user={user}
-              onEdit={() => modals.setIsBadgeManagerOpen(true)}
+              setUser={setUser}
+              isBadgeManagerOpen={modals.isBadgeManagerOpen}
+              setIsBadgeManagerOpen={modals.setIsBadgeManagerOpen}
             />
 
             <SkillsSection skills={SKILLS_DATA} />
@@ -812,15 +810,6 @@ function ProfilePage() {
       <RequestOverlay
         isOpen={modals.isRequestOpen}
         onClose={() => modals.setIsRequestOpen(false)}
-      />
-
-      <BadgeManager
-        isOpen={modals.isBadgeManagerOpen}
-        badges={user.badges}
-        achievements={ACHIEVEMENTS_DATA}
-        iconOptions={BADGE_ICON_OPTIONS}
-        onClose={() => modals.setIsBadgeManagerOpen(false)}
-        onSave={handleSaveBadges}
       />
     </>
   );
