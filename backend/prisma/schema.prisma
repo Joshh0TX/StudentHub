@@ -17,11 +17,10 @@ model User {
   department String
   level      Int
   createdAt  DateTime @default(now())
-  createdCourses Course[] @relation("UserCreatedCourses")
 
   // Academic
   courseMemberships CourseMember[]
-  coursesCreated    Course[]
+  createdCourses    Course[]       @relation("UserCreatedCourses")
 
   // Social
   posts     Post[]
@@ -36,7 +35,10 @@ model User {
   GroupMember   StudyGroupMember[]
 
   // Marketplace
-  store Store?
+  store      Store?
+  orders     Order[]
+  reviews    Review[]
+  favourites StoreFavourite[]
 }
 
 model Course {
@@ -168,11 +170,11 @@ model PastQuestion {
 }
 
 model Quiz {
-  id         String     @id @default(uuid())
+  id         String   @id @default(uuid())
   title      String
   courseCode String
   createdBy  String
-  createdAt  DateTime   @default(now())
+  createdAt  DateTime @default(now())
 
   creator   User       @relation(fields: [createdBy], references: [id])
   questions Question[]
@@ -199,9 +201,10 @@ model Store {
   ownerId     String   @unique
   createdAt   DateTime @default(now())
 
-  owner    User           @relation(fields: [ownerId], references: [id])
-  products Product[]
-  contacts StoreContact[]
+  owner      User             @relation(fields: [ownerId], references: [id])
+  products   Product[]
+  contacts   StoreContact[]
+  favourites StoreFavourite[]
 }
 
 model StoreContact {
@@ -225,5 +228,47 @@ model Product {
   storeId     String
   createdAt   DateTime @default(now())
 
+  store   Store    @relation(fields: [storeId], references: [id])
+  orders  Order[]
+  reviews Review[]
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  productId    String
+  buyerId      String
+  quantity     Int      @default(1)
+  deliveryTime String?
+  location     String?
+  note         String?
+  status       String   @default("Pending")
+  createdAt    DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  buyer   User    @relation(fields: [buyerId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId])
+}
+
+model StoreFavourite {
+  id        String   @id @default(uuid())
+  storeId   String
+  userId    String
+  createdAt DateTime @default(now())
+
   store Store @relation(fields: [storeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([storeId, userId])
 }

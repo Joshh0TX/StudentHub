@@ -129,3 +129,138 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
+
+// ─── ORDER ROUTES ─────────────────────────────────────────────────────────────
+
+// POST place an order
+router.post("/orders", async (req, res) => {
+  const { productId, buyerId, quantity, deliveryTime, location, note } = req.body;
+  if (!productId || !buyerId)
+    return res.status(400).json({ error: "productId and buyerId are required" });
+
+  try {
+    const order = await prisma.order.create({
+      data: { productId, buyerId, quantity: quantity || 1, deliveryTime, location, note },
+    });
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET orders for a store (seller view)
+router.get("/orders/store/:storeId", async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { product: { storeId: req.params.storeId } },
+      include: { product: true, buyer: { select: { id: true, name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT update order status
+router.put("/orders/:id/status", async (req, res) => {
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: "status is required" });
+
+  try {
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { status },
+    });
+    res.json(order);
+  } catch (error) {
+    if (error.code === "P2025")
+      return res.status(404).json({ error: "Order not found" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── REVIEW ROUTES ────────────────────────────────────────────────────────────
+
+// GET reviews for a product
+router.get("/:id/reviews", async (req, res) => {
+  try {
+    const reviews = await prisma.review.findMany({
+      where: { productId: req.params.id },
+      include: { user: { select: { id: true, name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST add a review
+router.post("/:id/reviews", async (req, res) => {
+  const { userId, text } = req.body;
+  if (!userId || !text)
+    return res.status(400).json({ error: "userId and text are required" });
+
+  try {
+    const review = await prisma.review.create({
+      data: { productId: req.params.id, userId, text },
+      include: { user: { select: { id: true, name: true } } },
+    });
+    res.status(201).json(review);
+  } catch (error) {
+    if (error.code === "P2002")
+      return res.status(409).json({ error: "You have already reviewed this product" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE a review
+router.delete("/reviews/:id", async (req, res) => {
+  try {
+    await prisma.review.delete({ where: { id: req.params.id } });
+    res.json({ message: "Review deleted" });
+  } catch (error) {
+    if (error.code === "P2025")
+      return res.status(404).json({ error: "Review not found" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── FAVOURITES ROUTES ────────────────────────────────────────────────────────
+
+// GET user's favourite stores
+router.get("/favourites/:userId", async (req, res) => {
+  try {
+    const favourites = await prisma.storeFavourite.findMany({
+      where: { userId: req.params.userId },
+      include: { store: { include: { products: true } } },
+    });
+    res.json(favourites.map((f) => f.store));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST toggle favourite (add if not exists, remove if exists)
+router.post("/favourites", async (req, res) => {
+  const { storeId, userId } = req.body;
+  if (!storeId || !userId)
+    return res.status(400).json({ error: "storeId and userId are required" });
+
+  try {
+    const existing = await prisma.storeFavourite.findUnique({
+      where: { storeId_userId: { storeId, userId } },
+    });
+
+    if (existing) {
+      await prisma.storeFavourite.delete({ where: { id: existing.id } });
+      return res.json({ favourited: false });
+    }
+
+    await prisma.storeFavourite.create({ data: { storeId, userId } });
+    res.status(201).json({ favourited: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});

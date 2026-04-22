@@ -1,164 +1,120 @@
 import "./Storefront.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  fetchStore,
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  fetchStoreOrders,
+  updateOrderStatus,
+} from "./marketplaceApi";
+import { categoriesByType } from "./marketplaceData";
 
 export default function Storefront() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const [store, setStore] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Rice and Chicken",
-      price: "N4000",
-      category: "Food",
-      orders: 18,
-      visits: 210,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Drinks Pack",
-      price: "N500",
-      category: "Food",
-      orders: 42,
-      visits: 340,
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Perfume",
-      price: "N25000",
-      category: "Beauty",
-      orders: 7,
-      visits: 95,
-      status: "Low stock",
-    },
-  ]);
   const [product, setProduct] = useState({
-    name: "",
-    desc: "",
-    price: "",
-    type: "goods",
-    category: "Food",
-    locations: "",
+    name: "", desc: "", price: "", type: "goods", category: "Food", locations: "",
   });
+
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    fetchStore(user.id)
+      .then((storeData) => {
+        if (!storeData || storeData.error) return;
+        setStore(storeData);
+        return Promise.all([
+          fetchProducts().then((all) =>
+            setProducts(all.filter((p) => p.storeId === storeData.id || p.store?.id === storeData.id))
+          ),
+          fetchStoreOrders(storeData.id).then((o) => setOrders(Array.isArray(o) ? o : [])),
+        ]);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingId
-            ? {
-                ...p,
-                name: product.name,
-                price: product.price,
-                category: product.category,
-              }
-            : p
-        )
-      );
-    } else {
-      const nextId = Math.max(0, ...products.map((p) => p.id)) + 1;
-      setProducts((prev) => [
-        {
-          id: nextId,
-          name: product.name,
-          price: product.price,
-          category: product.category,
-          orders: 0,
-          visits: 0,
-          status: "Active",
-        },
-        ...prev,
-      ]);
+    const payload = {
+      name: product.name,
+      description: product.desc,
+      price: parseFloat(product.price),
+      type: product.type,
+      category: product.category,
+      locations: product.locations.split(",").map((s) => s.trim()).filter(Boolean),
+    };
+    try {
+      if (editingId) {
+        const updated = await updateProduct(editingId, payload);
+        setProducts((prev) => prev.map((p) => (p.id === editingId ? updated : p)));
+      } else {
+        const created = await createProduct({ ...payload, storeId: store.id });
+        setProducts((prev) => [created, ...prev]);
+      }
+      setProduct({ name: "", desc: "", price: "", type: "goods", category: "Food", locations: "" });
+      setEditingId(null);
+      setShowProductForm(false);
+    } catch (err) {
+      console.error(err);
     }
-    setProduct({
-      name: "",
-      desc: "",
-      price: "",
-      type: "goods",
-      category: "Food",
-      locations: "",
-    });
-    setEditingId(null);
-    setShowProductForm(false);
   };
 
   const closeProductForm = () => {
     setShowProductForm(false);
     setEditingId(null);
+    setProduct({ name: "", desc: "", price: "", type: "goods", category: "Food", locations: "" });
   };
 
   const handleEdit = (item) => {
     setEditingId(item.id);
-    setProduct((prev) => ({
-      ...prev,
+    setProduct({
       name: item.name,
-      price: item.price,
-      category: item.category,
-    }));
+      desc: item.description || "",
+      price: String(item.price),
+      type: item.type || "goods",
+      category: item.category || "Food",
+      locations: Array.isArray(item.locations) ? item.locations.join(", ") : (item.locations || ""),
+    });
     setShowProductForm(true);
   };
 
-  const handleDelete = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteProduct(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const orders = [
-    {
-      id: "ORD-1021",
-      item: "Rice and Chicken",
-      buyer: "Ayo O.",
-      location: "Emerald Hall",
-      status: "Preparing",
-    },
-    {
-      id: "ORD-1033",
-      item: "Drinks Pack",
-      buyer: "Tomi J.",
-      location: "Queen Esther Hall",
-      status: "Ready",
-    },
-    {
-      id: "ORD-1055",
-      item: "Perfume",
-      buyer: "Mira K.",
-      location: "White Hall",
-      status: "Shipped",
-    },
-  ];
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const updated = await updateOrderStatus(orderId, newStatus);
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: updated.status || newStatus } : o)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  const notes = [
-    {
-      buyer: "Gbemi O.",
-      note: "Please add extra pepper, thank you!",
-      item: "Rice and Chicken",
-    },
-    {
-      buyer: "Ruth A.",
-      note: "Deliver after 6pm, I have class.",
-      item: "Drinks Pack",
-    },
-    {
-      buyer: "Tunde A.",
-      note: "Gift wrap if possible.",
-      item: "Perfume",
-    },
-  ];
+  const allCategories = categoriesByType[product.type] || categoriesByType.goods;
 
-  const stats = [
-    { label: "Store Visits", value: "1,248" },
-    { label: "Orders This Week", value: "36" },
-    { label: "Repeat Buyers", value: "18" },
-    { label: "Avg Rating", value: "4.7" },
-    { label: "Favourites", value: "214" },
-  ];
+  if (loading) return <main className="storefrontPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
+  if (!user) return <main className="storefrontPage"><p style={{ padding: "2rem" }}>Please log in to manage your storefront.</p></main>;
 
   return (
     <main className="storefrontPage">
@@ -168,17 +124,19 @@ export default function Storefront() {
           <span>/</span>
           <span>Storefront</span>
         </div>
-        <h1>Storefront</h1>
-        <p>Post products and manage your listings.</p>
+        <h1>{store?.name || "Storefront"}</h1>
+        <p>{store?.description || "Post products and manage your listings."}</p>
       </header>
 
       <section className="storefrontStats">
-        {stats.map((stat) => (
-          <div className="statCard" key={stat.label}>
-            <div className="statValue">{stat.value}</div>
-            <div className="statLabel">{stat.label}</div>
-          </div>
-        ))}
+        <div className="statCard">
+          <div className="statValue">{products.length}</div>
+          <div className="statLabel">Products</div>
+        </div>
+        <div className="statCard">
+          <div className="statValue">{orders.length}</div>
+          <div className="statLabel">Total Orders</div>
+        </div>
       </section>
 
       <section className="storefrontGrid">
@@ -188,13 +146,7 @@ export default function Storefront() {
             <button
               type="button"
               className="addProductBtn"
-              onClick={() => {
-                if (showProductForm) {
-                  closeProductForm();
-                } else {
-                  setShowProductForm(true);
-                }
-              }}
+              onClick={() => { if (showProductForm) { closeProductForm(); } else { setShowProductForm(true); } }}
             >
               {showProductForm ? "Close" : "Add Product"}
             </button>
@@ -204,133 +156,61 @@ export default function Storefront() {
               <div className="productRow" key={item.id}>
                 <div>
                   <div className="productName">{item.name}</div>
-                  <div className="productMeta">
-                    {item.category} · {item.price}
-                  </div>
+                  <div className="productMeta">{item.category} · ₦{item.price}</div>
                 </div>
                 <div className="productStats">
-                  <span>{item.visits} views</span>
-                  <span>{item.orders} orders</span>
-                  <span className="productStatus">{item.status}</span>
+                  <span className="productStatus">Active</span>
                 </div>
                 <div className="productActions">
-                  <button
-                    type="button"
-                    className="btnOutline"
-                    onClick={() => handleEdit(item)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="btnDanger"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    Delete
-                  </button>
+                  <button type="button" className="btnOutline" onClick={() => handleEdit(item)}>Edit</button>
+                  <button type="button" className="btnDanger" onClick={() => handleDelete(item.id)}>Delete</button>
                 </div>
               </div>
             ))}
+            {products.length === 0 && <p style={{ padding: "1rem", color: "#888" }}>No products yet. Add your first one!</p>}
           </div>
         </section>
 
         {showProductForm && (
-          <div
-            className="storefrontModal"
-            role="dialog"
-            aria-modal="true"
-            aria-label={editingId ? "Edit product" : "Create product"}
-          >
-            <button
-              className="storefrontModalBackdrop"
-              type="button"
-              aria-label="Close product form"
-              onClick={closeProductForm}
-            />
+          <div className="storefrontModal" role="dialog" aria-modal="true" aria-label={editingId ? "Edit product" : "Create product"}>
+            <button className="storefrontModalBackdrop" type="button" aria-label="Close product form" onClick={closeProductForm} />
             <div className="storefrontModalCard" role="document">
-              <button
-                className="storefrontModalClose"
-                type="button"
-                aria-label="Close"
-                onClick={closeProductForm}
-              >
-                ×
-              </button>
+              <button className="storefrontModalClose" type="button" aria-label="Close" onClick={closeProductForm}>×</button>
               <h2>{editingId ? "Edit Product" : "Create a Product"}</h2>
               <div className="storefrontModalBody">
                 <form className="storefrontForm" onSubmit={handleSubmit}>
                   <label>
                     Product Name
-                    <input
-                      name="name"
-                      type="text"
-                      value={product.name}
-                      onChange={handleChange}
-                      required
-                    />
+                    <input name="name" type="text" value={product.name} onChange={handleChange} required />
                   </label>
                   <label>
                     Description
-                    <textarea
-                      name="desc"
-                      rows="3"
-                      value={product.desc}
-                      onChange={handleChange}
-                      required
-                    />
+                    <textarea name="desc" rows="3" value={product.desc} onChange={handleChange} required />
                   </label>
                   <label>
                     Price
-                    <input
-                      name="price"
-                      type="text"
-                      value={product.price}
-                      onChange={handleChange}
-                      required
-                    />
+                    <input name="price" type="number" step="0.01" value={product.price} onChange={handleChange} required />
                   </label>
                   <label>
                     Type
-                    <select
-                      name="type"
-                      value={product.type}
-                      onChange={handleChange}
-                    >
+                    <select name="type" value={product.type} onChange={handleChange}>
                       <option value="goods">Goods</option>
                       <option value="services">Services</option>
                     </select>
                   </label>
                   <label>
                     Category
-                    <input
-                      name="category"
-                      type="text"
-                      value={product.category}
-                      onChange={handleChange}
-                      required
-                    />
+                    <select name="category" value={product.category} onChange={handleChange}>
+                      {allCategories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
                   </label>
                   <label>
                     Locations (comma separated)
-                    <input
-                      name="locations"
-                      type="text"
-                      value={product.locations}
-                      onChange={handleChange}
-                      required
-                    />
+                    <input name="locations" type="text" value={product.locations} onChange={handleChange} required />
                   </label>
                   <div className="storefrontModalActions">
-                    <button type="submit" className="submitButton">
-                      {editingId ? "Save Changes" : "Post Product"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btnOutline"
-                      onClick={closeProductForm}
-                    >
-                      Cancel
-                    </button>
+                    <button type="submit" className="submitButton">{editingId ? "Save Changes" : "Post Product"}</button>
+                    <button type="button" className="btnOutline" onClick={closeProductForm}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -344,27 +224,22 @@ export default function Storefront() {
             {orders.map((order) => (
               <div className="orderRow" key={order.id}>
                 <div>
-                  <div className="orderTitle">{order.item}</div>
-                  <div className="orderMeta">
-                    {order.id} · {order.buyer} · {order.location}
-                  </div>
+                  <div className="orderTitle">{order.product?.name || order.productId}</div>
+                  <div className="orderMeta">{order.id} · {order.buyer?.name || order.buyerId} · {order.location}</div>
+                  {order.note && <div className="noteMeta">{order.note}</div>}
                 </div>
-                <span className="orderStatus">{order.status}</span>
+                <select
+                  className="orderStatus"
+                  value={order.status}
+                  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                >
+                  {["Pending", "Preparing", "Ready", "Shipped"].map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="storefrontCard">
-          <h2>Buyer Notes</h2>
-          <div className="noteList">
-            {notes.map((note) => (
-              <div className="noteRow" key={`${note.buyer}-${note.item}`}>
-                <div className="noteBuyer">{note.buyer}</div>
-                <div className="noteText">{note.note}</div>
-                <div className="noteMeta">{note.item}</div>
-              </div>
-            ))}
+            {orders.length === 0 && <p style={{ padding: "1rem", color: "#888" }}>No orders yet.</p>}
           </div>
         </section>
       </section>

@@ -1,55 +1,102 @@
 import "./ProductDetail.css";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useState } from "react";
-import { marketplaceItems, storeContacts } from "./marketplaceData";
+import { useState, useEffect } from "react";
+import { fetchProduct, fetchReviews, placeOrder, postReview } from "./marketplaceApi";
 
 export default function ProductDetail() {
   const { productId } = useParams();
-  const item = marketplaceItems.find((p) => p.id === productId);
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const [item, setItem] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [orderNote, setOrderNote] = useState("");
   const [orderQty, setOrderQty] = useState(1);
   const [orderTime, setOrderTime] = useState("");
   const [orderLocation, setOrderLocation] = useState("");
-  const [showContacts, setShowContacts] = useState(false);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
-  if (!item) {
-    return <Navigate to="/marketplace" replace />;
-  }
+  const [showContacts, setShowContacts] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([fetchProduct(productId), fetchReviews(productId)])
+      .then(([productData, reviewsData]) => {
+        if (!productData || productData.error) {
+          setNotFound(true);
+        } else {
+          setItem(productData);
+          setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+        }
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [productId]);
+
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+    setOrderSubmitting(true);
+    try {
+      await placeOrder({ productId, buyerId: user?.id, quantity: orderQty, deliveryTime: orderTime, location: orderLocation, note: orderNote });
+      setOrderSuccess(true);
+      setShowOrderForm(false);
+      setOrderNote(""); setOrderQty(1); setOrderTime(""); setOrderLocation("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setOrderSubmitting(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewText.trim()) return;
+    setReviewSubmitting(true);
+    try {
+      const newReview = await postReview(productId, { userId: user?.id, text: reviewText });
+      setReviews((prev) => [...prev, newReview]);
+      setReviewText("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  if (loading) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
+  if (notFound) return <Navigate to="/marketplace" replace />;
 
   const galleryImages = item.image ? [item.image, item.image, item.image] : [];
+  const contacts = item.store?.contacts || [];
 
   return (
     <main className="productDetailPage">
       <div className="productDetailBreadcrumb">
         <Link to="/marketplace">Marketplace</Link>
         <span>/</span>
-        <span>{item.title}</span>
+        <span>{item.name}</span>
       </div>
 
       <section className="productDetailCard">
         <div className="productDetailMedia">
           {item.image ? (
-            <img src={item.image} alt={item.title} />
+            <img src={item.image} alt={item.name} />
           ) : (
             <div className="productDetailPlaceholder">No image</div>
           )}
           <div className="productDetailGallery">
             {galleryImages.length
               ? galleryImages.map((img, idx) => (
-                  <img
-                    src={img}
-                    alt={`${item.title} view ${idx + 1}`}
-                    key={`${item.id}-gallery-${idx}`}
-                  />
+                  <img src={img} alt={`${item.name} view ${idx + 1}`} key={`${item.id}-gallery-${idx}`} />
                 ))
               : Array.from({ length: 3 }).map((_, idx) => (
-                  <div
-                    className="productDetailThumbPlaceholder"
-                    key={`${item.id}-gallery-placeholder-${idx}`}
-                  >
-                    Image
-                  </div>
+                  <div className="productDetailThumbPlaceholder" key={`placeholder-${idx}`}>Image</div>
                 ))}
           </div>
         </div>
@@ -57,60 +104,39 @@ export default function ProductDetail() {
           <div className="productDetailTags">
             <span className="marketTag">{item.type}</span>
             <span className="marketTag muted">{item.category}</span>
-            {item.frequent && <span className="marketTag hot">Frequently Bought</span>}
           </div>
-          <h1>{item.title}</h1>
-          <p className="productDetailPrice">{item.price}</p>
-          <p className="productDetailDesc">{item.desc}</p>
+          <h1>{item.name}</h1>
+          <p className="productDetailPrice">₦{item.price}</p>
+          <p className="productDetailDesc">{item.description}</p>
           <div className="productDetailMeta">
             <div>
               <div className="metaLabel">Store</div>
-              <div className="metaValue">{item.storeName}</div>
+              <div className="metaValue">{item.store?.name}</div>
             </div>
             <div>
-              <div className="metaLabel">Added</div>
-              <div className="metaValue">{item.added}</div>
-            </div>
-            <div>
-              <div className="metaLabel">Orders</div>
-              <div className="metaValue">{item.orders}</div>
-            </div>
-            <div>
-              <div className="metaLabel">Visits</div>
-              <div className="metaValue">{item.visits}</div>
+              <div className="metaLabel">Category</div>
+              <div className="metaValue">{item.category}</div>
             </div>
           </div>
           <div className="productDetailLocations">
-            {item.locations.map((loc) => (
-              <span className="locationChip" key={loc}>
-                {loc}
-              </span>
+            {item.locations?.map((loc) => (
+              <span className="locationChip" key={loc}>{loc}</span>
             ))}
           </div>
           <div className="productDetailActions">
-            <button
-              className="mButton"
-              type="button"
-              onClick={() => setShowOrderForm((prev) => !prev)}
-            >
+            <button className="mButton" type="button" onClick={() => setShowOrderForm((prev) => !prev)}>
               {showOrderForm ? "Close Order Form" : "Place Order"}
             </button>
-            <button
-              className="btnOutline"
-              type="button"
-              onClick={() => setShowContacts((prev) => !prev)}
-            >
+            <button className="btnOutline" type="button" onClick={() => setShowContacts((prev) => !prev)}>
               {showContacts ? "Hide Contacts" : "Contact Seller"}
             </button>
           </div>
+          {orderSuccess && <p style={{ color: "green", fontSize: "0.9rem", marginTop: "0.5rem" }}>Order placed successfully!</p>}
           {showContacts && (
             <div className="contactPanel">
-              {storeContacts[item.storeName]?.length ? (
-                storeContacts[item.storeName].map((contact) => (
-                  <div
-                    className="contactRow"
-                    key={`${item.storeName}-${contact.type}-${contact.value}`}
-                  >
+              {contacts.length ? (
+                contacts.map((contact) => (
+                  <div className="contactRow" key={`${contact.type}-${contact.value}`}>
                     <span className="contactType">{contact.type}</span>
                     <span className="contactValue">{contact.value}</span>
                   </div>
@@ -121,45 +147,25 @@ export default function ProductDetail() {
             </div>
           )}
           {showOrderForm && (
-            <form className="orderForm" onSubmit={(e) => e.preventDefault()}>
+            <form className="orderForm" onSubmit={handleOrderSubmit}>
               <label>
                 Quantity
-                <input
-                  type="number"
-                  min="1"
-                  value={orderQty}
-                  onChange={(e) => setOrderQty(e.target.value)}
-                />
+                <input type="number" min="1" value={orderQty} onChange={(e) => setOrderQty(e.target.value)} />
               </label>
               <label>
                 Preferred Delivery Time
-                <input
-                  type="text"
-                  placeholder="e.g., Today 6pm"
-                  value={orderTime}
-                  onChange={(e) => setOrderTime(e.target.value)}
-                />
+                <input type="text" placeholder="e.g., Today 6pm" value={orderTime} onChange={(e) => setOrderTime(e.target.value)} />
               </label>
               <label>
                 Pickup / Delivery Location
-                <input
-                  type="text"
-                  placeholder="e.g., Queen Esther Hall"
-                  value={orderLocation}
-                  onChange={(e) => setOrderLocation(e.target.value)}
-                />
+                <input type="text" placeholder="e.g., Queen Esther Hall" value={orderLocation} onChange={(e) => setOrderLocation(e.target.value)} />
               </label>
               <label>
                 Buyer Note (optional)
-                <textarea
-                  rows="3"
-                  value={orderNote}
-                  onChange={(e) => setOrderNote(e.target.value)}
-                  placeholder="Any instructions for the seller?"
-                />
+                <textarea rows="3" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} placeholder="Any instructions for the seller?" />
               </label>
-              <button type="submit" className="submitButton">
-                Submit Order
+              <button type="submit" className="submitButton" disabled={orderSubmitting}>
+                {orderSubmitting ? "Submitting..." : "Submit Order"}
               </button>
             </form>
           )}
@@ -168,11 +174,11 @@ export default function ProductDetail() {
 
       <section className="productDetailReviews">
         <h2>Reviews</h2>
-        {item.reviews?.length ? (
+        {reviews.length ? (
           <div className="reviewList">
-            {item.reviews.map((review) => (
-              <div className="reviewCard" key={`${review.name}-${review.text}`}>
-                <div className="reviewName">{review.name}</div>
+            {reviews.map((review) => (
+              <div className="reviewCard" key={review.id || `${review.userId}-${review.text}`}>
+                <div className="reviewName">{review.user?.name || "Anonymous"}</div>
                 <div className="reviewText">{review.text}</div>
               </div>
             ))}
@@ -180,30 +186,17 @@ export default function ProductDetail() {
         ) : (
           <p className="reviewEmpty">No reviews yet.</p>
         )}
-      </section>
-
-      <section className="popularStores">
-        <div className="popularHeader">
-          <h2>Popular Stores</h2>
-          <p>More trusted sellers you might like.</p>
-        </div>
-        <div className="popularGrid">
-          <div className="popularCard">
-            <div className="popularTitle">Gbemi’s Kitchen</div>
-            <div className="popularMeta">Food · Emerald Hall</div>
-            <button className="favoriteBtn">Visit Store</button>
-          </div>
-          <div className="popularCard">
-            <div className="popularTitle">Kemi’s Beauty Bar</div>
-            <div className="popularMeta">Beauty · White Hall</div>
-            <button className="favoriteBtn">Visit Store</button>
-          </div>
-          <div className="popularCard">
-            <div className="popularTitle">Simi’s Dispatch</div>
-            <div className="popularMeta">Delivery · FAD Hall</div>
-            <button className="favoriteBtn">Visit Store</button>
-          </div>
-        </div>
+        {user && (
+          <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
+            <label>
+              Leave a Review
+              <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience..." />
+            </label>
+            <button type="submit" className="submitButton" disabled={reviewSubmitting || !reviewText.trim()}>
+              {reviewSubmitting ? "Posting..." : "Post Review"}
+            </button>
+          </form>
+        )}
       </section>
     </main>
   );
