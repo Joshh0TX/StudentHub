@@ -2,6 +2,10 @@ import React, { useState, useRef } from 'react';
 import './profile.css';
 import * as Icons from 'lucide-react';
 import BadgeManager from './profileSubsection/BadgeManager';
+import SkillsManager from './profileSubsection/SkillsManager';
+import InterestsManager from './profileSubsection/InterestsManager';
+import ProjectsManager from './profileSubsection/ProjectsManager';
+import AchievementsManager from './profileSubsection/AchievementsManager';
 import EditAbout from './profileSubsection/EditAbout';
 import RequestOverlay from './profileSubsection/RequestOverlay';
 import { Edit, Award, Trophy, Star, Zap, Users, X, Camera } from 'lucide-react';
@@ -33,6 +37,10 @@ function useModalManager() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isEditingAbout, setIsEditingAbout] = useState(false);
   const [isBadgeManagerOpen, setIsBadgeManagerOpen] = useState(false);
+  const [isSkillManagerOpen, setIsSkillManagerOpen] = useState(false);
+  const [isInterestManagerOpen, setIsInterestManagerOpen] = useState(false);
+  const [isProjectsManagerOpen, setIsProjectsManagerOpen] = useState(false);
+  const [isAchievementsManagerOpen, setIsAchievementsManagerOpen] = useState(false);
 
   return {
     isModalOpen,
@@ -45,6 +53,14 @@ function useModalManager() {
     setIsEditingAbout,
     isBadgeManagerOpen,
     setIsBadgeManagerOpen,
+    isSkillManagerOpen,
+    setIsSkillManagerOpen,
+    isInterestManagerOpen,
+    setIsInterestManagerOpen,
+    isProjectsManagerOpen,
+    setIsProjectsManagerOpen,
+    isAchievementsManagerOpen,
+    setIsAchievementsManagerOpen,
   };
 }
 
@@ -68,6 +84,20 @@ function useProfileData() {
       { id: 3, name: 'Best UI Design', icon: 'FaStar', color: '#10b981', selected: true },
       { id: 4, name: 'Fastest Learner', icon: 'FaBolt', color: '#ef4444', selected: true },
     ],
+    skills: [
+      { id: 1, name: 'React', level: 85, core: true },
+      { id: 2, name: 'Node.js', level: 78, core: true },
+      { id: 3, name: 'UI/UX Design', level: 92, core: true },
+      { id: 4, name: 'Python', level: 65, core: true },
+      { id: 5, name: 'TypeScript', level: 60, core: false },
+    ],
+    achievements: [
+      '1st Place - University Hackathon 2025',
+      'Google Developer Scholarship Recipient',
+      'Best Project Award - TechFest 2024',
+    ],
+    projects: [],
+    interests: INTERESTS_DATA,
   });
 
   return { user, setUser };
@@ -78,6 +108,14 @@ function useProfileData() {
  * Follows Dependency Inversion by abstracting API calls
  */
 function useProfileFetch(setUser) {
+  // populate additional data like projects once
+  React.useEffect(() => {
+    setUser((prev) =>
+      prev.projects && prev.projects.length > 0
+        ? prev
+        : ({ ...prev, projects: PROJECTS_DATA.map((p, i) => ({ id: i + 1, ...p })) })
+    );
+  }, [setUser]);
   return setUser;
 }
 
@@ -536,17 +574,24 @@ function BadgesSection({ user, onEdit }) {
  * COMPONENT: SkillsSection
  * Responsibility: Display skills with progress bars
  */
-function SkillsSection({ skills }) {
+function SkillsSection({ skills, onEdit }) {
+  const coreSkills = Array.isArray(skills) ? skills.filter((s) => s.core) : [];
+  let visible = coreSkills.slice(0, 4);
+
+  if (visible.length === 0 && Array.isArray(skills)) {
+    visible = [...skills].sort((a, b) => b.level - a.level).slice(0, 4);
+  }
+
   return (
     <div className="info-box skills-box">
       <div className="box-header">
         <h2>Skills</h2>
-        <button className="edit-rect-btn">
+        <button className="edit-rect-btn" onClick={onEdit}>
           <Edit size={18} /> Edit
         </button>
       </div>
       <div className="skills-list">
-        {skills.map((skill, i) => (
+        {visible.map((skill, i) => (
           <div key={i} className="skill-item">
             <div className="skill-header">
               <span className="skill-name">{skill.name}</span>
@@ -569,12 +614,12 @@ function SkillsSection({ skills }) {
  * COMPONENT: InterestsSection
  * Responsibility: Display user interests
  */
-function InterestsSection({ interests }) {
+function InterestsSection({ interests = [], onEdit }) {
   return (
     <div className="info-box interests-box">
       <div className="box-header">
         <h2>Interests</h2>
-        <button className="edit-rect-btn">
+        <button className="edit-rect-btn" onClick={onEdit}>
           <Edit size={18} /> Edit
         </button>
       </div>
@@ -589,43 +634,17 @@ function InterestsSection({ interests }) {
   );
 }
 
-/**
- * COMPONENT: ConnectSection
- * Responsibility: Display social connections
- */
-function ConnectSection({ socials }) {
-  return (
-    <div className="info-box connect-box">
-      <div className="box-header">
-        <h2>Connect</h2>
-        <button className="edit-rect-btn">
-          <Edit size={18} /> Edit
-        </button>
-      </div>
-      <div className="social-links">
-        {socials.map((social, i) => (
-          <a key={i} href={social.link} className="social-link">
-            <Users size={20} />
-            <span>
-              {social.platform}: <strong>{social.handle}</strong>
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /**
  * COMPONENT: ProjectsSection
  * Responsibility: Display user projects
  */
-function ProjectsSection({ projects }) {
+function ProjectsSection({ projects, onEdit }) {
   return (
     <div className="info-box projects-box">
       <div className="box-header">
         <h2>Projects &amp; Portfolios</h2>
-        <button className="edit-rect-btn">
+        <button className="edit-rect-btn" onClick={onEdit}>
           <Edit size={18} /> Edit
         </button>
       </div>
@@ -655,17 +674,19 @@ function ProjectsSection({ projects }) {
  * COMPONENT: AchievementsSection
  * Responsibility: Display user achievements
  */
-function AchievementsSection({ achievements }) {
+function AchievementsSection({ achievements = [], onEdit }) {
+  const visible = Array.isArray(achievements) ? achievements.slice(0, 4) : [];
+
   return (
     <div className="info-box achievements-box">
       <div className="box-header">
         <h2>Notable Achievements</h2>
-        <button className="edit-rect-btn">
+        <button className="edit-rect-btn" onClick={onEdit}>
           <Edit size={18} /> Edit
         </button>
       </div>
       <div className="achievements-list">
-        {achievements.map((ach, i) => (
+        {visible.map((ach, i) => (
           <div key={i} className="achievement-item">
             <Trophy size={22} className="trophy-icon" />
             <span>{ach}</span>
@@ -738,6 +759,38 @@ function ProfilePage() {
     modals.setIsBadgeManagerOpen(false);
   };
 
+  const handleSaveSkills = (updatedSkills) => {
+    setUser((prev) => ({
+      ...prev,
+      skills: updatedSkills,
+    }));
+    modals.setIsSkillManagerOpen(false);
+  };
+
+  const handleSaveInterests = (updatedInterests) => {
+    setUser((prev) => ({
+      ...prev,
+      interests: updatedInterests,
+    }));
+    modals.setIsInterestManagerOpen(false);
+  };
+
+  const handleSaveProjects = (updatedProjects) => {
+    setUser((prev) => ({
+      ...prev,
+      projects: updatedProjects,
+    }));
+    modals.setIsProjectsManagerOpen(false);
+  };
+
+  const handleSaveAchievements = (updatedAchievements) => {
+    setUser((prev) => ({
+      ...prev,
+      achievements: updatedAchievements,
+    }));
+    modals.setIsAchievementsManagerOpen(false);
+  };
+
   // ========================================================================
   // RENDER - Organized by sections
   // ========================================================================
@@ -790,18 +843,18 @@ function ProfilePage() {
               onEdit={() => modals.setIsBadgeManagerOpen(true)}
             />
 
-            <SkillsSection skills={SKILLS_DATA} />
+            <SkillsSection skills={user.skills} onEdit={() => modals.setIsSkillManagerOpen(true)} />
 
-            <InterestsSection interests={INTERESTS_DATA} />
+            <InterestsSection interests={user.interests} onEdit={() => modals.setIsInterestManagerOpen(true)} />
 
-            <ConnectSection socials={SOCIALS_DATA} />
+            
           </div>
 
           {/* ===== RIGHT COLUMN ===== */}
           <div className="right-column">
-            <ProjectsSection projects={PROJECTS_DATA} />
+            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} />
 
-            <AchievementsSection achievements={ACHIEVEMENTS_DATA} />
+            <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} />
 
             <ActivitiesSection activities={ACTIVITIES_DATA} />
           </div>
@@ -821,6 +874,34 @@ function ProfilePage() {
         iconOptions={BADGE_ICON_OPTIONS}
         onClose={() => modals.setIsBadgeManagerOpen(false)}
         onSave={handleSaveBadges}
+      />
+
+      <SkillsManager
+        isOpen={modals.isSkillManagerOpen}
+        skills={user.skills}
+        onClose={() => modals.setIsSkillManagerOpen(false)}
+        onSave={handleSaveSkills}
+      />
+
+      <InterestsManager
+        isOpen={modals.isInterestManagerOpen}
+        interests={user.interests}
+        onClose={() => modals.setIsInterestManagerOpen(false)}
+        onSave={handleSaveInterests}
+      />
+
+      <ProjectsManager
+        isOpen={modals.isProjectsManagerOpen}
+        projects={user.projects}
+        onClose={() => modals.setIsProjectsManagerOpen(false)}
+        onSave={handleSaveProjects}
+      />
+
+      <AchievementsManager
+        isOpen={modals.isAchievementsManagerOpen}
+        achievements={user.achievements}
+        onClose={() => modals.setIsAchievementsManagerOpen(false)}
+        onSave={handleSaveAchievements}
       />
     </>
   );
