@@ -1,5 +1,31 @@
--- AlterTable
-ALTER TABLE "StudyGroup" ALTER COLUMN "year" DROP NOT NULL;
+-- Recreate StudyGroup (was dropped in previous migration)
+CREATE TABLE "StudyGroup" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "course_code" TEXT NOT NULL,
+    "course_title" TEXT NOT NULL,
+    "description" TEXT,
+    "max_members" INTEGER NOT NULL,
+    "department" TEXT NOT NULL,
+    "year" INTEGER,
+    "createdBy" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "StudyGroup_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey for StudyGroup
+ALTER TABLE "StudyGroup" ADD CONSTRAINT "StudyGroup_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Add StudyGroup relation to Resource
+ALTER TABLE "Resource" ADD COLUMN "groupId" TEXT,
+ADD COLUMN "description" TEXT,
+ADD COLUMN "department" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "courseTitle" TEXT,
+ADD COLUMN "year" INTEGER;
+
+-- AddForeignKey for Resource -> StudyGroup
+ALTER TABLE "Resource" ADD CONSTRAINT "Resource_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "StudyGroup"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- CreateTable
 CREATE TABLE "StudyGroupMember" (
