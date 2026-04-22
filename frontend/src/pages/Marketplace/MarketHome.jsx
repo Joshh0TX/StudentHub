@@ -1,272 +1,176 @@
 import "./MarketHome.css";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { categoriesByType, marketplaceItems, storeContacts } from "./marketplaceData";
+import { categoriesByType } from "./marketplaceData";
+import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStore } from "./marketplaceApi";
+import { getUser } from "./testUser";
+
+const FEATURED_STORES = [
+  { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f" },
+  { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942" },
+  { id: "s3", name: "Simi's Dispatch", category: "Delivery", bg: "#1a3d2b" },
+  { id: "s4", name: "Josh's Tech Desk", category: "Tech", bg: "#2d1b4e" },
+  { id: "s5", name: "Titi's Mini Mart", category: "Goods", bg: "#3b2a1a" },
+  { id: "s6", name: "Tunde's Treats", category: "Food", bg: "#1a2e3b" },
+  { id: "s7", name: "Sade's Appliances", category: "Appliances", bg: "#2a3b1a" },
+  { id: "s8", name: "Mike's Bookshop", category: "Educational", bg: "#3b1a1a" },
+];
 
 export default function MarketHome() {
-  const formEnabled = false;
-  const isSeller = false;
   const navigate = useNavigate();
-  const [showForm, setShowForm] = useState(false);
+  const user = getUser();
+  const sliderRef = useRef(null);
+
+  const [products, setProducts] = useState([]);
   const [showStoreForm, setShowStoreForm] = useState(false);
+  const [isSeller, setIsSeller] = useState(false);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [activeContactStore, setActiveContactStore] = useState(null);
-  const [form, setForm] = useState({
-    name: "",
-    desc: "",
-    price: "",
-    location: "",
-    type: "goods",
-    category: "Food",
-  });
+  const [storeError, setStoreError] = useState("");
+  const [storeLoading, setStoreLoading] = useState(false);
   const [storeForm, setStoreForm] = useState({
-    storeName: "",
-    storeDesc: "",
-    storeType: "goods",
-    contactType: "WhatsApp",
-    contactValue: "",
-    contacts: [],
+    storeName: "", storeDesc: "", storeType: "goods", storeImage: null,
+    contactType: "WhatsApp", contactValue: "", contacts: [],
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    fetchProducts().then(setProducts).catch(console.error);
+    if (user) {
+      fetchStore(user.id)
+        .then((store) => { if (store && !store.error) setIsSeller(true); })
+        .catch(() => {});
+    }
+  }, []);
 
   const handleStoreChange = (e) => {
-    const { name, value } = e.target;
-    setStoreForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    if (name === "storeImage") setStoreForm((p) => ({ ...p, storeImage: files[0] || null }));
+    else setStoreForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleAddContact = () => {
-    const nextValue = storeForm.contactValue.trim();
-    if (!nextValue) {
-      return;
-    }
-    setStoreForm((prev) => ({
-      ...prev,
-      contacts: [...prev.contacts, { type: prev.contactType, value: nextValue }],
-      contactValue: "",
-    }));
+    const v = storeForm.contactValue.trim();
+    if (!v) return;
+    setStoreForm((p) => ({ ...p, contacts: [...p.contacts, { type: p.contactType, value: v }], contactValue: "" }));
   };
 
-  const handleRemoveContact = (index) => {
-    setStoreForm((prev) => ({
-      ...prev,
-      contacts: prev.contacts.filter((_, idx) => idx !== index),
-    }));
-  };
+  const handleRemoveContact = (i) =>
+    setStoreForm((p) => ({ ...p, contacts: p.contacts.filter((_, idx) => idx !== i) }));
 
-  const closeStoreForm = () => setShowStoreForm(false);
-
-  const handleSubmit = (e) => {
+  const handleCreateStore = async (e) => {
     e.preventDefault();
-    console.log("Form data:", form);
+    if (!user) return setStoreError("You must be logged in");
+    setStoreError(""); setStoreLoading(true);
+    try {
+      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeType, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
+      setIsSeller(true);
+      setShowStoreForm(false);
+      navigate("/storefront");
+    } catch (err) {
+      setStoreError(err.message);
+    } finally {
+      setStoreLoading(false);
+    }
   };
 
   const locations = [
-    "All Locations",
-    "Diamond Hall",
-    "Sapphire Hall",
-    "Crystal Hall",
-    "Platinum Hall",
-    "Queen Esther Hall",
-    "FAD Hall",
-    "White Hall",
-    "Nyberg Hall",
-    "Havillah Hall",
-    "Ogden Hall",
-    "Ameyo Hall",
-    "Samuel Akande Hall",
-    "Emerald Hall",
-    "Winslow Hall",
-    "Gideon Troopers Hall",
-    "Neal Wilson Hall",
-    "Welch Hall",
-    "Nelson Mandela Hall",
+    "All Locations","Diamond Hall","Sapphire Hall","Crystal Hall","Platinum Hall",
+    "Queen Esther Hall","FAD Hall","White Hall","Nyberg Hall","Havillah Hall",
+    "Ogden Hall","Ameyo Hall","Samuel Akande Hall","Emerald Hall","Winslow Hall",
+    "Gideon Troopers Hall","Neal Wilson Hall","Welch Hall","Nelson Mandela Hall",
   ];
 
-  const items = marketplaceItems;
+  const allCategories = Array.from(new Set([...categoriesByType.goods, ...categoriesByType.services]));
 
-  const categoryOptions = categoriesByType[form.type] || [];
-  const allCategories = Array.from(
-    new Set([...categoriesByType.goods, ...categoriesByType.services])
-  );
-
-  const handleFormTypeChange = (e) => {
-    const nextType = e.target.value;
-    const nextCategory = categoriesByType[nextType]?.[0] || "Other";
-    setForm((prev) => ({
-      ...prev,
-      type: nextType,
-      category: nextCategory,
-    }));
-  };
-
-  const filteredItems = items.filter((item) => {
-    const matchesQuery =
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.desc.toLowerCase().includes(query.toLowerCase()) ||
-      item.locations.join(" ").toLowerCase().includes(query.toLowerCase());
+  const filteredItems = products.filter((item) => {
+    const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase());
     const matchesType = typeFilter === "all" || item.type === typeFilter;
-    const matchesCategory =
-      categoryFilter === "all" || item.category === categoryFilter;
-    const matchesLocation =
-      locationFilter === "all" || item.locations.includes(locationFilter);
+    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+    const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
     return matchesQuery && matchesType && matchesCategory && matchesLocation;
   });
 
-  const favoriteStores = Array.from(
-    new Map(
-      items
-        .filter((item) => item.frequent)
-        .map((item) => [
-          item.storeName,
-          {
-            storeName: item.storeName,
-            category: item.category,
-            locations: item.locations,
-            storeRating: item.storeRating,
-            storeReviews: item.storeReviews,
-          },
-        ])
-    ).values()
-  );
-
-  const [favoriteSet, setFavoriteSet] = useState(
-    new Set(favoriteStores.map((s) => s.storeName))
-  );
-
-  const toggleFavorite = (storeName) => {
-    setFavoriteSet((prev) => {
-      const next = new Set(prev);
-      if (next.has(storeName)) {
-        next.delete(storeName);
-      } else {
-        next.add(storeName);
-      }
-      return next;
-    });
-  };
-
-  const favoriteList = favoriteStores.filter((s) =>
-    favoriteSet.has(s.storeName)
-  );
-
-  const contactOptions = [
-    "WhatsApp",
-    "Phone",
-    "Instagram",
-    "Snapchat",
-    "Telegram",
-    "Email",
-    "X",
-  ];
-
-  const getInitials = (name) =>
-    name
-      .split(" ")
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase();
+  const allStores = Array.from(new Map(products.map((p) => [p.store?.id, p.store]).filter(([id]) => id)).values());
+  const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
+  const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`) : null;
 
   return (
     <div>
-      <header></header>
       <main className="marketPage">
-        <div className="marketHeaderBar">
-          <Link to="/marketplace" className="marketLogo">
-            <div className="marketLogoMark">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
-              </svg>
+
+        {/* Hero */}
+        <div className="marketHero">
+          <div className="marketHeroContent">
+            <h2 className="marketHeroTitle">Welcome to StudentHub<br />Marketplace</h2>
+            <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
+            <div className="marketHeroActions">
+              <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
+              <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create my Store</button>
             </div>
-            <span className="marketLogoText">
-              Student<span>Hub</span>
-            </span>
-          </Link>
-        </div>
-        <div className="marketHeadings">
-          <h1 className="marketHeading">Marketplace</h1>
-          <p className="marketSubheading">
-            Welcome to the marketplace! Advertise your business or browse available items.
-          </p>
-          <button
-            type="button"
-            className="marketToggle"
-            onClick={() => {
-              if (isSeller) {
-                navigate("/storefront");
-                return;
-              }
-              setShowStoreForm((prev) => !prev);
-            }}
-          >
-            {isSeller ? "Storefront" : "Create My Store"}
-          </button>
+          </div>
+          <div className="marketHeroIllustration">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="60" fill="rgba(255,255,255,0.07)" />
+              <circle cx="60" cy="60" r="42" fill="rgba(255,255,255,0.07)" />
+              <path d="M38 48h44l-6 32H44L38 48z" fill="rgba(255,255,255,0.9)" />
+              <path d="M50 48V40a10 10 0 0120 0v8" stroke="rgba(255,255,255,0.9)" strokeWidth="3" strokeLinecap="round" />
+              <circle cx="54" cy="62" r="3" fill="#3b82f6" />
+              <circle cx="66" cy="62" r="3" fill="#3b82f6" />
+            </svg>
+          </div>
         </div>
 
+        {/* Search */}
+        <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
+          <input type="text" placeholder="Search items, locations..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+
+        {/* Popular Stores Slider */}
+        <div className="popularSliderSection">
+          <div className="popularSliderHeader">
+            <div>
+              <h2>Popular Stores</h2>
+              <p>More trusted sellers you might like.</p>
+            </div>
+            <div className="sliderNavBtns">
+              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
+              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
+            </div>
+          </div>
+          <div className="popularSliderTrack" ref={sliderRef}>
+            {[...allStores, ...FEATURED_STORES.filter(f => !allStores.some(s => s.name === f.name))].map((store) => (
+              <Link to={`/store/${encodeURIComponent(store.id)}`} className="popularSliderCard" key={store.id}>
+                <div className="popularSliderImg">
+                  {storeImg(store) ? <img src={storeImg(store)} alt={store.name} /> : <span>{getInitials(store.name)}</span>}
+                </div>
+                <div className="popularSliderName">{store.name}</div>
+                <div className="popularSliderCat">{store.type || store.category}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Create Store Modal */}
         {showStoreForm && (
-          <div
-            className="storeModal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Create store"
-          >
-            <button
-              className="storeModalBackdrop"
-              type="button"
-              aria-label="Close create store form"
-              onClick={closeStoreForm}
-            />
+          <div className="storeModal" role="dialog" aria-modal="true" aria-label="Create store">
+            <button className="storeModalBackdrop" type="button" onClick={() => setShowStoreForm(false)} />
             <div className="storeModalCard" role="document">
-              <button
-                className="storeModalClose"
-                type="button"
-                aria-label="Close"
-                onClick={closeStoreForm}
-              >
-                ×
-              </button>
+              <button className="storeModalClose" type="button" onClick={() => setShowStoreForm(false)}>×</button>
               <h3 className="storeModalTitle">Create Your Store</h3>
-              <p className="storeModalSubtitle">
-                Add your details and the best ways buyers can reach you.
-              </p>
+              <p className="storeModalSubtitle">Add your details and the best ways buyers can reach you.</p>
+              {storeError && <p style={{ color: "red", fontSize: "0.85rem" }}>{storeError}</p>}
               <div className="storeModalBody">
-                <form className="storeForm" onSubmit={(e) => e.preventDefault()}>
-                  <label>
-                    Store Name
-                    <input
-                      name="storeName"
-                      type="text"
-                      value={storeForm.storeName}
-                      onChange={handleStoreChange}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Store Description
-                    <textarea
-                      name="storeDesc"
-                      rows="3"
-                      value={storeForm.storeDesc}
-                      onChange={handleStoreChange}
-                      required
-                    />
-                  </label>
+                <form className="storeForm" onSubmit={handleCreateStore}>
+                  <label>Store Name<input name="storeName" type="text" value={storeForm.storeName} onChange={handleStoreChange} required /></label>
+                  <label>Store Description<textarea name="storeDesc" rows="3" value={storeForm.storeDesc} onChange={handleStoreChange} required /></label>
+                  <label>Store Profile Photo (optional)<input name="storeImage" type="file" accept="image/*" onChange={handleStoreChange} /></label>
                   <label>
                     Store Type
-                    <select
-                      name="storeType"
-                      value={storeForm.storeType}
-                      onChange={handleStoreChange}
-                      required
-                    >
+                    <select name="storeType" value={storeForm.storeType} onChange={handleStoreChange}>
                       <option value="goods">Goods</option>
                       <option value="services">Services</option>
                       <option value="both">Both</option>
@@ -275,67 +179,28 @@ export default function MarketHome() {
                   <label>
                     Contact Methods
                     <div className="storeContactRow">
-                      <select
-                        name="contactType"
-                        value={storeForm.contactType}
-                        onChange={handleStoreChange}
-                      >
-                        {contactOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
+                      <select name="contactType" value={storeForm.contactType} onChange={handleStoreChange}>
+                        {contactOptions.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
-                      <input
-                        name="contactValue"
-                        type="text"
-                        placeholder="Add handle, number, or email"
-                        value={storeForm.contactValue}
-                        onChange={handleStoreChange}
-                      />
-                      <button
-                        type="button"
-                        className="btnSecondary"
-                        onClick={handleAddContact}
-                        disabled={!storeForm.contactValue.trim()}
-                      >
-                        Add
-                      </button>
+                      <input name="contactValue" type="text" placeholder="Add handle, number, or email" value={storeForm.contactValue} onChange={handleStoreChange} />
+                      <button type="button" className="btnSecondary" onClick={handleAddContact} disabled={!storeForm.contactValue.trim()}>Add</button>
                     </div>
                     {storeForm.contacts.length > 0 ? (
                       <div className="storeContactList">
-                        {storeForm.contacts.map((contact, index) => (
-                          <div className="contactChip" key={`${contact.type}-${index}`}>
-                            <span className="contactChipLabel">
-                              {contact.type}: {contact.value}
-                            </span>
-                            <button
-                              type="button"
-                              className="contactRemove"
-                              onClick={() => handleRemoveContact(index)}
-                            >
-                              Remove
-                            </button>
+                        {storeForm.contacts.map((c, i) => (
+                          <div className="contactChip" key={i}>
+                            <span className="contactChipLabel">{c.type}: {c.value}</span>
+                            <button type="button" className="contactRemove" onClick={() => handleRemoveContact(i)}>Remove</button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="contactHint">
-                        Add at least one way buyers can reach you.
-                      </p>
+                      <p className="contactHint">Add at least one way buyers can reach you.</p>
                     )}
                   </label>
                   <div className="storeModalActions">
-                    <button className="submitButton" type="submit">
-                      Create Store
-                    </button>
-                    <button
-                      className="btnOutline"
-                      type="button"
-                      onClick={closeStoreForm}
-                    >
-                      Cancel
-                    </button>
+                    <button className="submitButton" type="submit" disabled={storeLoading}>{storeLoading ? "Creating..." : "Create Store"}</button>
+                    <button className="btnOutline" type="button" onClick={() => setShowStoreForm(false)}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -343,242 +208,56 @@ export default function MarketHome() {
           </div>
         )}
 
-        <section className="storeRow">
-          <section className="favoriteStores">
-            <div className="favoriteHeader">
-              <h2>Favourite Stores</h2>
-              <p>Your starred spots and quick buy-again picks.</p>
-            </div>
-            <div className="storeIconGrid">
-              {favoriteList.map((store) => (
-                <div className="storeIconItem" key={store.storeName}>
-                  <Link
-                    to={`/store/${encodeURIComponent(store.storeName)}`}
-                    className="storeIconLink"
-                  >
-                    <div className="storeIconCircle">
-                      {getInitials(store.storeName)}
-                    </div>
-                    <div className="storeIconName">{store.storeName}</div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="popularStores">
-            <div className="popularHeader">
-              <h2>Popular Stores</h2>
-              <p>More trusted sellers you might like.</p>
-            </div>
-            <div className="storeIconGrid">
-              {favoriteStores.map((store) => (
-                <div className="storeIconItem" key={`popular-${store.storeName}`}>
-                  <Link
-                    to={`/store/${encodeURIComponent(store.storeName)}`}
-                    className="storeIconLink"
-                  >
-                    <div className="storeIconCircle">
-                      {getInitials(store.storeName)}
-                    </div>
-                    <div className="storeIconName">{store.storeName}</div>
-                  </Link>
-                  <button
-                    type="button"
-                    className="favoriteBtn"
-                    onClick={() => toggleFavorite(store.storeName)}
-                  >
-                    {favoriteSet.has(store.storeName)
-                      ? "Favourited"
-                      : "Favourite"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-        </section>
-
+        {/* Filters */}
         <div className="marketControls">
-          <div className="marketSearch">
-            <input
-              type="text"
-              placeholder="Search items, locations..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
           <div className="marketFilters">
-            <select
-              value={typeFilter}
-              onChange={(e) => {
-                const nextType = e.target.value;
-                setTypeFilter(nextType);
-                setCategoryFilter("all");
-              }}
-            >
+            <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
               <option value="all">All Types</option>
               <option value="goods">Goods</option>
               <option value="services">Services</option>
             </select>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
               <option value="all">All Categories</option>
-              {(typeFilter === "all"
-                ? allCategories
-                : categoriesByType[typeFilter]
-              ).map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+              {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-            >
+            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
               {locations.map((loc) => (
-                <option key={loc} value={loc === "All Locations" ? "all" : loc}>
-                  {loc}
-                </option>
+                <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {formEnabled && showForm && (
-          <form className="marketForm" onSubmit={handleSubmit}>
-            <label>
-              Item Name
-              <input
-                name="name"
-                type="text"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Item Description
-              <input
-                name="desc"
-                type="text"
-                value={form.desc}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Item Price
-              <input
-                name="price"
-                type="text"
-                value={form.price}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Where is your item/service available?
-              <input
-                name="location"
-                type="text"
-                value={form.location}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Type
-              <select
-                name="type"
-                value={form.type}
-                onChange={handleFormTypeChange}
-                required
-              >
-                <option value="goods">Goods</option>
-                <option value="services">Services</option>
-              </select>
-            </label>
-            <label>
-              Category
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                required
-              >
-                {categoryOptions.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button className="submitButton" type="submit">
-              Submit
-            </button>
-          </form>
-        )}
-
         <p className="itemNumber">{filteredItems.length} items available</p>
         <section className="markettopGird">
           {filteredItems.map((item) => (
-            <div className="marketCard" key={`${item.title}-${item.storeName}`}>
-              {item.image && (
-                <img src={item.image} alt={item.title} className="marketImage" />
-              )}
+            <div className="marketCard" key={item.id}>
+              {item.images?.[0] && <img src={item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`} alt={item.name} className="marketImage" />}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>
-                {item.frequent && <span className="marketTag hot">Frequently Bought</span>}
               </div>
               <p className="cardTitle">
-                <Link to={`/marketplace/${item.id}`} className="productLink">
-                  {item.title}
-                </Link>
+                <Link to={`/marketplace/${item.id}`} className="productLink">{item.name}</Link>
               </p>
-              <p className="itemDesc">{item.desc}</p>
-              <p className="marketPrice">{item.price}</p>
-              <p className="mTime">{item.time}</p>
+              <p className="itemDesc">{item.description}</p>
+              <p className="marketPrice">₦{item.price}</p>
               <div className="locationChips">
-                {item.locations.map((loc) => (
-                  <span className="locationChip" key={loc}>
-                    {loc}
-                  </span>
-                ))}
+                {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}
               </div>
-              <Link
-                to={`/store/${encodeURIComponent(item.storeName)}`}
-                className="sellerName"
-              >
-                {item.storeName}
-              </Link>
-              <button
-                className="mButton"
-                type="button"
-                onClick={() =>
-                  setActiveContactStore((prev) =>
-                    prev === item.storeName ? null : item.storeName
-                  )
-                }
-                aria-expanded={activeContactStore === item.storeName}
-              >
-                {activeContactStore === item.storeName
-                  ? "Hide Contacts"
-                  : "Contact Seller"}
+              <Link to={`/store/${encodeURIComponent(item.store?.id)}`} className="sellerName">{item.store?.name}</Link>
+              <button className="mButton" type="button" onClick={() => setActiveContactStore((prev) => prev === item.store?.id ? null : item.store?.id)}>
+                {activeContactStore === item.store?.id ? "Hide Contacts" : "Contact Seller"}
               </button>
-              {activeContactStore === item.storeName && (
+              {activeContactStore === item.store?.id && (
                 <div className="contactPanel">
-                  {storeContacts[item.storeName]?.length ? (
-                    storeContacts[item.storeName].map((contact) => (
-                      <div
-                        className="contactRow"
-                        key={`${item.storeName}-${contact.type}-${contact.value}`}
-                      >
-                        <span className="contactType">{contact.type}</span>
-                        <span className="contactValue">{contact.value}</span>
+                  {item.store?.contacts?.length ? (
+                    item.store.contacts.map((c) => (
+                      <div className="contactRow" key={`${c.type}-${c.value}`}>
+                        <span className="contactType">{c.type}</span>
+                        <span className="contactValue">{c.value}</span>
                       </div>
                     ))
                   ) : (

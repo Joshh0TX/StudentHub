@@ -1,5 +1,16 @@
 .layout {
   min-height: 100vh;
-  padding-bottom: 60px;
   background: #f9fafb;
+}
+
+.content-area {
+  /* This pushes the content down so it doesn't hide under the fixed TopNav */
+  padding-top: 64px; 
+  
+  /* Remove the old padding-bottom unless you want extra scroll space */
+  padding-bottom: 20px; 
+  
+  /* Ensures the content centers nicely if you have a max-width */
+  width: 100%;
+  box-sizing: border-box;
 }

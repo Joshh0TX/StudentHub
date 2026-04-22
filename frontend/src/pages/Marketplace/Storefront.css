@@ -217,16 +217,17 @@
 .orderRow,
 .noteRow {
   background: var(--secondary);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .productRow {
   grid-template-columns: 1fr auto auto;
   align-items: center;
+  gap: 8px;
 }
 
 .productName {
@@ -301,4 +302,33 @@
   .storefrontCard {
     max-width: 100%;
   }
+}
+
+/* Store avatar hover overlay */
+.storeAvatarEdit {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.storeAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.storeAvatarEdit:hover .storeAvatarOverlay {
+  opacity: 1;
 }

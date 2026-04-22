@@ -1,12 +1,14 @@
 import { Outlet } from 'react-router-dom';
-import BottomNav from '../../components/Bottomnav/Bottomnav.jsx';
+import TopNav from '../../components/Bottomnav/Bottomnav'; // Updated name
 import './Layout.css';
 
 export default function Layout() {
   return (
     <div className="layout">
+      <TopNav />
+      <main className="content-area">
         <Outlet />
-      <BottomNav />
+      </main>
     </div>
   );
 }

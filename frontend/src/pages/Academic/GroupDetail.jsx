@@ -1,18 +1,53 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Users,
-  Calendar,
   MapPin,
   Video,
   ArrowLeft,
   Plus,
   X,
   Clock,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import "./GroupDetail.css";
 
 const API = import.meta.env.VITE_API_URL;
+
+// ── Reusable fetch helper ─────────────────────────────────────────
+const apiFetch = async (endpoint, options = {}) => {
+  const res = await fetch(`${API}${endpoint}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let message;
+    try {
+      const json = JSON.parse(text);
+      message = json.error || json.message || "An error occurred";
+    } catch {
+      message = text.slice(0, 150) || `Server error ${res.status}`;
+    }
+    throw new Error(message);
+  }
+  return res.json();
+};
+
+// ── Normalise schedule field names ────────────────────────────────
+// Prisma returns camelCase (dateTime, isOnline, meetingUrl)
+// Raw SQL returns snake_case (date_time, is_online, meeting_url)
+// This function handles both so the UI never breaks
+const normaliseSchedule = (s) => ({
+  id: s.id,
+  title: s.title,
+  notes: s.notes,
+  date_time: s.date_time ?? s.dateTime,
+  is_online: s.is_online ?? s.isOnline ?? false,
+  location: s.location,
+  meeting_url: s.meeting_url ?? s.meetingUrl,
+});
 
 // ── Add Schedule Modal ────────────────────────────────────────────
 const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
@@ -36,21 +71,31 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
   };
 
   const handleSubmit = async () => {
-    if (!form.title || !form.date_time) {
-      setError("Title and date are required.");
+    if (!form.title.trim()) {
+      setError("Session title is required.");
+      return;
+    }
+    if (!form.date_time) {
+      setError("Date and time are required.");
+      return;
+    }
+    if (form.is_online && !form.meeting_url.trim()) {
+      setError("Please provide a meeting URL for online sessions.");
+      return;
+    }
+    if (!form.is_online && !form.location.trim()) {
+      setError("Please provide a location for in-person sessions.");
       return;
     }
     setLoading(true);
     setError(null);
+
     try {
-      const res = await fetch(`${API}/api/groups/${groupId}/schedules`, {
+      const data = await apiFetch(`/api/groups/${groupId}/schedules`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Failed to add schedule");
-      const data = await res.json();
-      onAdded(data);
+      onAdded(normaliseSchedule(data));
       onClose();
     } catch (err) {
       setError(err.message);
@@ -60,7 +105,10 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
   };
 
   return (
-    <div className="modal-overlay">
+    <div
+      className="modal-overlay"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="modal">
         <div className="modal-header">
           <h2>Add Meeting Schedule</h2>
@@ -69,7 +117,11 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
           </button>
         </div>
 
-        {error && <p className="modal-error">{error}</p>}
+        {error && (
+          <div className="modal-error">
+            <AlertCircle size={15} /> {error}
+          </div>
+        )}
 
         <div className="modal-body">
           <label>
@@ -80,6 +132,7 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
             value={form.title}
             onChange={handleChange}
             placeholder="e.g. Week 3 Problem Session"
+            maxLength={150}
           />
 
           <label>
@@ -104,7 +157,9 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
 
           {form.is_online ? (
             <>
-              <label>Meeting URL</label>
+              <label>
+                Meeting URL <span>*</span>
+              </label>
               <input
                 name="meeting_url"
                 value={form.meeting_url}
@@ -114,7 +169,9 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
             </>
           ) : (
             <>
-              <label>Location</label>
+              <label>
+                Location <span>*</span>
+              </label>
               <input
                 name="location"
                 value={form.location}
@@ -131,11 +188,12 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
             onChange={handleChange}
             placeholder="Any additional notes for this session..."
             rows={3}
+            maxLength={500}
           />
         </div>
 
         <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="btn-cancel" onClick={onClose} disabled={loading}>
             Cancel
           </button>
           <button
@@ -143,7 +201,13 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? "Adding..." : "Add Schedule"}
+            {loading ? (
+              <>
+                <RefreshCw size={14} className="spinner" /> Adding...
+              </>
+            ) : (
+              "Add Schedule"
+            )}
           </button>
         </div>
       </div>
@@ -153,58 +217,77 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
 
 // ── Schedule Card ─────────────────────────────────────────────────
 const ScheduleCard = ({ schedule }) => {
-  const date = new Date(schedule.date_time);
+  const s = normaliseSchedule(schedule);
+  const date = new Date(s.date_time);
+  const isValidDate = !isNaN(date.getTime());
 
   return (
     <div className="schedule-card">
+      {/* Date block */}
       <div className="schedule-date">
-        <span className="schedule-day">
-          {date.toLocaleDateString("en-US", { weekday: "short" })}
-        </span>
-        <span className="schedule-num">{date.getDate()}</span>
-        <span className="schedule-month">
-          {date.toLocaleDateString("en-US", { month: "short" })}
-        </span>
+        {isValidDate ? (
+          <>
+            <span className="schedule-day">
+              {date.toLocaleDateString("en-US", { weekday: "short" })}
+            </span>
+            <span className="schedule-num">{date.getDate()}</span>
+            <span className="schedule-month">
+              {date.toLocaleDateString("en-US", { month: "short" })}
+            </span>
+          </>
+        ) : (
+          <span className="schedule-day">TBD</span>
+        )}
       </div>
 
+      {/* Info block */}
       <div className="schedule-info">
-        <p className="schedule-title">{schedule.title}</p>
+        <p className="schedule-title">{s.title}</p>
+
+        {isValidDate && (
+          <div className="schedule-meta">
+            <Clock size={13} />
+            <span>
+              {date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </div>
+        )}
+
         <div className="schedule-meta">
-          <Clock size={13} />
-          <span>
-            {date.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
-        <div className="schedule-meta">
-          {schedule.is_online ? (
+          {s.is_online ? (
             <>
               <Video size={13} />
-              <a
-                href={schedule.meeting_url}
-                target="_blank"
-                rel="noreferrer"
-                className="schedule-link"
-              >
-                Join Online
-              </a>
+              {s.meeting_url ? (
+                <a
+                  href={s.meeting_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="schedule-link"
+                >
+                  Join Online
+                </a>
+              ) : (
+                <span>Online (no link provided)</span>
+              )}
             </>
           ) : (
             <>
               <MapPin size={13} />
-              <span>{schedule.location}</span>
+              <span>{s.location || "Location TBD"}</span>
             </>
           )}
         </div>
-        {schedule.notes && <p className="schedule-notes">{schedule.notes}</p>}
+
+        {s.notes && <p className="schedule-notes">{s.notes}</p>}
       </div>
 
       <span
-        className={`schedule-badge ${schedule.is_online ? "badge-online" : "badge-physical"}`}
+        className={`schedule-badge ${s.is_online ? "badge-online" : "badge-physical"}`}
       >
-        {schedule.is_online ? "Online" : "In Person"}
+        {s.is_online ? "Online" : "In Person"}
       </span>
     </div>
   );
@@ -214,28 +297,38 @@ const ScheduleCard = ({ schedule }) => {
 const GroupDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`${API}/api/groups/${id}`);
-        if (!res.ok) throw new Error("Group not found");
-        const data = await res.json();
-        setGroup(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGroup();
+  const fetchGroup = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiFetch(`/api/groups/${id}`);
+
+      // Normalise member_count to a number regardless of SQL/Prisma source
+      const memberCount = Number(
+        data.member_count ?? data._count?.members ?? 0,
+      );
+
+      // Normalise schedule field names from either Prisma or raw SQL
+      const schedules = (data.schedules ?? []).map(normaliseSchedule);
+
+      setGroup({ ...data, member_count: memberCount, schedules });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchGroup();
+  }, [fetchGroup]);
 
   const handleScheduleAdded = (newSchedule) => {
     setGroup((prev) => ({
@@ -244,34 +337,66 @@ const GroupDetail = () => {
     }));
   };
 
-  if (loading) return <p className="detail-empty">Loading group...</p>;
-  if (error) return <p className="detail-empty">{error}</p>;
+  // ── Loading ───────────────────────────────────────────────────
+  if (loading)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading group...</p>
+      </div>
+    );
+
+  // ── Error ─────────────────────────────────────────────────────
+  if (error)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>{error}</p>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button className="btn-retry" onClick={fetchGroup}>
+            Retry
+          </button>
+          <button
+            className="btn-cancel"
+            onClick={() => navigate("/study-groups")}
+          >
+            Back to Groups
+          </button>
+        </div>
+      </div>
+    );
+
+  // ── Safety check — group failed to load silently ──────────────
+  if (!group) return <p className="detail-empty">Group not found.</p>;
 
   const isFull = group.member_count >= group.max_members;
 
   return (
     <div className="group-detail-page">
-      {/* Back button */}
-      <button className="btn-back" onClick={() => navigate("/study-groups")}>
+      {/* ── Back Button ── */}
+      <button className="btn-back" onClick={() => navigate(-1)}>
         <ArrowLeft size={16} /> Back to Study Groups
       </button>
 
-      {/* Group Header */}
+      {/* ── Group Header ── */}
       <div className="detail-header">
         <div className="detail-header-text">
           <h1>{group.name}</h1>
           <p className="detail-course">
-            {group.course_code} - {group.course_title}
-          </p>
-          <p className="detail-dept">
-            {group.department_name} — Year {group.year}
+            {[
+              group.course_code ?? group.courseCode,
+              group.course_title ?? group.courseTitle,
+            ]
+              .filter(Boolean)
+              .join(" - ")}
           </p>
         </div>
         <div className="detail-header-actions">
           <div className="detail-members">
             <Users size={16} />
             <span>
-              {group.member_count}/{group.max_members} members
+              {group.member_count}/{group.max_members ?? group.maxMembers}{" "}
+              members
             </span>
           </div>
           <button className="btn-join-detail" disabled={isFull}>
@@ -280,7 +405,7 @@ const GroupDetail = () => {
         </div>
       </div>
 
-      {/* Description */}
+      {/* ── Description ── */}
       <div className="detail-section">
         <h2>About this Group</h2>
         <p className="detail-description">
@@ -288,7 +413,7 @@ const GroupDetail = () => {
         </p>
       </div>
 
-      {/* Schedules */}
+      {/* ── Schedules ── */}
       <div className="detail-section">
         <div className="detail-section-header">
           <h2>Meeting Schedule</h2>
@@ -300,7 +425,7 @@ const GroupDetail = () => {
           </button>
         </div>
 
-        {!group.schedules || group.schedules.length === 0 ? (
+        {group.schedules.length === 0 ? (
           <p className="detail-empty">No sessions scheduled yet.</p>
         ) : (
           <div className="schedules-list">
@@ -311,6 +436,7 @@ const GroupDetail = () => {
         )}
       </div>
 
+      {/* ── Add Schedule Modal ── */}
       {showModal && (
         <AddScheduleModal
           groupId={id}
