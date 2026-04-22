@@ -5,6 +5,8 @@ require('dotenv').config();
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const authRoutes = require("./modules/auth/routes");
 const userRoutes = require('./modules/users/routes');
+const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
+
 
 
 const app = express();
@@ -14,8 +16,7 @@ app.use(express.json());
 app.use('/api/groups', groupRoutes);
 app.use("/api/auth", authRoutes);
 app.use('/api/users', userRoutes);
-
-app.get('/', (req, res) => res.json({ message: 'StudentHub API running' }));
+app.use("/api/products", marketplaceRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'StudentHub API running' }));
 

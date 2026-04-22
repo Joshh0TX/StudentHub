@@ -1,5 +1,5 @@
 // users.service.js
-const prisma = require("../../prisma/client");
+const prisma = require("../../config/prisma");
 
 exports.getProfile = async (userId) => {
     return prisma.user.findUnique({

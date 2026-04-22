@@ -20,6 +20,8 @@ model User {
 
   // Academic
   courseMemberships CourseMember[]
+  coursesCreated Course[]
+
 
   // Social
   posts     Post[]
@@ -30,6 +32,10 @@ model User {
   resources     Resource[]
   pastQuestions PastQuestion[]
   quizzes       Quiz[]
+
+  // Marketplace
+  store Store?
+
 }
 
 model Course {
@@ -147,4 +153,41 @@ model Question {
   correctAnswer String
 
   quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+model Store {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("goods")
+  ownerId     String   @unique
+  createdAt   DateTime @default(now())
+
+  owner    User      @relation(fields: [ownerId], references: [id])
+  products Product[]
+  contacts StoreContact[]
+}
+
+model StoreContact {
+  id      String @id @default(uuid())
+  storeId String
+  type    String
+  value   String
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  type        String   @default("goods")
+  category    String
+  locations   String[]
+  storeId     String
+  createdAt   DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id])
 }
