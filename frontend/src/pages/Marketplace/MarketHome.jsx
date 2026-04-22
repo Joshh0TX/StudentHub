@@ -109,7 +109,7 @@ export default function MarketHome() {
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
               <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
-              <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create my Store</button>
+              <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
             </div>
           </div>
           <div className="marketHeroIllustration">
@@ -124,11 +124,7 @@ export default function MarketHome() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
-          <input type="text" placeholder="Search items, locations..." value={query} onChange={(e) => setQuery(e.target.value)} />
-        </div>
-
+      
         {/* Popular Stores Slider */}
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
@@ -207,7 +203,9 @@ export default function MarketHome() {
             </div>
           </div>
         )}
-
+        <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
+          <input type="text" placeholder="Search items, locations..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
         {/* Filters */}
         <div className="marketControls">
           <div className="marketFilters">

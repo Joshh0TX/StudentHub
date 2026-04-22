@@ -284,7 +284,7 @@ input[type="button"]:focus-visible {
   margin-bottom: 10px;
   letter-spacing: 0.2px;
   text-decoration: none;
-  display: inline-block;
+  display: block;
 }
 
 .sellerName:hover {
@@ -437,26 +437,23 @@ input[type="button"]:focus-visible {
 }
 
 .marketFilters {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .marketFilters select {
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 10px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
   border: 1px solid color-mix(in oklch, var(--chart-2) 22%, var(--border));
   background: color-mix(in oklch, var(--chart-2) 6%, var(--card));
   color: var(--foreground);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
+  font-weight: 500;
   outline: none;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
-}
-
-.marketFilters select:disabled {
-  opacity: 0.6;
-  background: var(--muted);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  cursor: pointer;
 }
 
 .marketMeta {
@@ -984,7 +981,7 @@ input[type="button"]:focus-visible {
 .popularSliderTrack::-webkit-scrollbar { display: none; }
 
 .popularSliderCard {
-  flex: 0 0 140px;
+  flex: 0 0 260px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -1001,8 +998,8 @@ input[type="button"]:focus-visible {
 }
 
 .popularSliderImg {
-  width: 140px;
-  height: 110px;
+  width: 260px;
+  height: 150px;
   border-radius: 14px;
   background: color-mix(in oklch, var(--chart-2) 30%, var(--secondary));
   overflow: hidden;
@@ -1019,7 +1016,7 @@ input[type="button"]:focus-visible {
 }
 
 .popularSliderImg span {
-  font-size: 1.4rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--primary);
 }
