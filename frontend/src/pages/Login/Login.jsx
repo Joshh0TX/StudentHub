@@ -72,25 +72,10 @@ const Login = () => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <h1 className="logo">🎓 Student<span style={{color:'#3B82F6'}}>Hub</span></h1>
+        <h1 className="logo"> Student<span style={{color:'#3B82F6'}}>Hub</span></h1>
 
         {/* Toggle Tabs */}
-        <div className="tabs">
-          <button
-            className={isLogin ? "tab active" : "tab"}
-            onClick={() => setIsLogin(true)}
-            style={{margin:'5px',borderRadius:'10px', boxShadow:'none'}}
-          >
-            Sign In
-          </button>
-          <button
-            className={!isLogin ? "tab active" : "tab"}
-            onClick={() => setIsLogin(false)}
-            style={{margin:'5px', borderRadius:'10px', boxShadow:'none'}}
-          >
-            Register
-          </button>
-        </div>
+        
 
         <form onSubmit={handleSubmit}>
           {!isLogin && (
