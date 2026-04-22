@@ -7,6 +7,8 @@ const resourceRoutes = require('./modules/academic/routes/resources.routes');
 const userRoutes = require('./modules/users/routes');
 const loginRoutes = require('./modules/auth/routes');
 const signupRoutes = require('./modules/auth/routes');
+const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
+
 
 const app = express();
 app.use(cors());
@@ -18,8 +20,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', signupRoutes);
 app.use('/api/auth', loginRoutes);
 
-
-app.get('/', (req, res) => res.json({ message: 'StudentHub API running' }));
+app.use("/api/products", marketplaceRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

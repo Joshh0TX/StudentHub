@@ -21,6 +21,7 @@ model User {
 
   // Academic
   courseMemberships CourseMember[]
+  coursesCreated    Course[]
 
   // Social
   posts     Post[]
@@ -30,9 +31,12 @@ model User {
   // Existing features
   resources     Resource[]
   pastQuestions PastQuestion[]
+  quizzes       Quiz[]
   studyGroups   StudyGroup[]
-  GroupMember   StudyGroupMember[] 
+  GroupMember   StudyGroupMember[]
 
+  // Marketplace
+  store Store?
 }
 
 model Course {
@@ -43,7 +47,7 @@ model Course {
   createdBy  String
   createdAt  DateTime @default(now())
 
-  creator     User             @relation("UserCreatedCourses",fields: [createdBy], references: [id])
+  creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
   timetable   TimetableEntry[]
@@ -53,7 +57,7 @@ model CourseMember {
   id       String @id @default(uuid())
   userId   String
   courseId String
-  role     String @default("student") // "rep" | "student"
+  role     String @default("student")
 
   user   User   @relation(fields: [userId], references: [id])
   course Course @relation(fields: [courseId], references: [id])
@@ -105,45 +109,45 @@ model Follow {
   @@unique([followerId, followingId])
 }
 
-// ── Study Groups ──────────────────────────────────────────────
 model StudyGroup {
-  id            String   @id @default(cuid())
-  name          String
-  course_code   String
-  course_title  String
-  description   String?
-  max_members   Int
-  department    String
-  year          Int?      // ✅ ADD THIS
-  createdBy     String
-  createdAt     DateTime @default(now())
-  creator   User       @relation(fields: [createdBy], references: [id])
+  id           String   @id @default(cuid())
+  name         String
+  course_code  String
+  course_title String
+  description  String?
+  max_members  Int
+  department   String
+  year         Int?
+  createdBy    String
+  createdAt    DateTime @default(now())
+
+  creator   User               @relation(fields: [createdBy], references: [id])
   resources Resource[]
   members   StudyGroupMember[]
 }
 
 model StudyGroupMember {
-  id        String     @id @default(cuid())
-  groupId   String
-  userId    String
-  joinedAt  DateTime   @default(now())
-  group     StudyGroup @relation(fields: [groupId], references: [id])
-  user      User       @relation(fields: [userId], references: [id])
+  id       String     @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime   @default(now())
+
+  group StudyGroup @relation(fields: [groupId], references: [id])
+  user  User       @relation(fields: [userId], references: [id])
 
   @@unique([groupId, userId])
 }
 
-// ── Resources ─────────────────────────────────────────────────
 model Resource {
   id          String   @id @default(uuid())
   title       String
-  type        String              // "pdf" | "link" | "video" | "notes"
+  type        String
   url         String
-  description String?             // student explains why resource is useful
+  description String?
   department  String
   courseCode  String
-  courseTitle String?             // human-readable course name
-  year        Int?                // academic year / level (e.g. 300)
+  courseTitle String?
+  year        Int?
   groupId     String?
   uploadedBy  String
   createdAt   DateTime @default(now())
@@ -161,4 +165,69 @@ model PastQuestion {
   createdAt  DateTime @default(now())
 
   uploader User @relation(fields: [uploadedBy], references: [id])
+<<<<<<< HEAD
 }
+=======
+}
+
+model Quiz {
+  id         String     @id @default(uuid())
+  title      String
+  courseCode String
+  createdBy  String
+  createdAt  DateTime   @default(now())
+
+  creator   User       @relation(fields: [createdBy], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id            String @id @default(uuid())
+  quizId        String
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String
+
+  quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+model Store {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("goods")
+  ownerId     String   @unique
+  createdAt   DateTime @default(now())
+
+  owner    User           @relation(fields: [ownerId], references: [id])
+  products Product[]
+  contacts StoreContact[]
+}
+
+model StoreContact {
+  id      String @id @default(uuid())
+  storeId String
+  type    String
+  value   String
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  type        String   @default("goods")
+  category    String
+  locations   String[]
+  storeId     String
+  createdAt   DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+>>>>>>> 10d8bf88ab77029f0559af54303b65daa09bb8e8
