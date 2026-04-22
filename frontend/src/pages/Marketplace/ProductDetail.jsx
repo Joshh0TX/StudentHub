@@ -2,10 +2,11 @@ import "./ProductDetail.css";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { fetchProduct, fetchReviews, placeOrder, postReview } from "./marketplaceApi";
+import { getUser } from "./testUser";
 
 export default function ProductDetail() {
   const { productId } = useParams();
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = getUser();
 
   const [item, setItem] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -72,7 +73,9 @@ export default function ProductDetail() {
   if (loading) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
   if (notFound) return <Navigate to="/marketplace" replace />;
 
-  const galleryImages = item.image ? [item.image, item.image, item.image] : [];
+  const images = item.images?.length ? item.images.map(img => img.startsWith("http") ? img : `http://localhost:5000${img}`) : [];
+  const mainImage = images[0] || null;
+  const galleryImages = images.length > 1 ? images.slice(1) : [];
   const contacts = item.store?.contacts || [];
 
   return (
@@ -85,8 +88,8 @@ export default function ProductDetail() {
 
       <section className="productDetailCard">
         <div className="productDetailMedia">
-          {item.image ? (
-            <img src={item.image} alt={item.name} />
+          {mainImage ? (
+            <img src={mainImage} alt={item.name} />
           ) : (
             <div className="productDetailPlaceholder">No image</div>
           )}

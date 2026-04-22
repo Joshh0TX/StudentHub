@@ -6,19 +6,34 @@ export const fetchProducts = () =>
 export const fetchProduct = (id) =>
   fetch(`${BASE}/${id}`).then((r) => r.json());
 
-export const createProduct = (data) =>
-  fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  }).then((r) => r.json());
+// POST create product (multipart)
+export const createProduct = (data) => {
+  const form = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (key === "images") {
+      val.forEach((file) => form.append("images", file));
+    } else if (key === "locations") {
+      form.append("locations", JSON.stringify(val));
+    } else if (val !== undefined && val !== null) {
+      form.append(key, val);
+    }
+  });
+  return fetch(BASE, { method: "POST", body: form }).then((r) => r.json());
+};
 
-export const updateProduct = (id, data) =>
-  fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  }).then((r) => r.json());
+export const updateProduct = (id, data) => {
+  const form = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (key === "images") {
+      val.forEach((file) => form.append("images", file));
+    } else if (key === "locations") {
+      form.append("locations", JSON.stringify(val));
+    } else if (val !== undefined && val !== null) {
+      form.append(key, val);
+    }
+  });
+  return fetch(`${BASE}/${id}`, { method: "PUT", body: form }).then((r) => r.json());
+};
 
 export const deleteProduct = (id) =>
   fetch(`${BASE}/${id}`, { method: "DELETE" }).then((r) => r.json());
@@ -26,19 +41,29 @@ export const deleteProduct = (id) =>
 export const fetchStore = (ownerId) =>
   fetch(`${BASE}/store/${ownerId}`).then((r) => r.json());
 
-export const createStore = (data) =>
-  fetch(`${BASE}/store`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  }).then((r) => r.json());
+// Fetches store by store ID and increments visit count
+export const fetchStoreById = (storeId) =>
+  fetch(`${BASE}/store/view/${storeId}`).then((r) => r.json());
 
-export const updateStore = (id, data) =>
-  fetch(`${BASE}/store/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  }).then((r) => r.json());
+export const createStore = (data) => {
+  const form = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (key === "image" && val) form.append("image", val);
+    else if (key === "contacts") form.append("contacts", JSON.stringify(val));
+    else if (val !== undefined && val !== null) form.append(key, val);
+  });
+  return fetch(`${BASE}/store`, { method: "POST", body: form }).then((r) => r.json());
+};
+
+export const updateStore = (id, data) => {
+  const form = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (key === "image" && val) form.append("image", val);
+    else if (key === "contacts") form.append("contacts", JSON.stringify(val));
+    else if (val !== undefined && val !== null) form.append(key, val);
+  });
+  return fetch(`${BASE}/store/${id}`, { method: "PUT", body: form }).then((r) => r.json());
+};
 
 export const placeOrder = (data) =>
   fetch(`${BASE}/orders`, {
