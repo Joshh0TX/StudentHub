@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './profile.css';
 import * as Icons from 'lucide-react';
 import BadgeManager from './profileSubsection/BadgeManager';
@@ -69,37 +69,23 @@ function useModalManager() {
  * Decouples state management from component logic
  */
 function useProfileData() {
-  const [user, setUser] = useState({
-    name: 'Henry Ade',
-    course: 'Computer Science',
-    profileImage: '',
-    bio: 'Passionate full-stack developer building clean and practical web experiences.',
-    location: 'Lagos, Nigeria',
-    joinedDate: 'Joined 2025',
-    email: 'henry.ade@example.com',
-    coverImage: '',
-    badges: [
-      { id: 1, name: 'Top Contributor', icon: 'FaAward', color: '#f59e0b', selected: true },
-      { id: 2, name: 'Hackathon Winner', icon: 'FaTrophy', color: '#3b82f6', selected: true },
-      { id: 3, name: 'Best UI Design', icon: 'FaStar', color: '#10b981', selected: true },
-      { id: 4, name: 'Fastest Learner', icon: 'FaBolt', color: '#ef4444', selected: true },
-    ],
-    skills: [
-      { id: 1, name: 'React', level: 85, core: true },
-      { id: 2, name: 'Node.js', level: 78, core: true },
-      { id: 3, name: 'UI/UX Design', level: 92, core: true },
-      { id: 4, name: 'Python', level: 65, core: true },
-      { id: 5, name: 'TypeScript', level: 60, core: false },
-    ],
-    achievements: [
-      '1st Place - University Hackathon 2025',
-      'Google Developer Scholarship Recipient',
-      'Best Project Award - TechFest 2024',
-    ],
-    projects: [],
-    interests: INTERESTS_DATA,
-  });
+  const [user, setUser] = useState(null);
+    useEffect(() => {
+      const fetchProfile = async () => {
+        const token = localStorage.getItem("token");
 
+        const res = await fetch("http://localhost:5000/api/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        setUser(data);
+      };
+
+      fetchProfile();
+    }, []);
   return { user, setUser };
 }
 
