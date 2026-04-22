@@ -1,62 +1,131 @@
-const prisma = require('../../../config/prisma');
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-exports.createGroup = async (req, res) => {
+// GET /api/groups?department=CSC&year=300
+const getGroups = async (req, res) => {
+  const { department, year } = req.query;
+  if (!department)
+    return res.status(400).json({ error: "department is required" });
+
   try {
-    const { name, department, level, description } = req.body;
+    const groups = await prisma.studyGroup.findMany({
+      where: {
+        department,
+        ...(year ? { year: parseInt(year) } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return res.json(groups);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// GET /api/groups/:id
+const getGroupById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const group = await prisma.studyGroup.findUnique({
+      where: { id },
+      include: { resources: true },
+    });
+    if (!group) return res.status(404).json({ error: "Group not found" });
+    return res.json(group);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// GET /api/groups/my-groups?student_id=xxx
+const getMyGroups = async (req, res) => {
+  const userId = req.query.student_id ?? req.user?.id ?? "test-user-123";
+
+  try {
+    const memberships = await prisma.studyGroupMember.findMany({
+      where: { userId },
+      include: { group: true },
+    });
+
+    const groups = memberships.map((m) => m.group);
+    return res.json(groups);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// POST /api/groups
+// Body: { name, course_code, course_title, description, max_members, year, department }
+const createGroup = async (req, res) => {
+  const createdBy = req.user?.id ?? "test-user-123";
+  const { name, course_code, course_title, description, max_members, year, department } = req.body;
+
+  const missing = ["name", "department"].filter((f) => !req.body[f]);
+  if (missing.length) {
+    return res
+      .status(400)
+      .json({ error: `Missing required fields: ${missing.join(", ")}` });
+  }
+
+  try {
     const group = await prisma.studyGroup.create({
       data: {
         name,
+        course_code: course_code ?? null,
+        course_title: course_title ?? null,
+        description: description ?? null,
+        max_members: max_members ? parseInt(max_members) : null,
         department,
-        level: parseInt(level),
-        description,
-        createdBy: 'test-user-123'
-      }
-    });
-    res.status(201).json(group);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getGroups = async (req, res) => {
-  try {
-    const { department, level } = req.query;
-    const groups = await prisma.studyGroup.findMany({
-      where: {
-        ...(department && { department }),
-        ...(level && { level: parseInt(level) })
+        year: year ? parseInt(year) : null,
+        createdBy,
       },
-      include: { members: true }
     });
-    res.json(groups);
+    return res.status(201).json(group);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
-exports.getGroupById = async (req, res) => {
+// POST /api/groups/:id/join
+const joinGroup = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?.id ?? "test-user-123";
+
   try {
-    const group = await prisma.studyGroup.findUnique({
-      where: { id: req.params.id },
-      include: { members: true, resources: true }
+    const group = await prisma.studyGroup.findUnique({ where: { id } });
+    if (!group) return res.status(404).json({ error: "Group not found" });
+
+    // ← add here
+    const existing = await prisma.studyGroupMember.findUnique({
+      where: { groupId_userId: { groupId: id, userId } },
     });
-    if (!group) return res.status(404).json({ error: 'Group not found' });
-    res.json(group);
+    if (existing) return res.status(400).json({ error: "Already a member" });
+
+    await prisma.studyGroupMember.create({
+      data: { groupId: id, userId },
+    });
+
+    return res.json({ message: "Joined successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
-exports.joinGroup = async (req, res) => {
+// DELETE /api/groups/:id  (creator only)
+const deleteGroup = async (req, res) => {
+  const { id } = req.params;
+  const requesterId = req.user?.id ?? "test-user-123";
+
   try {
-    const member = await prisma.groupMember.create({
-      data: {
-        groupId: req.params.id,
-        userId: 'test-user-123'
-      }
-    });
-    res.status(201).json(member);
+    const group = await prisma.studyGroup.findUnique({ where: { id } });
+    if (!group) return res.status(404).json({ error: "Group not found" });
+    if (group.createdBy !== requesterId) {
+      return res.status(403).json({ error: "Not authorised" });
+    }
+    await prisma.studyGroup.delete({ where: { id } });
+    return res.json({ message: "Group deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
+
+module.exports = { getGroups, getGroupById, getMyGroups, createGroup, deleteGroup, joinGroup };

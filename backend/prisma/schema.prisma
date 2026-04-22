@@ -17,11 +17,11 @@ model User {
   department String
   level      Int
   createdAt  DateTime @default(now())
+  createdCourses Course[] @relation("UserCreatedCourses")
 
   // Academic
   courseMemberships CourseMember[]
-  coursesCreated Course[]
-
+  coursesCreated    Course[]
 
   // Social
   posts     Post[]
@@ -32,10 +32,11 @@ model User {
   resources     Resource[]
   pastQuestions PastQuestion[]
   quizzes       Quiz[]
+  studyGroups   StudyGroup[]
+  GroupMember   StudyGroupMember[]
 
   // Marketplace
   store Store?
-
 }
 
 model Course {
@@ -46,7 +47,7 @@ model Course {
   createdBy  String
   createdAt  DateTime @default(now())
 
-  creator     User           @relation(fields: [createdBy], references: [id])
+  creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
   timetable   TimetableEntry[]
@@ -56,7 +57,7 @@ model CourseMember {
   id       String @id @default(uuid())
   userId   String
   courseId String
-  role     String @default("student") // "rep" | "student"
+  role     String @default("student")
 
   user   User   @relation(fields: [userId], references: [id])
   course Course @relation(fields: [courseId], references: [id])
@@ -77,7 +78,7 @@ model Assignment {
 }
 
 model TimetableEntry {
-  id        String @id @default(uuid())
+  id        String  @id @default(uuid())
   courseId  String
   day       String
   startTime String
@@ -108,16 +109,51 @@ model Follow {
   @@unique([followerId, followingId])
 }
 
-model Resource {
-  id         String   @id @default(uuid())
-  title      String
-  type       String
-  url        String
-  courseCode String
-  uploadedBy String
-  createdAt  DateTime @default(now())
+model StudyGroup {
+  id           String   @id @default(cuid())
+  name         String
+  course_code  String
+  course_title String
+  description  String?
+  max_members  Int
+  department   String
+  year         Int?
+  createdBy    String
+  createdAt    DateTime @default(now())
 
-  uploader User @relation(fields: [uploadedBy], references: [id])
+  creator   User               @relation(fields: [createdBy], references: [id])
+  resources Resource[]
+  members   StudyGroupMember[]
+}
+
+model StudyGroupMember {
+  id       String     @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime   @default(now())
+
+  group StudyGroup @relation(fields: [groupId], references: [id])
+  user  User       @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+}
+
+model Resource {
+  id          String   @id @default(uuid())
+  title       String
+  type        String
+  url         String
+  description String?
+  department  String
+  courseCode  String
+  courseTitle String?
+  year        Int?
+  groupId     String?
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+
+  group    StudyGroup? @relation(fields: [groupId], references: [id])
+  uploader User        @relation(fields: [uploadedBy], references: [id])
 }
 
 model PastQuestion {
@@ -163,7 +199,7 @@ model Store {
   ownerId     String   @unique
   createdAt   DateTime @default(now())
 
-  owner    User      @relation(fields: [ownerId], references: [id])
+  owner    User           @relation(fields: [ownerId], references: [id])
   products Product[]
   contacts StoreContact[]
 }

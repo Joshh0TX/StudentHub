@@ -4,6 +4,7 @@ import Layout from "./pages/Layout/Layout.jsx";
 import AcademicHome from "./pages/Academic/AcademicHome";
 import StudyMaterials from "./pages/Academic/StudyMaterials";
 import StudyGroups from "./pages/Academic/StudyGroups";
+import GroupDetail from "./pages/Academic/GroupDetail";
 import ExamSchedule from "./pages/Academic/ExamSchedule";
 import Resources from "./pages/Academic/Resources";
 import Login from "./pages/Login/Login.jsx";
@@ -32,12 +33,12 @@ function App() {
           <Route index element={<StudyMaterials />} />
           <Route path="study-materials" element={<StudyMaterials />} />
           <Route path="study-groups" element={<StudyGroups />} />
+          <Route path="study-groups/:id" element={<GroupDetail />} />
           <Route path="exam-schedule" element={<ExamSchedule />} />
           <Route path="resources" element={<Resources />} />
         </Route>
         <Route path="/profile" element={<Profile />} />
         <Route path="/newsroom" element={<NewsHome />} />
-        
       </Route>
     </Routes>
   );

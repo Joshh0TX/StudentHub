@@ -1,260 +1,463 @@
-import { useOutletContext } from "react-router-dom";
-import { Users, Calendar, MessageCircle, UserPlus } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { Users, UserPlus, X, RefreshCw, AlertCircle } from "lucide-react";
 import "./StudyGroups.css";
 
-const allGroups = {
-  "Computer Science": {
-    1: [
-      {
-        id: 1,
-        name: "Python Beginners Circle",
-        course: "CS101 - Intro to Programming",
-        description:
-          "Weekly sessions covering Python basics and beginner coding exercises",
-        members: 5,
-        maxMembers: 8,
-        nextSession: "Apr 10, 2026 at 2:00 PM",
-        location: "Library Room 101",
-      },
-      {
-        id: 2,
-        name: "Discrete Math Study Group",
-        course: "CS102 - Discrete Mathematics",
-        description: "Problem-solving sessions on logic, sets and graph theory",
-        members: 4,
-        maxMembers: 6,
-        nextSession: "Apr 11, 2026 at 4:00 PM",
-        location: "Online - Zoom",
-      },
-    ],
-    2: [
-      {
-        id: 3,
-        name: "Algorithms Study Circle",
-        course: "CS201 - Data Structures & Algorithms",
-        description:
-          "Weekly sessions focusing on problem-solving and coding challenges",
-        members: 6,
-        maxMembers: 8,
-        nextSession: "Apr 4, 2026 at 3:00 PM",
-        location: "Library Room 204",
-      },
-      {
-        id: 4,
-        name: "Database Project Team",
-        course: "CS202 - Database Systems",
-        description: "Working on the final database design project together",
-        members: 4,
-        maxMembers: 6,
-        nextSession: "Apr 3, 2026 at 6:00 PM",
-        location: "Student Center Room 12",
-      },
-      {
-        id: 5,
-        name: "React Developers Club",
-        course: "CS202 - Object Oriented Programming",
-        description:
-          "Building projects together using React and modern JavaScript",
-        members: 7,
-        maxMembers: 10,
-        nextSession: "Apr 5, 2026 at 5:00 PM",
-        location: "Tech Lab B",
-      },
-    ],
-    3: [
-      {
-        id: 6,
-        name: "AI Research Group",
-        course: "CS301 - Artificial Intelligence",
-        description:
-          "Exploring AI papers and implementing machine learning models",
-        members: 5,
-        maxMembers: 8,
-        nextSession: "Apr 6, 2026 at 3:00 PM",
-        location: "Innovation Hub Room 3",
-      },
-      {
-        id: 7,
-        name: "Software Engineering Team",
-        course: "CS302 - Software Engineering",
-        description:
-          "Collaborative project planning and agile methodology practice",
-        members: 6,
-        maxMembers: 8,
-        nextSession: "Apr 8, 2026 at 1:00 PM",
-        location: "Library Room 305",
-      },
-    ],
-  },
-  Mathematics: {
-    1: [
-      {
-        id: 8,
-        name: "Calculus Study Group",
-        course: "MA101 - Calculus I",
-        description:
-          "Working through problem sets and past exam questions together",
-        members: 5,
-        maxMembers: 8,
-        nextSession: "Apr 7, 2026 at 10:00 AM",
-        location: "Math Block Room 2",
-      },
-      {
-        id: 9,
-        name: "Linear Algebra Circle",
-        course: "MA102 - Linear Algebra",
-        description:
-          "Visualising vectors and matrices through collaborative problem solving",
-        members: 3,
-        maxMembers: 6,
-        nextSession: "Apr 9, 2026 at 2:00 PM",
-        location: "Online - Google Meet",
-      },
-    ],
-    2: [
-      {
-        id: 10,
-        name: "Calculus II Group",
-        course: "MA201 - Calculus II",
-        description:
-          "Tackling integration techniques and series convergence together",
-        members: 4,
-        maxMembers: 6,
-        nextSession: "Apr 10, 2026 at 3:00 PM",
-        location: "Math Block Room 5",
-      },
-    ],
-    3: [
-      {
-        id: 11,
-        name: "Analysis Study Circle",
-        course: "MA301 - Real Analysis",
-        description: "Working through proofs and real analysis problem sets",
-        members: 4,
-        maxMembers: 6,
-        nextSession: "Apr 11, 2026 at 11:00 AM",
-        location: "Library Room 202",
-      },
-    ],
-  },
-  Physics: {
-    1: [
-      {
-        id: 12,
-        name: "Mechanics Study Group",
-        course: "PH101 - Mechanics",
-        description:
-          "Solving mechanics problems and reviewing lecture content weekly",
-        members: 6,
-        maxMembers: 8,
-        nextSession: "Apr 4, 2026 at 4:00 PM",
-        location: "Science Block Room 7",
-      },
-    ],
-    2: [
-      {
-        id: 13,
-        name: "Electromagnetism Group",
-        course: "PH201 - Electromagnetism",
-        description:
-          "Working through Griffiths problems and lab report preparation",
-        members: 5,
-        maxMembers: 8,
-        nextSession: "Apr 5, 2026 at 2:00 PM",
-        location: "Physics Lab 3",
-      },
-    ],
-    3: [
-      {
-        id: 14,
-        name: "Quantum Study Circle",
-        course: "PH301 - Quantum Mechanics",
-        description:
-          "Discussing quantum theory and working through problem sets",
-        members: 4,
-        maxMembers: 6,
-        nextSession: "Apr 7, 2026 at 3:00 PM",
-        location: "Science Block Room 12",
-      },
-    ],
-  },
+const API = import.meta.env.VITE_API_URL;
+
+// ── Reusable fetch helper ─────────────────────────────────────────
+// Handles JSON parsing, error checking and throws clean error messages
+const apiFetch = async (endpoint, options = {}) => {
+  const res = await fetch(`${API}${endpoint}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let message;
+    try {
+      const json = JSON.parse(text);
+      message = json.error || json.message || "An error occurred";
+    } catch {
+      message = text.slice(0, 150) || `Server error ${res.status}`;
+    }
+    throw new Error(message);
+  }
+  return res.json();
 };
 
-const GroupCard = ({ group }) => {
-  const isFull = group.members >= group.maxMembers;
+// ── Create Group Modal ────────────────────────────────────────────
+const CreateGroupModal = ({
+  onClose,
+  onCreated,
+  selectedProgram,
+  selectedYear,
+  departmentId,
+}) => {
+  const [form, setForm] = useState({
+    name: "",
+    course_code: "",
+    course_title: "",
+    description: "",
+    max_members: 8,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (
+      !form.name.trim() ||
+      !form.course_code.trim() ||
+      !form.course_title.trim()
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    const maxMembers = Number(form.max_members);
+    if (isNaN(maxMembers) || maxMembers < 2 || maxMembers > 30) {
+      setError("Maximum members must be between 2 and 30.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await apiFetch("/api/groups", {
+        method: "POST",
+        body: JSON.stringify({
+          name: form.name.trim(),
+          course_code: form.course_code.trim().toUpperCase(),
+          course_title: form.course_title.trim(),
+          description: form.description.trim(),
+          max_members: maxMembers,
+          year: Number(selectedYear),
+          department: selectedProgram, //change when auth is complete
+        }),
+      });
+      onCreated(data);
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="group-card">
-      {/* Card Header */}
-      <div className="group-card-header">
-        <h3 className="group-name">{group.name}</h3>
-        <div className="group-members">
-          <Users size={15} />
-          <span>
-            {group.members}/{group.maxMembers}
-          </span>
+    <div
+      className="modal-overlay"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="modal">
+        <div className="modal-header">
+          <h2>Create Study Group</h2>
+          <button className="modal-close" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
-      </div>
 
-      {/* Course */}
-      <p className="group-course">{group.course}</p>
+        {error && (
+          <div className="modal-error">
+            <AlertCircle size={15} />
+            {error}
+          </div>
+        )}
 
-      {/* Description */}
-      <p className="group-desc">{group.description}</p>
+        <div className="modal-body">
+          <label>
+            Group Name <span>*</span>
+          </label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="e.g. Algorithms Study Circle"
+            maxLength={100}
+          />
 
-      {/* Meta */}
-      <div className="group-meta">
-        <div className="group-meta-item">
-          <Calendar size={15} />
-          <span>Next session: {group.nextSession}</span>
+          <label>
+            Course Code <span>*</span>
+          </label>
+          <input
+            name="course_code"
+            value={form.course_code}
+            onChange={handleChange}
+            placeholder="e.g. CS201"
+            maxLength={20}
+          />
+
+          <label>
+            Course Title <span>*</span>
+          </label>
+          <input
+            name="course_title"
+            value={form.course_title}
+            onChange={handleChange}
+            placeholder="e.g. Data Structures & Algorithms"
+            maxLength={150}
+          />
+
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="What will this group focus on?"
+            rows={3}
+            maxLength={500}
+          />
+          <span className="char-count">{form.description.length}/500</span>
+
+          <label>Maximum Members</label>
+          <input
+            type="number"
+            name="max_members"
+            value={form.max_members}
+            onChange={handleChange}
+            min={2}
+            max={30}
+          />
+
+          {/* Read only info so user can confirm context */}
+          <div className="modal-context">
+            <span>
+              Department: <strong>{selectedProgram}</strong>
+            </span>
+            <span>
+              Year: <strong>{selectedYear}</strong>
+            </span>
+          </div>
         </div>
-        <div className="group-meta-item">
-          <MessageCircle size={15} />
-          <span>{group.location}</span>
-        </div>
-      </div>
 
-      {/* Actions */}
-      <div className="group-actions">
-        <button className="btn-join" disabled={isFull}>
-          {isFull ? "Group Full" : "Join Group"}
-        </button>
-        <button className="btn-details">View Details</button>
+        <div className="modal-footer">
+          <button className="btn-cancel" onClick={onClose} disabled={loading}>
+            Cancel
+          </button>
+          <button
+            className="btn-submit"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <RefreshCw size={14} className="spinner" /> Creating...
+              </>
+            ) : (
+              "Create Group"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
+// ── Group Card ────────────────────────────────────────────────────
+const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
+  const navigate = useNavigate();
+  const memberCount = Number(group.member_count ?? 0);
+  const isFull = memberCount >= group.max_members;
+
+  return (
+    <div className={`group-card ${isMember ? "group-card--member" : ""}`}>
+      <div className="group-card-header">
+        <h3 className="group-name">{group.name}</h3>
+        <div className={`group-members ${isFull ? "group-members--full" : ""}`}>
+          <Users size={15} />
+          <span>
+            {memberCount}/{group.max_members}
+          </span>
+        </div>
+      </div>
+
+      <p className="group-course">
+        {[group.course_code, group.course_title].filter(Boolean).join(" - ")}
+      </p>
+
+      <p className="group-desc">
+        {group.description || "No description provided."}
+      </p>
+
+      {isMember && <span className="member-badge">✓ You are a member</span>}
+      {isFull && !isMember && <span className="full-badge">Group Full</span>}
+
+      <div className="group-actions">
+        <button
+          className="btn-join"
+          disabled={isFull || isMember || isJoining}
+          onClick={() => onJoin(group.id)}
+        >
+          {isJoining
+            ? "Joining..."
+            : isMember
+              ? "Joined"
+              : isFull
+                ? "Full"
+                : "Join Group"}
+        </button>
+        <button
+          className="btn-details"
+          onClick={() => navigate(`/study-groups/${group.id}`)}
+        >
+          View Details
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Component ────────────────────────────────────────────────
 const StudyGroups = () => {
   const { selectedProgram, selectedYear } = useOutletContext();
 
-  const groups = allGroups[selectedProgram]?.[selectedYear] ?? [];
+  const [groups, setGroups] = useState([]);
+  const [myGroupIds, setMyGroupIds] = useState(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [joiningId, setJoiningId] = useState(null); // tracks which group is being joined
+  const [departmentId, setDepartmentId] = useState(null);
+
+  // ── Fetch department ID from program name ─────────────────────
+  // Needed so the POST body can send a valid department_id foreign key
+  const fetchDepartmentId = useCallback(async (program) => {
+    try {
+      const data = await apiFetch(
+        `/api/departments?name=${encodeURIComponent(program)}`,
+      );
+      // API returns array — take the first match
+      if (data.length > 0) setDepartmentId(data[0].id);
+    } catch (err) {
+      console.error("Could not fetch department ID:", err.message);
+    }
+  }, []);
+
+  // ── Fetch all groups + student's joined groups ────────────────
+  const fetchGroups = useCallback(async () => {
+    if (!selectedProgram || !selectedYear) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [allData, myData] = await Promise.all([
+        apiFetch(
+          `/api/groups?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
+        ),
+        apiFetch(`/api/groups/my-groups?student_id=test-user-123`),
+      ]);
+
+      // ✅ Ensure arrays always
+      const safeGroups = Array.isArray(allData) ? allData : [];
+      const safeMyGroups = Array.isArray(myData) ? myData : [];
+
+      setGroups(safeGroups);
+      setMyGroupIds(new Set(safeMyGroups.map((g) => g.id)));
+    } catch (err) {
+      // ✅ If backend says "not found", treat as empty instead
+      if (err.message.toLowerCase().includes("not found")) {
+        setGroups([]);
+        setMyGroupIds(new Set());
+        setError(null); // prevent error UI
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedProgram, selectedYear]);
+
+  // Re-fetch whenever program or year changes
+  useEffect(() => {
+    fetchGroups();
+    fetchDepartmentId(selectedProgram);
+  }, [fetchGroups, fetchDepartmentId, selectedProgram]);
+
+  // ── Join a group ──────────────────────────────────────────────
+  const handleJoin = async (groupId) => {
+    setJoiningId(groupId);
+    try {
+      await apiFetch(`/api/groups/${groupId}/join`, {
+        method: "POST",
+        body: JSON.stringify({ student_id: 1 }), // replace with real auth id
+      });
+
+      // Update locally without re-fetching entire list
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.id === groupId
+            ? { ...g, member_count: Number(g.member_count) + 1 }
+            : g,
+        ),
+      );
+      setMyGroupIds((prev) => new Set([...prev, groupId]));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setJoiningId(null);
+    }
+  };
+
+  // ── Add new group to top of list after creation ───────────────
+  const handleCreated = (newGroup) => {
+    setGroups((prev) => [{ ...newGroup, member_count: 0 }, ...prev]);
+  };
+
+  // ── Filter groups based on selected tab ──────────────────────
+  const visibleGroups =
+    filter === "mine" ? groups.filter((g) => myGroupIds.has(g.id)) : groups;
+
+  // ── Render ────────────────────────────────────────────────────
+  if (loading)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading groups...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>{error}</p>
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+          <button className="btn-retry" onClick={fetchGroups}>
+            Retry
+          </button>
+
+          {/* ✅ Allow user to create anyway */}
+          <button className="btn-create" onClick={() => setShowModal(true)}>
+            <UserPlus size={18} /> Create Group
+          </button>
+        </div>
+      </div>
+    );
 
   return (
     <div className="study-groups-page">
-      {/* Page Header */}
+      {/* ── Page Header ── */}
       <div className="study-groups-header">
         <div>
           <h1>Study Groups</h1>
           <p>Join or create study groups with your classmates</p>
         </div>
-        <button className="btn-create">
-          <UserPlus size={18} />
-          Create Group
+        <div className="header-actions">
+          <button className="btn-refresh" onClick={fetchGroups} title="Refresh">
+            <RefreshCw size={16} />
+          </button>
+          <button className="btn-create" onClick={() => setShowModal(true)}>
+            <UserPlus size={18} /> Create Group
+          </button>
+        </div>
+      </div>
+
+      {/* ── Filter Bar ── */}
+      <div className="filter-bar">
+        <button
+          className={`filter-btn ${filter === "all" ? "filter-btn--active" : ""}`}
+          onClick={() => setFilter("all")}
+        >
+          All Groups
+          <span className="filter-count">{groups.length}</span>
+        </button>
+        <button
+          className={`filter-btn ${filter === "mine" ? "filter-btn--active" : ""}`}
+          onClick={() => setFilter("mine")}
+        >
+          My Groups
+          <span className="filter-count">{myGroupIds.size}</span>
         </button>
       </div>
 
-      {/* Cards Grid */}
-      {groups.length === 0 ? (
-        <p className="groups-empty">
-          No study groups available for this selection.
-        </p>
+      {/* ── Group Cards ── */}
+      {visibleGroups.length === 0 ? (
+        <div className="groups-empty">
+          <p>
+            {filter === "mine"
+              ? "You have not joined any groups yet."
+              : "No study groups available for this selection."}
+          </p>
+
+          {/* ✅ Show button only when viewing all groups */}
+          {filter !== "mine" && (
+            <button className="btn-create" onClick={() => setShowModal(true)}>
+              <UserPlus size={18} /> Create New Group
+            </button>
+          )}
+        </div>
       ) : (
         <div className="groups-grid">
-          {groups.map((group) => (
-            <GroupCard key={group.id} group={group} />
+          {visibleGroups.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              onJoin={handleJoin}
+              isMember={myGroupIds.has(group.id)}
+              isJoining={joiningId === group.id}
+            />
           ))}
         </div>
+      )}
+
+      {/* ── Create Group Modal ── */}
+      {showModal && (
+        <CreateGroupModal
+          onClose={() => setShowModal(false)}
+          onCreated={handleCreated}
+          selectedProgram={selectedProgram}
+          selectedYear={selectedYear}
+          departmentId={departmentId}
+        />
       )}
     </div>
   );
