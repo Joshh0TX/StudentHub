@@ -14,13 +14,13 @@ model User {
   name       String?
   profilePic String?
   bio        String?
-  department String
-  level      Int
+  department String?
+  level      Int?
   createdAt  DateTime @default(now())
-  createdCourses Course[] @relation("UserCreatedCourses")
 
   // Academic
   courseMemberships CourseMember[]
+  createdCourses    Course[]
 
   // Social
   posts     Post[]
@@ -31,7 +31,6 @@ model User {
   resources     Resource[]
   pastQuestions PastQuestion[]
   quizzes       Quiz[]
-  studyGroups   StudyGroup[]
 }
 
 model Course {
@@ -42,7 +41,7 @@ model Course {
   createdBy  String
   createdAt  DateTime @default(now())
 
-  creator     User             @relation("UserCreatedCourses",fields: [createdBy], references: [id])
+  creator     User           @relation(fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
   timetable   TimetableEntry[]
@@ -73,7 +72,7 @@ model Assignment {
 }
 
 model TimetableEntry {
-  id        String  @id @default(uuid())
+  id        String @id @default(uuid())
   courseId  String
   day       String
   startTime String
@@ -104,39 +103,16 @@ model Follow {
   @@unique([followerId, followingId])
 }
 
-// ── Study Groups ──────────────────────────────────────────────
-model StudyGroup {
-  id            String   @id @default(cuid())
-  name          String
-  course_code   String
-  course_title  String
-  description   String?
-  max_members   Int
-  department    String
-  year          Int      // ✅ ADD THIS
-  createdBy     String
-  createdAt     DateTime @default(now())
-  creator   User       @relation(fields: [createdBy], references: [id])
-  resources Resource[]
-}
-
-// ── Resources ─────────────────────────────────────────────────
 model Resource {
-  id          String   @id @default(uuid())
-  title       String
-  type        String              // "pdf" | "link" | "video" | "notes"
-  url         String
-  description String?             // student explains why resource is useful
-  department  String
-  courseCode  String
-  courseTitle String?             // human-readable course name
-  year        Int?                // academic year / level (e.g. 300)
-  groupId     String?
-  uploadedBy  String
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  title      String
+  type       String
+  url        String
+  courseCode String
+  uploadedBy String
+  createdAt  DateTime @default(now())
 
-  group    StudyGroup? @relation(fields: [groupId], references: [id])
-  uploader User        @relation(fields: [uploadedBy], references: [id])
+  uploader User @relation(fields: [uploadedBy], references: [id])
 }
 
 model PastQuestion {
@@ -151,11 +127,11 @@ model PastQuestion {
 }
 
 model Quiz {
-  id         String   @id @default(uuid())
+  id         String     @id @default(uuid())
   title      String
   courseCode String
   createdBy  String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime   @default(now())
 
   creator   User       @relation(fields: [createdBy], references: [id])
   questions Question[]

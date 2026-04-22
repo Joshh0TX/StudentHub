@@ -4,8 +4,9 @@ require('dotenv').config();
 
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const resourceRoutes = require('./modules/academic/routes/resources.routes');
-const authRoutes = require('./modules/auth/routes');
 const userRoutes = require('./modules/users/routes');
+const loginRoutes = require('./modules/auth/routes');
+const signupRoutes = require('./modules/auth/routes');
 
 const app = express();
 app.use(cors());
@@ -13,8 +14,10 @@ app.use(express.json());
 
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', signupRoutes);
+app.use('/api/auth', loginRoutes);
+
 
 app.get('/', (req, res) => res.json({ message: 'StudentHub API running' }));
 
