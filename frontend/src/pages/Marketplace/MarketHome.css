@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap");
 
 :root {
   --font-size: 16px;
@@ -155,7 +155,7 @@ input[type="button"]:focus-visible {
 }
 
 .marketLogoText {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -832,4 +832,209 @@ input[type="button"]:focus-visible {
   .storeContactRow button {
     width: 100%;
   }
+}
+
+/* ── Hero Banner ─────────────────────────────────────────── */
+.marketHero {
+  position: relative;
+  border-radius: 20px;
+  padding: 40px 40px;
+  margin-bottom: 28px;
+  overflow: hidden;
+  background: #1a3a6b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 180px;
+}
+
+.marketHeroContent {
+  flex: 1;
+  max-width: 480px;
+  z-index: 1;
+}
+
+.marketHeroTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.marketHeroSub {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.marketHeroActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.marketHeroCta {
+  background: #fff;
+  color: #1a3a6b;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 150ms;
+  box-shadow: none;
+}
+
+.marketHeroCta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+.marketHeroSecondary {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+  box-shadow: none;
+}
+
+.marketHeroSecondary:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.8);
+  transform: none;
+  box-shadow: none;
+}
+
+.marketHeroIllustration {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* ── Popular Stores Slider ───────────────────────────────── */
+.popularSliderSection {
+  margin-bottom: 24px;
+}
+
+.popularSliderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.popularSliderHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.popularSliderHeader p {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  margin: 2px 0 0;
+}
+
+.sliderNavBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.sliderNavBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  min-width: unset;
+  box-shadow: none;
+}
+
+.sliderNavBtn:hover {
+  background: var(--accent);
+  transform: none;
+  box-shadow: none;
+}
+
+.popularSliderTrack {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+}
+
+.popularSliderTrack::-webkit-scrollbar { display: none; }
+
+.popularSliderCard {
+  flex: 0 0 140px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 180ms;
+}
+
+.popularSliderCard:hover {
+  transform: translateY(-2px);
+}
+
+.popularSliderImg {
+  width: 140px;
+  height: 110px;
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--chart-2) 30%, var(--secondary));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.popularSliderImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.popularSliderImg span {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.popularSliderName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--foreground);
+}
+
+.popularSliderCat {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  text-transform: capitalize;
+  margin-top: -4px;
 }

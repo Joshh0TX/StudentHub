@@ -1,5 +1,5 @@
 // courses.service.js
-const prisma = require("../../prisma/client");
+const prisma = require("../../config/prisma");
 const generateCode = require("../../utils/generateCode");
 
 exports.createCourse = async (userId, data) => {

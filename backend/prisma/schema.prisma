@@ -14,13 +14,13 @@ model User {
   name       String?
   profilePic String?
   bio        String?
-  department String
-  level      Int
+  department String?
+  level      Int?
   createdAt  DateTime @default(now())
-  createdCourses Course[] @relation("UserCreatedCourses")
 
   // Academic
   courseMemberships CourseMember[]
+  createdCourses    Course[]       @relation("UserCreatedCourses")
 
   // Social
   posts     Post[]
@@ -31,8 +31,13 @@ model User {
   resources     Resource[]
   pastQuestions PastQuestion[]
   studyGroups   StudyGroup[]
-  GroupMember   StudyGroupMember[] 
+  GroupMember   StudyGroupMember[]
 
+  // Marketplace
+  store      Store?
+  orders     Order[]
+  reviews    Review[]
+  favourites StoreFavourite[]
 }
 
 model Course {
@@ -43,7 +48,7 @@ model Course {
   createdBy  String
   createdAt  DateTime @default(now())
 
-  creator     User             @relation("UserCreatedCourses",fields: [createdBy], references: [id])
+  creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
   timetable   TimetableEntry[]
@@ -53,7 +58,7 @@ model CourseMember {
   id       String @id @default(uuid())
   userId   String
   courseId String
-  role     String @default("student") // "rep" | "student"
+  role     String @default("student")
 
   user   User   @relation(fields: [userId], references: [id])
   course Course @relation(fields: [courseId], references: [id])
@@ -105,45 +110,45 @@ model Follow {
   @@unique([followerId, followingId])
 }
 
-// ── Study Groups ──────────────────────────────────────────────
 model StudyGroup {
-  id            String   @id @default(cuid())
-  name          String
-  course_code   String
-  course_title  String
-  description   String?
-  max_members   Int
-  department    String
-  year          Int?      // ✅ ADD THIS
-  createdBy     String
-  createdAt     DateTime @default(now())
-  creator   User       @relation(fields: [createdBy], references: [id])
+  id           String   @id @default(cuid())
+  name         String
+  course_code  String
+  course_title String
+  description  String?
+  max_members  Int
+  department   String
+  year         Int?
+  createdBy    String
+  createdAt    DateTime @default(now())
+
+  creator   User               @relation(fields: [createdBy], references: [id])
   resources Resource[]
   members   StudyGroupMember[]
 }
 
 model StudyGroupMember {
-  id        String     @id @default(cuid())
-  groupId   String
-  userId    String
-  joinedAt  DateTime   @default(now())
-  group     StudyGroup @relation(fields: [groupId], references: [id])
-  user      User       @relation(fields: [userId], references: [id])
+  id       String     @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime   @default(now())
+
+  group StudyGroup @relation(fields: [groupId], references: [id])
+  user  User       @relation(fields: [userId], references: [id])
 
   @@unique([groupId, userId])
 }
 
-// ── Resources ─────────────────────────────────────────────────
 model Resource {
   id          String   @id @default(uuid())
   title       String
-  type        String              // "pdf" | "link" | "video" | "notes"
+  type        String
   url         String
-  description String?             // student explains why resource is useful
+  description String?
   department  String
   courseCode  String
-  courseTitle String?             // human-readable course name
-  year        Int?                // academic year / level (e.g. 300)
+  courseTitle String?
+  year        Int?
   groupId     String?
   uploadedBy  String
   createdAt   DateTime @default(now())
@@ -163,4 +168,86 @@ model PastQuestion {
   uploader User @relation(fields: [uploadedBy], references: [id])
 }
 
+model Store {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("goods")
+  image       String?
+  visits      Int      @default(0)
+  ownerId     String   @unique
+  createdAt   DateTime @default(now())
 
+  owner      User             @relation(fields: [ownerId], references: [id])
+  products   Product[]
+  contacts   StoreContact[]
+  favourites StoreFavourite[]
+}
+
+model StoreContact {
+  id      String @id @default(uuid())
+  storeId String
+  type    String
+  value   String
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  images      String[]
+  type        String   @default("goods")
+  category    String
+  locations   String[]
+  visits      Int      @default(0)
+  storeId     String
+  createdAt   DateTime @default(now())
+
+  store   Store    @relation(fields: [storeId], references: [id])
+  orders  Order[]
+  reviews Review[]
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  productId    String
+  buyerId      String
+  quantity     Int      @default(1)
+  deliveryTime String?
+  location     String?
+  note         String?
+  status       String   @default("Pending")
+  createdAt    DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  buyer   User    @relation(fields: [buyerId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId])
+}
+
+model StoreFavourite {
+  id        String   @id @default(uuid())
+  storeId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([storeId, userId])
+}
