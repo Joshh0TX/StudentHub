@@ -14,8 +14,8 @@ model User {
   name       String?
   profilePic String?
   bio        String?
-  department String
-  level      Int
+  department String?
+  level      Int?
   createdAt  DateTime @default(now())
 
   // Academic
@@ -30,7 +30,6 @@ model User {
   // Existing features
   resources     Resource[]
   pastQuestions PastQuestion[]
-  quizzes       Quiz[]
   studyGroups   StudyGroup[]
   GroupMember   StudyGroupMember[]
 
@@ -167,30 +166,6 @@ model PastQuestion {
   createdAt  DateTime @default(now())
 
   uploader User @relation(fields: [uploadedBy], references: [id])
-}
-
-model Quiz {
-  id         String   @id @default(uuid())
-  title      String
-  courseCode String
-  createdBy  String
-  createdAt  DateTime @default(now())
-
-  creator   User       @relation(fields: [createdBy], references: [id])
-  questions Question[]
-}
-
-model Question {
-  id            String @id @default(uuid())
-  quizId        String
-  questionText  String
-  optionA       String
-  optionB       String
-  optionC       String
-  optionD       String
-  correctAnswer String
-
-  quiz Quiz @relation(fields: [quizId], references: [id])
 }
 
 model Store {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
-
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
@@ -20,19 +19,54 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+    if (isLogin) {
+      await handleLogin();
+    } else {
+      await handleRegister();
+    }
+  };
+
+  const handleRegister = async () => {
+    const res = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type" : "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error);
       return;
     }
 
-    if (isLogin) {
-      navigate("/newsroom");
-    } else {
-      navigate("/onboard");
+    alert("Registered successfully");
+  };
+
+
+  const handleLogin = async () => {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),     
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error);
+      return;
     }
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    window.location.href = "/profile";
   };
 
   return (
