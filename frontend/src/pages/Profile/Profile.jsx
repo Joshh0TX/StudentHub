@@ -127,25 +127,32 @@ function useImageUpload() {
   const coverInputRef = useRef(null);
   const profileInputRef = useRef(null);
 
+  // 1. THE HELPER (Inside the hook, but separate from the handlers)
+  // This is "private" logic that only this hook uses.
+  const processImage = (e, key, setUser) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUser((prev) => ({ ...prev, [key]: imageUrl }));
+      return true;
+    }
+    return false;
+  };
+
   const handleCoverUpdate = () => {
     if (coverInputRef.current) {
       coverInputRef.current.click();
     }
   };
 
+  // 2. THE HANDLERS (Much cleaner now!)
   const onCoverChange = (e, setUser) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUser((prev) => ({ ...prev, coverImage: imageUrl }));
-    }
+    processImage(e, 'coverImage', setUser);
   };
 
   const onProfileChange = (e, setUser, setIsProfileMenuOpen) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUser((prev) => ({ ...prev, profileImage: imageUrl }));
+    const success = processImage(e, 'profileImage', setUser);
+    if (success) {
       setIsProfileMenuOpen(false);
     }
   };

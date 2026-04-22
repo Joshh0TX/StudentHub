@@ -1,34 +1,175 @@
-.bottom-nav {
+/* --- HEADER LAYOUT --- */
+.site-header {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 70px;
   background: #ffffff;
-  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #edf2f7;
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
   z-index: 1000;
+  box-sizing: border-box;
 }
 
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
+/* --- CLICKABLE ANCHORS (Logo & Profile) --- */
+.logo-anchor, 
+.profile-anchor {
   text-decoration: none;
-  color: #9ca3af;
-  font-size: 11px;
-  font-weight: 500;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  z-index: 10; /* Ensures they stay above the absolute center box */
+}
+
+.logo-anchor:hover,
+.profile-anchor:hover {
+  opacity: 0.8;
+}
+
+/* --- LOGO STYLE --- */
+.stuudo-logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #1a202c;
+  letter-spacing: -2px;
+  font-family: 'Helvetica Neue', sans-serif;
+  margin: 0;
+}
+
+.stuudo-logo span {
+  color: #3b82f6;
+}
+
+/* --- CENTER NAVIGATION (Absolute Centering Fix) --- */
+.header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none; /* Allows clicks to pass to logo/profile if they overlap */
+}
+
+.icon-hub {
+  display: flex;
+  gap: 35px;
+  align-items: center;
+  pointer-events: auto; /* Re-enables clicks for the nav icons */
+}
+
+/* --- NAV ICON LINKS --- */
+.nav-link {
+  color: #a0aec0;
   padding: 8px 16px;
+  border-radius: 99px; /* Pill shape foundation */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Hover State (Not Active) */
+.nav-link:hover:not(.active) {
+  background: #f8fafc;
+  color: #3b82f6;
+  padding: 8px 24px;
+  border: 2px solid #e2e8f0;
+  border-radius: 99px;
+}
+
+/* Active State */
+.nav-link.active {
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 2px solid #3b82f6;
+  border-radius: 99px;
+  padding: 8px 32px; /* Increased length for active */
+  transform: scale(1.05);
+}
+
+/* --- RIGHT SECTION: PROFILE & TOGGLE --- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.user-profile-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f7fafc;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.profile-anchor:hover .user-avatar {
+  border-color: #3b82f6;
+}
+
+.user-display-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
   transition: color 0.2s;
 }
 
-.nav-item.active {
-  color: #3B82F6;
+.profile-anchor:hover .user-display-name {
+  color: #3b82f6;
 }
 
-.nav-item:hover {
-  color: #3B82F6;
+/* --- VISIBLE PILL TOGGLE --- */
+.pill-toggle {
+  width: 54px;
+  height: 28px;
+  background: #edf2f7;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  transition: background 0.3s ease;
+}
+
+.pill-toggle.is-dark {
+  background: #2d3748;
+}
+
+.toggle-thumb {
+  position: absolute;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  color: #3b82f6; /* Sun icon color */
+}
+
+.pill-toggle.is-dark .toggle-thumb {
+  transform: translateX(26px);
+  color: #f6e05e; /* Moon icon color */
+}
+
+.toggle-icon-bg {
+  color: #cbd5e0; /* Colors for the static icons behind the thumb */
 }

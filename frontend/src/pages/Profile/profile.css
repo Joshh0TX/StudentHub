@@ -782,9 +782,67 @@
 
   /* Grid Fixes */
   .info-grid {
-    width: 90%;
+    width: 95%;
     grid-template-columns: 1fr;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
+    gap: 1rem;
+  }
+
+  /* Make info boxes breathe on small screens */
+  .info-box {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .box-header h2 {
+    font-size: 1.15rem;
+  }
+
+  /* Reduce edit button footprint */
+  .edit-rect-btn {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Badges layout adapts to smaller width */
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  .badge-btn {
+    padding: 0.9rem 0.6rem;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+
+  /* Projects: tighter cards and image height */
+  .projects-grid {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .project-card img {
+    height: 150px;
+  }
+
+  /* Achievements: compact list spacing */
+  .achievements-list {
+    gap: 0.6rem;
+  }
+
+  .achievement-item {
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  /* Skills: reduce spacing and font sizes slightly */
+  .skills-list {
+    gap: 1rem;
+  }
+
+  .skill-header {
+    font-size: 0.98rem;
   }
 }
 
@@ -792,5 +850,18 @@
 @media (max-width: 400px) {
   .profile-text h1 {
     font-size: 1.5rem;
+  }
+
+  .info-box {
+    padding: 0.75rem;
+  }
+
+  .box-header h2 {
+    font-size: 1rem;
+  }
+
+  .edit-rect-btn {
+    padding: 6px 8px;
+    font-size: 0.85rem;
   }
 }

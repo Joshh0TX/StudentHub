@@ -1,26 +1,73 @@
-import { NavLink } from 'react-router-dom';
-import { Home, ShoppingBag, BookOpen, User } from 'lucide-react';
+import React from 'react';
+import { NavLink, Link } from 'react-router-dom';
+import { Home, ShoppingBag, BookOpen, User, Sun, Moon } from 'lucide-react';
 import './Bottomnav.css';
 
-export default function BottomNav() {
+const NavIcon = ({ to, Icon }) => (
+  <NavLink 
+    to={to} 
+    className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+  >
+    <Icon size={18} strokeWidth={2.5} />
+  </NavLink>
+);
+
+const UserProfile = ({ name, avatarUrl }) => {
+  const fallback = `https://ui-avatars.com/api/?name=${name}&background=DBEAFE&color=3B82F6&bold=true`;
+  
   return (
-    <nav className="bottom-nav">
-      <NavLink to="/newsroom" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <Home size={22} />
-        <span>Home</span>
-      </NavLink>
-      <NavLink to="/marketplace" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <ShoppingBag size={22} />
-        <span>Market</span>
-      </NavLink>
-      <NavLink to="/academy" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <BookOpen size={22} />
-        <span>Academic</span>
-      </NavLink>
-      <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <User size={22} />
-        <span>Profile</span>
-      </NavLink>
-    </nav>
+    <div className="user-profile-group">
+      {/* Profile Image first (Left), then Name */}
+      <img 
+        src={avatarUrl || fallback} 
+        alt="Profile" 
+        className="user-avatar" 
+        onError={(e) => { e.target.src = fallback; }} 
+      />
+      <span className="user-display-name">{name}</span>
+    </div>
+  );
+};
+
+const ThemeToggle = ({ isDarkMode, onToggle }) => (
+  <div className={`pill-toggle ${isDarkMode ? 'is-dark' : 'is-light'}`} onClick={onToggle}>
+    <div className="toggle-thumb">
+      {isDarkMode ? <Moon size={12} fill="currentColor" /> : <Sun size={12} fill="currentColor" />}
+    </div>
+    <Sun size={14} className="toggle-icon-bg" />
+    <Moon size={14} className="toggle-icon-bg" />
+  </div>
+);
+
+export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Alex Smith" } }) {
+  return (
+    <header className="site-header">
+      {/* 1. Left Section */}
+      <div className="header-left">
+        <Link to="/newsroom" className="logo-anchor">
+           <h1 className="stuudo-logo">stuudo<span>.</span></h1>
+        </Link>
+        
+      </div>
+
+      {/* 2. Center Section (Absolute Centering) */}
+      <div className="header-center">
+        <nav className="icon-hub">
+          <NavIcon to="/newsroom" Icon={Home} />
+          <NavIcon to="/marketplace" Icon={ShoppingBag} />
+          <NavIcon to="/academy" Icon={BookOpen} />
+          <NavIcon to="/profile" Icon={User} />
+        </nav>
+      </div>
+
+      {/* 3. Right Section */}
+      <div className="header-right">
+        <Link to="/profile" className="profile-anchor">
+           <UserProfile name={user.name} avatarUrl={user.avatar} />
+        </Link>
+        
+        <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
+      </div>
+    </header>
   );
 }
