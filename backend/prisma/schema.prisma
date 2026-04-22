@@ -14,8 +14,8 @@ model User {
   name       String?
   profilePic String?
   bio        String?
-  department String
-  level      Int
+  department String?
+  level      Int?
   createdAt  DateTime @default(now())
   createdCourses Course[] @relation("UserCreatedCourses")
 
