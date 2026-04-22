@@ -200,11 +200,16 @@ const CreateGroupModal = ({
   );
 };
 
-// ── Group Card ────────────────────────────────────────────────────
 const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
   const navigate = useNavigate();
   const memberCount = Number(group.member_count ?? 0);
   const isFull = memberCount >= group.max_members;
+
+  // Guard — if group.id is missing, button does nothing
+  const handleViewDetails = () => {
+    if (!group.id) return console.error("Group ID is missing:", group);
+    navigate(`${group.id}`);
+  };
 
   return (
     <div className={`group-card ${isMember ? "group-card--member" : ""}`}>
@@ -243,10 +248,7 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
                 ? "Full"
                 : "Join Group"}
         </button>
-        <button
-          className="btn-details"
-          onClick={() => navigate(`/study-groups/${group.id}`)}
-        >
+        <button className="btn-details" onClick={handleViewDetails}>
           View Details
         </button>
       </div>

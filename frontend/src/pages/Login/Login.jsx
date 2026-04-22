@@ -74,7 +74,6 @@ const Login = () => {
       <div className="auth-card">
         <h1 className="logo"> Student<span style={{color:'#3B82F6'}}>Hub</span></h1>
 
-        {/* Toggle Tabs */}
         
 
         <form onSubmit={handleSubmit}>

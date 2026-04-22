@@ -1,24 +1,53 @@
 import "./StoreView.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { marketplaceItems } from "./marketplaceData";
+import { fetchProducts, fetchFavourites, toggleFavourite } from "./marketplaceApi";
 
 export default function StoreView() {
   const { storeId } = useParams();
   const decodedStore = decodeURIComponent(storeId || "");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const [items, setItems] = useState([]);
   const [isFavourited, setIsFavourited] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const items = marketplaceItems.filter(
-    (item) => item.storeName.toLowerCase() === decodedStore.toLowerCase()
-  );
+  useEffect(() => {
+    fetchProducts()
+      .then((allProducts) => {
+        const filtered = allProducts.filter(
+          (p) => String(p.store?.id) === decodedStore || p.store?.name?.toLowerCase() === decodedStore.toLowerCase()
+        );
+        setItems(filtered);
+        if (user && filtered.length > 0) {
+          const storeIdToCheck = filtered[0].store?.id;
+          if (storeIdToCheck) {
+            fetchFavourites(user.id)
+              .then((favs) => setIsFavourited(favs.some((f) => f.id === storeIdToCheck)))
+              .catch(console.error);
+          }
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [decodedStore]);
 
-  const storeName = items[0]?.storeName || decodedStore || "Store";
-  const totalOrders = items.reduce((sum, item) => sum + (item.orders || 0), 0);
-  const totalVisits = items.reduce((sum, item) => sum + (item.visits || 0), 0);
+  const handleToggleFavourite = async () => {
+    if (!user || items.length === 0) return;
+    const storeIdToToggle = items[0]?.store?.id;
+    if (!storeIdToToggle) return;
+    try {
+      const res = await toggleFavourite(storeIdToToggle, user.id);
+      setIsFavourited(res.favourited);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return <main className="storeViewPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
+
+  const storeName = items[0]?.store?.name || decodedStore || "Store";
   const topSelling = [...items].sort((a, b) => (b.orders || 0) - (a.orders || 0)).slice(0, 3);
-  const storeRating = items[0]?.storeRating;
-  const storeFavorites = items[0]?.storeFavorites;
-  const storeReviews = items[0]?.storeReviews || [];
 
   return (
     <main className="storeViewPage">
@@ -31,24 +60,17 @@ export default function StoreView() {
       <header className="storeViewHeader">
         <div className="storeViewHeaderMain">
           <div className="storeViewAvatar">
-            {storeName
-              .split(" ")
-              .slice(0, 2)
-              .map((p) => p[0])
-              .join("")
-              .toUpperCase()}
+            {storeName.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
           </div>
           <div>
             <h1>{storeName}</h1>
-            <p className="storeViewSub">
-              Trusted campus seller · Fast delivery · Great reviews
-            </p>
+            <p className="storeViewSub">Trusted campus seller · Fast delivery · Great reviews</p>
           </div>
         </div>
         <button
           type="button"
           className={isFavourited ? "btnSecondary" : "btnOutline"}
-          onClick={() => setIsFavourited((prev) => !prev)}
+          onClick={handleToggleFavourite}
         >
           {isFavourited ? "Favourited" : "Favourite Store"}
         </button>
@@ -56,29 +78,9 @@ export default function StoreView() {
 
       <section className="storeViewStats">
         <div className="storeStat">
-          <div className="storeStatValue">{totalVisits}</div>
-          <div className="storeStatLabel">Visits</div>
-        </div>
-        <div className="storeStat">
-          <div className="storeStatValue">{totalOrders}</div>
-          <div className="storeStatLabel">Orders</div>
-        </div>
-        <div className="storeStat">
           <div className="storeStatValue">{items.length}</div>
           <div className="storeStatLabel">Products</div>
         </div>
-        {storeRating && (
-          <div className="storeStat">
-            <div className="storeStatValue">{storeRating}</div>
-            <div className="storeStatLabel">Store Rating</div>
-          </div>
-        )}
-        {storeFavorites && (
-          <div className="storeStat">
-            <div className="storeStatValue">{storeFavorites}</div>
-            <div className="storeStatLabel">Favourites</div>
-          </div>
-        )}
       </section>
 
       <section className="storeViewSection">
@@ -86,15 +88,11 @@ export default function StoreView() {
         <div className="storeViewGrid">
           {topSelling.map((item) => (
             <div className="storeProductCard" key={item.id}>
-              {item.image && <img src={item.image} alt={item.title} />}
+              {item.image && <img src={item.image} alt={item.name} />}
               <div className="storeProductInfo">
-                <div className="storeProductTitle">{item.title}</div>
-                <div className="storeProductMeta">
-                  {item.price} · {item.orders} orders
-                </div>
-                <Link to={`/marketplace/${item.id}`} className="storeProductLink">
-                  View Product
-                </Link>
+                <div className="storeProductTitle">{item.name}</div>
+                <div className="storeProductMeta">₦{item.price}</div>
+                <Link to={`/marketplace/${item.id}`} className="storeProductLink">View Product</Link>
               </div>
             </div>
           ))}
@@ -106,38 +104,16 @@ export default function StoreView() {
         <div className="storeViewGrid">
           {items.map((item) => (
             <div className="storeProductCard" key={`all-${item.id}`}>
-              {item.image && <img src={item.image} alt={item.title} />}
+              {item.image && <img src={item.image} alt={item.name} />}
               <div className="storeProductInfo">
-                <div className="storeProductTitle">{item.title}</div>
-                <div className="storeProductMeta">
-                  {item.price} · {item.category}
-                </div>
-                <Link to={`/marketplace/${item.id}`} className="storeProductLink">
-                  View Product
-                </Link>
+                <div className="storeProductTitle">{item.name}</div>
+                <div className="storeProductMeta">₦{item.price} · {item.category}</div>
+                <Link to={`/marketplace/${item.id}`} className="storeProductLink">View Product</Link>
               </div>
             </div>
           ))}
+          {items.length === 0 && <p style={{ color: "#888" }}>No products in this store yet.</p>}
         </div>
-      </section>
-
-      <section className="storeViewSection">
-        <h2>Store Reviews</h2>
-        {storeReviews.length ? (
-          <div className="storeReviewGrid">
-            {storeReviews.map((review) => (
-              <div
-                className="storeReviewCard"
-                key={`${review.name}-${review.text}`}
-              >
-                <div className="storeReviewName">{review.name}</div>
-                <div className="storeReviewText">{review.text}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="storeReviewEmpty">No store reviews yet.</p>
-        )}
       </section>
     </main>
   );
