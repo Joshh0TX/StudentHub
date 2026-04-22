@@ -173,6 +173,8 @@ model Store {
   name        String
   description String?
   type        String   @default("goods")
+  image       String?
+  visits      Int      @default(0)
   ownerId     String   @unique
   createdAt   DateTime @default(now())
 
@@ -197,9 +199,11 @@ model Product {
   description String?
   price       Float
   image       String?
+  images      String[]
   type        String   @default("goods")
   category    String
   locations   String[]
+  visits      Int      @default(0)
   storeId     String
   createdAt   DateTime @default(now())
 
