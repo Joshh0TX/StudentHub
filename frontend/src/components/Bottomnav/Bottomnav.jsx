@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Home, ShoppingBag, BookOpen, User, Sun, Moon } from 'lucide-react';
+import { Home, ShoppingBag, BookOpen, User, LogOut } from 'lucide-react';
 import './Bottomnav.css';
 
 const NavIcon = ({ to, Icon }) => (
@@ -29,15 +29,7 @@ const UserProfile = ({ name, avatarUrl }) => {
   );
 };
 
-const ThemeToggle = ({ isDarkMode, onToggle }) => (
-  <div className={`pill-toggle ${isDarkMode ? 'is-dark' : 'is-light'}`} onClick={onToggle}>
-    <div className="toggle-thumb">
-      {isDarkMode ? <Moon size={12} fill="currentColor" /> : <Sun size={12} fill="currentColor" />}
-    </div>
-    <Sun size={14} className="toggle-icon-bg" />
-    <Moon size={14} className="toggle-icon-bg" />
-  </div>
-);
+
 
 export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Alex Smith" } }) {
   return (
@@ -66,7 +58,9 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Alex S
            <UserProfile name={user.name} avatarUrl={user.avatar} />
         </Link>
         
-        <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
+        <Link to="/" className="logout-btn">
+         <LogOut size={20} />
+        </Link>
       </div>
     </header>
   );
