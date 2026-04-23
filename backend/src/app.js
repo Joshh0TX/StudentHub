@@ -14,7 +14,7 @@ const path = require("path");
 
 const app = express();
 app.use(cors({
-    origin: "https://studenthub-zs3y.onrender.com",
+    origin: "https://student-hub-henna-nu.vercel.app/",
     credentials: true,
 }));
 app.use(express.json());
