@@ -137,7 +137,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #2563eb;
+  background-color: #1a3a6b;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -189,7 +189,8 @@
   border-radius: 14px;
   width: 100%;
   max-width: 480px;
-  max-height: 81vh;
+  max-height: 100vh;
+  margin-top: 53px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -231,26 +232,26 @@
   border-radius: 8px;
 }
 
-.modal-body {
+.modal-Gbody {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.modal-body label {
+.modal-Gbody label {
   font-size: 13px;
   font-weight: 600;
   color: #374151;
 }
 
-.modal-body label span {
+.modal-Gbody label span {
   color: #ef4444;
   margin-left: 2px;
 }
 
-.modal-body input,
-.modal-body textarea {
+.modal-Gbody input,
+.modal-Gbody textarea {
   width: 100%;
   padding: 9px 12px;
   font-size: 14px;
@@ -262,8 +263,8 @@
   font-family: inherit;
 }
 
-.modal-body input:focus,
-.modal-body textarea:focus {
+.modal-Gbody input:focus,
+.modal-Gbody textarea:focus {
   border-color: #3b82f6;
 }
 
@@ -306,7 +307,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background: #2563eb;
+  background: #1a3a6b;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -545,7 +546,7 @@
   display: inline-block;
   font-size: 12px;
   font-weight: 500;
-  color: #1d4ed8;
+  color: #1a3a6b;
   background: #dbeafe;
   padding: 3px 10px;
   border-radius: 999px;

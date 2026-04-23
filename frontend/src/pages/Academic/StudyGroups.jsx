@@ -110,7 +110,7 @@ const CreateGroupModal = ({
           </div>
         )}
 
-        <div className="modal-body">
+        <div className="modal-Gbody">
           <label>
             Group Name <span>*</span>
           </label>
@@ -201,7 +201,9 @@ const CreateGroupModal = ({
 
 const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
   const navigate = useNavigate();
-  const memberCount = isNaN(Number(group.member_count)) ? 0 : Number(group.member_count ?? 0);
+  const memberCount = isNaN(Number(group.member_count))
+    ? 0
+    : Number(group.member_count ?? 0);
   const isFull = memberCount >= group.max_members;
 
   // Guard — if group.id is missing, button does nothing
@@ -328,7 +330,7 @@ const StudyGroups = () => {
     try {
       await apiFetch(`/api/groups/${groupId}/join`, {
         method: "POST",
-        body: JSON.stringify({ student_id: 1 }), // replace with real auth id
+        body: JSON.stringify({ student_id: "test-user-123" }), // replace with real auth id
       });
 
       // Update locally without re-fetching entire list
