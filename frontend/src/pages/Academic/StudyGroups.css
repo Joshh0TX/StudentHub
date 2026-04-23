@@ -33,7 +33,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #2563eb;
+  background-color: #1a3a6b;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -42,7 +42,7 @@
 }
 
 .btn-create:hover {
-  background-color: #1d4ed8;
+  background-color: #1b54f1;
 }
 
 /* ── Grid ── */
@@ -416,7 +416,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
+  width: 48px;
   height: 38px;
   background: #ffffff;
   border: 1.5px solid #e5e7eb;

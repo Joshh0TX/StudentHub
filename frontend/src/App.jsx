@@ -2,7 +2,6 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import Layout from "./pages/Layout/Layout.jsx";
 import AcademicHome from "./pages/Academic/AcademicHome";
-import StudyMaterials from "./pages/Academic/StudyMaterials";
 import StudyGroups from "./pages/Academic/StudyGroups";
 import GroupDetail from "./pages/Academic/GroupDetail";
 import ExamSchedule from "./pages/Academic/ExamSchedule";
@@ -15,6 +14,7 @@ import ProductDetail from "./pages/Marketplace/ProductDetail.jsx";
 import StoreView from "./pages/Marketplace/StoreView.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
+import Timetable from "./pages/Academic/Timetable.jsx";
 
 function App() {
   return (
@@ -30,8 +30,8 @@ function App() {
         <Route path="/store/:storeId" element={<StoreView />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>
-          <Route index element={<StudyMaterials />} />
-          <Route path="study-materials" element={<StudyMaterials />} />
+          <Route index element={<Timetable />} />
+          <Route path="timetables" element={<Timetable />} />
           <Route path="study-groups" element={<StudyGroups />} />
           <Route path="study-groups/:id" element={<GroupDetail />} />
           <Route path="exam-schedule" element={<ExamSchedule />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { AlertCircle, ExternalLink } from "lucide-react";
 import "./Resources.css";
 
 // ── Tag Colours ───────────────────────────────────────────────────
@@ -91,7 +91,13 @@ const Resources = () => {
   }, [selectedProgram, selectedYear]);
 
   if (loading) return <p className="resources-empty">Loading resources...</p>;
-  if (error) return <p className="resources-empty">{error}</p>;
+  if (error)
+    return (
+      <p className="resources-error">
+        <AlertCircle size={20} />
+        {error}
+      </p>
+    );
 
   return (
     <div className="resources-page">
