@@ -8,7 +8,7 @@ const userRoutes = require('./modules/users/routes');
 const loginRoutes = require('./modules/auth/routes');
 const signupRoutes = require('./modules/auth/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
-
+const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 
 const path = require("path");
 
@@ -22,6 +22,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', signupRoutes);
 app.use('/api/auth', loginRoutes);
+app.use("/api/timetables", timetableRoutes);
 
 app.use("/api/products", marketplaceRoutes);
 
