@@ -30,6 +30,10 @@ const Login = () => {
   };
 
   const handleRegister = async () => {
+    if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+    }
     const res = await fetch("http://localhost:5000/api/auth/register", {
       method: "POST",
       headers: { "Content-Type" : "application/json" },
@@ -42,7 +46,9 @@ const Login = () => {
       return;
     }
 
-    alert("Registered successfully");
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/profile";
   };
 
 

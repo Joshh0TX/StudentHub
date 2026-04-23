@@ -20,8 +20,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/auth', signupRoutes);
-app.use('/api/auth', loginRoutes);
+app.use('/api/auth', require('./modules/auth/routes'));
 
 app.use("/api/products", marketplaceRoutes);
 
