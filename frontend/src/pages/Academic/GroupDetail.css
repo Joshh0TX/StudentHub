@@ -81,27 +81,6 @@
   border-radius: 999px;
 }
 
-.btn-join-detail {
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  background: #2563eb;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  white-space: nowrap;
-}
-
-.btn-join-detail:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-.btn-join-detail:disabled {
-  background: #93c5fd;
-  cursor: not-allowed;
-}
-
 /* ── Sections ── */
 .detail-section {
   background: #ffffff;
@@ -262,10 +241,6 @@
   }
   .detail-header-actions {
     align-items: flex-start;
-  }
-  .btn-join-detail {
-    width: 100%;
-    text-align: center;
   }
 }
 

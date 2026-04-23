@@ -32,7 +32,6 @@ const CreateGroupModal = ({
   onCreated,
   selectedProgram,
   selectedYear,
-  departmentId,
 }) => {
   const [form, setForm] = useState({
     name: "",
@@ -111,7 +110,7 @@ const CreateGroupModal = ({
           </div>
         )}
 
-        <div className="modal-body">
+        <div className="modal-Gbody">
           <label>
             Group Name <span>*</span>
           </label>
@@ -202,7 +201,9 @@ const CreateGroupModal = ({
 
 const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
   const navigate = useNavigate();
-  const memberCount = Number(group.member_count ?? 0);
+  const memberCount = isNaN(Number(group.member_count))
+    ? 0
+    : Number(group.member_count ?? 0);
   const isFull = memberCount >= group.max_members;
 
   // Guard — if group.id is missing, button does nothing
@@ -329,7 +330,7 @@ const StudyGroups = () => {
     try {
       await apiFetch(`/api/groups/${groupId}/join`, {
         method: "POST",
-        body: JSON.stringify({ student_id: 1 }), // replace with real auth id
+        body: JSON.stringify({ student_id: "test-user-123" }), // replace with real auth id
       });
 
       // Update locally without re-fetching entire list
@@ -375,11 +376,6 @@ const StudyGroups = () => {
         <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
           <button className="btn-retry" onClick={fetchGroups}>
             Retry
-          </button>
-
-          {/* ✅ Allow user to create anyway */}
-          <button className="btn-create" onClick={() => setShowModal(true)}>
-            <UserPlus size={18} /> Create Group
           </button>
         </div>
       </div>
@@ -429,13 +425,6 @@ const StudyGroups = () => {
               ? "You have not joined any groups yet."
               : "No study groups available for this selection."}
           </p>
-
-          {/* ✅ Show button only when viewing all groups */}
-          {filter !== "mine" && (
-            <button className="btn-create" onClick={() => setShowModal(true)}>
-              <UserPlus size={18} /> Create New Group
-            </button>
-          )}
         </div>
       ) : (
         <div className="groups-grid">

@@ -369,7 +369,7 @@ const GroupDetail = () => {
   // ── Safety check — group failed to load silently ──────────────
   if (!group) return <p className="detail-empty">Group not found.</p>;
 
-  const isFull = group.member_count >= group.max_members;
+
 
   return (
     <div className="group-detail-page">
@@ -399,9 +399,6 @@ const GroupDetail = () => {
               members
             </span>
           </div>
-          <button className="btn-join-detail" disabled={isFull}>
-            {isFull ? "Group Full" : "Join Group"}
-          </button>
         </div>
       </div>
 
