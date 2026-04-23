@@ -1,0 +1,132 @@
+/* --- CONTAINER --- */
+.right-rail-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between the two cards */
+  height: 100%; /* Fills the sticky column-right */
+}
+
+/* --- THE CARDS --- */
+.right-rail-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: calc(50% - 10px); /* Makes both cards fit perfectly in the view */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.rail-card-header {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #1a202c;
+}
+
+.rail-card-content {
+  flex: 1;
+  padding: 8px 0;
+}
+
+/* --- TRENDING ROWS --- */
+.trend-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.trend-row:hover {
+  background: #f8fafc;
+}
+
+.trend-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.trend-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #2d3748;
+}
+
+.trend-meta {
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+/* --- SUGGESTED SCROLL LOGIC --- */
+.scrollable-area {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollable-area::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.suggested-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.user-avatar-sm {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1a202c;
+}
+
+.user-bio {
+  font-size: 0.7rem;
+  color: #718096;
+}
+
+.follow-action-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+  color: #4a5568;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.follow-action-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+/* --- UTILITIES --- */
+.text-orange { color: #f6ad55; }
+.text-muted { color: #cbd5e0; }

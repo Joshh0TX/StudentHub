@@ -1,262 +1,44 @@
-/* --- MAIN SIDEBAR CONTAINER --- */
-.amebo-sidebar {
-  width: 300px;
-  height: calc(100vh - 120px);
-  position: sticky;
-  top: 100px;
-  background: #ffffff;
-  border-radius: 20px; /* Kept rounded */
-  border: 1px solid #edf2f7;
-  overflow: hidden;
-  margin: 20px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+/* --- THE MAIN SHELL --- */
+.amebo-shell {
+  background-color: #f8fafc;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-}
-
-/* --- THE NEW SCROLLABLE WRAPPER --- */
-.sidebar-scroll-container {
-  flex: 1;
-  overflow-y: auto;
-  position: relative; /* Essential for mini-nav positioning */
-}
-.sidebar-scroll-container::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar-scroll-container::-webkit-scrollbar-thumb {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-/* --- THE MINI NAV SLIDE-DOWN --- */
-.mini-nav-bar {
-  /* Change to absolute by default so it takes 0px space in the container */
-  position: absolute; 
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-bottom: 1px solid #f1f5f9;
-  z-index: 100;
-  
-  /* Hidden state */
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none; /* Stops it from blocking clicks while hidden */
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
-}
-
-.mini-nav-bar.visible {
-  position: sticky; 
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-.mini-nav-bar button {
-  background: none;
-  border: none; /* Removed the border */
-  padding: 0;
-  cursor: pointer;
-  color: #cbd5e0;
-  height: 100%;
-  flex: 1;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  outline: none;
-  transition: all 0.2s ease; /* Smooth transition for the color */
 }
 
-
-.mini-nav-bar button:hover svg,
-.mini-nav-bar button.active svg {
-  transform: scale(1.3); 
-  color: #3b82f6;        
-}
-.mini-nav-bar button svg {
-  transition: transform 0.2s ease; 
-  transform-origin: center;        
-  display: block;
-} 
-
-
-/* --- PROFILE HEADER (Locked at top of sidebar) --- */
-.profile-card {
-  flex-shrink: 0;
-  position: relative;
-  text-align: center;
-  z-index: 2;
-  background: white;
-}
-
-.cover-photo {
-  height: 100px;
-  background: #e2e8f0;
-}
-
-.cover-photo img {
+/* --- THE GRID CONTAINER --- */
+.amebo-content-grid {
+  display: flex;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 1550px;
+  gap: 20px;
+  padding: 5px 15px; /* Creates the outer "floating" gap */
+  align-items: flex-start;
 }
 
-.avatar-wrapper {
-  margin-top: -35px;
-  display: flex;
-  justify-content: center;
+/* --- COLUMN 1: LEFT (The Sidebar Wrapper) --- */
+.column-left {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px; 
+  /* This gives the '93%' something to calculate against */
+  height: calc(100vh - 48px); 
+  z-index: 10;
 }
 
-.profile-avatar-large {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%; 
-  border: 4px solid #ffffff;
-  object-fit: cover;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+/* --- COLUMN 2: CENTER (The Feed) --- */
+.column-center {
+  flex: 1;
+  min-width: 0; /* Keeps the feed from breaking the layout on small screens */
 }
 
-.profile-info {
-  padding: 10px 15px 15px;
+/* --- COLUMN 3: RIGHT (The Trending Wrapper) --- */
+.column-right {
+  width: 230px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+  height: calc(100vh - 48px);
 }
 
-.profile-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #1a202c;
-  font-weight: 800;
-}
-
-.profile-info p {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
-  color: #718096;
-}
-
-
-/* --- STATS GRID (Changed to scroll naturally) --- */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: #fcfcfd;
-  border-top: 1px solid #f1f5f9;
-  
-  /* Change position from sticky to relative or static */
-  position: relative; 
-  top: auto; 
-  z-index: 5;
-}
-
-.stat-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 5px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 2px solid transparent;
-}
-
-.stat-box:hover {
-  background: #f8fafc;
-}
-
-.stat-box.active {
-  background: #ffffff;
-  border-bottom: 2px solid #3b82f6;
-}
-
-.stat-count {
-  font-weight: 800;
-  font-size: 14px;
-  color: #1a202c;
-}
-
-.stat-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: #a0aec0;
-  font-weight: 600;
-  margin-top: 2px;
-}
-
-.stat-icon {
-  margin-bottom: 4px;
-  color: #cbd5e0;
-}
-
-.active .stat-icon {
-  color: #3b82f6;
-}
-
-/* --- BUTTON & LIST --- */
-.view-profile-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  margin: 15px;
-  padding: 10px;
-  background: #f1f5f9;
-  color: #475569;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 700;
-  border-radius: 12px;
-  transition: 0.2s;
-}
-
-.view-profile-btn:hover {
-  background: #3b82f6;
-  color: #ffffff;
-}
-
-.dynamic-list-container {
-  padding: 0 15px 20px;
-}
-
-.list-title {
-  font-size: 10px;
-  color: #cbd5e0;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-}
-
-.mini-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.mini-list-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.item-img {
-  width: 34px;
-  height: 34px;
-  background: #f1f5f9;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.item-name {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #2d3748;
-}
-
-.item-meta {
-  display: block;
-  font-size: 0.75rem;
-  color: #a0aec0;
-}
