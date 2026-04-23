@@ -32,7 +32,6 @@ const CreateGroupModal = ({
   onCreated,
   selectedProgram,
   selectedYear,
-  departmentId,
 }) => {
   const [form, setForm] = useState({
     name: "",
@@ -202,7 +201,7 @@ const CreateGroupModal = ({
 
 const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
   const navigate = useNavigate();
-  const memberCount = Number(group.member_count ?? 0);
+  const memberCount = isNaN(Number(group.member_count)) ? 0 : Number(group.member_count ?? 0);
   const isFull = memberCount >= group.max_members;
 
   // Guard — if group.id is missing, button does nothing
@@ -376,11 +375,6 @@ const StudyGroups = () => {
           <button className="btn-retry" onClick={fetchGroups}>
             Retry
           </button>
-
-          {/* ✅ Allow user to create anyway */}
-          <button className="btn-create" onClick={() => setShowModal(true)}>
-            <UserPlus size={18} /> Create Group
-          </button>
         </div>
       </div>
     );
@@ -429,13 +423,6 @@ const StudyGroups = () => {
               ? "You have not joined any groups yet."
               : "No study groups available for this selection."}
           </p>
-
-          {/* ✅ Show button only when viewing all groups */}
-          {filter !== "mine" && (
-            <button className="btn-create" onClick={() => setShowModal(true)}>
-              <UserPlus size={18} /> Create New Group
-            </button>
-          )}
         </div>
       ) : (
         <div className="groups-grid">

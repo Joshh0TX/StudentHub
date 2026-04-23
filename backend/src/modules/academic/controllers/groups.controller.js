@@ -13,9 +13,18 @@ const getGroups = async (req, res) => {
         department,
         ...(year ? { year: parseInt(year) } : {}),
       },
+      include: {
+        _count: { select: { members: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
-    return res.json(groups);
+
+    const result = groups.map((g) => ({
+      ...g,
+      member_count: g._count.members,
+    }));
+
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

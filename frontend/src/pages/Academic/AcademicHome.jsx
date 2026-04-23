@@ -1,8 +1,7 @@
 import { useState } from "react";
 import "./AcademicHome.css";
 import { Outlet, NavLink } from "react-router-dom";
-import { BookText, Users, BookOpen, Link } from "lucide-react";
-
+import { Users, BookOpen, Link, Calendar } from "lucide-react";
 
 const programs = {
   Accounting: { years: [1, 2, 3] },
@@ -64,26 +63,9 @@ export default function AcademicHome() {
   return (
     <>
       <div className="academic-layout">
-     
         {/* ── Top Header ── */}
         <header className="header">
           <div className="brand">
-            <div className="brand-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-              </svg>
-            </div>
             <div className="brand-text">
               <span className="brand-name">Study Corner</span>
               <span className="brand-sub">
@@ -120,8 +102,8 @@ export default function AcademicHome() {
 
         {/* ── Tab Navigation ── */}
         <nav className="tab-nav">
-          <NavLink to="/academy/study-materials" state={navState}>
-            <BookText size={16} /> Study Materials
+          <NavLink to="/academy/timetables" state={navState}>
+            <Calendar size={16} /> Timetables
           </NavLink>
           <NavLink to="/academy/study-groups" state={navState}>
             <Users size={16} /> Study Groups
