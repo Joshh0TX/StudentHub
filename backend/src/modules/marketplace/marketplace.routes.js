@@ -21,11 +21,12 @@ router.get("/store/:ownerId", async (req, res) => {
 // GET store by store ID (for StoreView) — increments visits
 router.get("/store/view/:storeId", async (req, res) => {
   try {
-    const store = await prisma.store.update({
+    const store = await prisma.store.findUnique({
       where: { id: req.params.storeId },
-      data: { visits: { increment: 1 } },
       include: { contacts: true, products: true },
     });
+    if (!store) return res.status(404).json({ error: "Store not found" });
+    prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});
     res.json(store);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -157,12 +158,13 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const product = await prisma.product.update({
+    const product = await prisma.product.findUnique({
       where: { id: req.params.id },
-      data: { visits: { increment: 1 } },
       include: { store: { include: { contacts: true } } },
     });
     if (!product) return res.status(404).json({ error: "Product not found" });
+    // increment visits in background, don't block response
+    prisma.product.update({ where: { id: req.params.id }, data: { visits: { increment: 1 } } }).catch(() => {});
     res.json(product);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -11,7 +11,8 @@ model User {
   id         String   @id @default(uuid())
   email      String   @unique
   password   String
-  name       String?
+  f_name      String
+  l_name      String
   profilePic String?
   bio        String?
   department String?
@@ -51,7 +52,7 @@ model Course {
   creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
-  timetable   TimetableEntry[]
+  timetableClasses TimetableClass[]
 }
 
 model CourseMember {
@@ -78,15 +79,26 @@ model Assignment {
   course Course @relation(fields: [courseId], references: [id])
 }
 
-model TimetableEntry {
-  id        String  @id @default(uuid())
-  courseId  String
-  day       String
-  startTime String
-  endTime   String
-  location  String?
+model Timetable {
+  id        Int              @id @default(autoincrement())
+  name      String           @db.VarChar(100)
+  studentId Int?
+  createdAt DateTime         @default(now())
+  classes   TimetableClass[]
+}
 
-  course Course @relation(fields: [courseId], references: [id])
+model TimetableClass {
+  id          Int       @id @default(autoincrement())
+  timetableId Int
+  courseId    String?
+  subject     String    @db.VarChar(60)
+  location    String?   @db.VarChar(60)
+  day         String    @db.VarChar(10)
+  startTime   String    @db.VarChar(5)
+  endTime     String    @db.VarChar(5)
+  colorIdx    Int       @default(0)
+  timetable   Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
 }
 
 model Post {

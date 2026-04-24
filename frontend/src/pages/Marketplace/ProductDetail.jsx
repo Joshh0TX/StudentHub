@@ -1,7 +1,7 @@
 import "./ProductDetail.css";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { fetchProduct, fetchReviews, placeOrder, postReview } from "./marketplaceApi";
+import { fetchProduct, fetchReviews, placeOrder, postReview, toggleFavourite, fetchFavourites } from "./marketplaceApi";
 import { getUser } from "./testUser";
 
 export default function ProductDetail() {
@@ -24,6 +24,8 @@ export default function ProductDetail() {
   const [showContacts, setShowContacts] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [isFavourited, setIsFavourited] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -39,6 +41,17 @@ export default function ProductDetail() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [productId]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchFavourites(user.id)
+      .then((favs) => {
+        if (Array.isArray(favs)) {
+          setIsFavourited(favs.some((f) => f.id === productId || f.storeId === productId));
+        }
+      })
+      .catch(() => {});
+  }, [productId, user?.id]);
 
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +80,19 @@ export default function ProductDetail() {
       console.error(err);
     } finally {
       setReviewSubmitting(false);
+    }
+  };
+
+  const handleToggleFavourite = async () => {
+    if (!user || !item?.store?.id) return;
+    setFavLoading(true);
+    try {
+      await toggleFavourite(item.store.id, user.id);
+      setIsFavourited((prev) => !prev);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFavLoading(false);
     }
   };
 
@@ -133,6 +159,21 @@ export default function ProductDetail() {
             <button className="btnOutline" type="button" onClick={() => setShowContacts((prev) => !prev)}>
               {showContacts ? "Hide Contacts" : "Contact Seller"}
             </button>
+            {user && (
+              <button
+                type="button"
+                className={`heartBtn${isFavourited ? " active" : ""}`}
+                onClick={handleToggleFavourite}
+                disabled={favLoading}
+                aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill={isFavourited ? "currentColor" : "none"}
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </button>
+            )}
           </div>
           {orderSuccess && <p style={{ color: "green", fontSize: "0.9rem", marginTop: "0.5rem" }}>Order placed successfully!</p>}
           {showContacts && (
