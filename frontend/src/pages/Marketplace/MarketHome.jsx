@@ -86,7 +86,7 @@ export default function MarketHome() {
   const allCategories = Array.from(new Set([...categoriesByType.goods, ...categoriesByType.services]));
 
   const filteredItems = products.filter((item) => {
-    const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase());
+    const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase()) || item.store?.name?.toLowerCase().includes(query.toLowerCase());
     const matchesType = typeFilter === "all" || item.type === typeFilter;
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
     const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
@@ -204,7 +204,29 @@ export default function MarketHome() {
           </div>
         )}
         <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
-          <input type="text" placeholder="Search items, locations..." value={query} onChange={(e) => setQuery(e.target.value)} />
+          <div className="marketSearchWrapper">
+            <input
+              type="text"
+              placeholder="Search items, locations..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && query.trim())
+                  navigate(`/marketplace/search?q=${encodeURIComponent(query.trim())}`);
+              }}
+            />
+            <button
+              type="button"
+              className="marketSearchBtn"
+              onClick={() => { if (query.trim()) navigate(`/marketplace/search?q=${encodeURIComponent(query.trim())}`); }}
+              aria-label="Search"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </div>
         </div>
         {/* Filters */}
         <div className="marketControls">
@@ -231,7 +253,7 @@ export default function MarketHome() {
         <p className="itemNumber">{filteredItems.length} items available</p>
         <section className="markettopGird">
           {filteredItems.map((item) => (
-            <div className="marketCard" key={item.id}>
+            <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
               {item.images?.[0] && <img src={item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`} alt={item.name} className="marketImage" />}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>

@@ -258,3 +258,29 @@
     grid-template-columns: 1.1fr 1fr;
   }
 }
+
+.heartBtn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+  box-shadow: none;
+  transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.heartBtn:hover {
+  transform: scale(1.1);
+  box-shadow: none;
+}
+
+.heartBtn.active {
+  color: #e11d48;
+  background: color-mix(in oklch, #e11d48 12%, var(--secondary));
+  border-color: color-mix(in oklch, #e11d48 30%, var(--border));
+}

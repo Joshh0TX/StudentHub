@@ -1,7 +1,16 @@
+import { dummyProducts } from "./marketplaceData";
+
 const BASE = "http://localhost:5000/api/products";
 
 export const fetchProducts = () =>
-  fetch(BASE).then((r) => r.json());
+  fetch(BASE)
+    .then((r) => r.json())
+    .then((real) => {
+      const realIds = new Set((Array.isArray(real) ? real : []).map((p) => p.id));
+      const extras = dummyProducts.filter((d) => !realIds.has(d.id));
+      return [...(Array.isArray(real) ? real : []), ...extras];
+    })
+    .catch(() => dummyProducts);
 
 export const fetchProduct = (id) =>
   fetch(`${BASE}/${id}`).then((r) => r.json());
