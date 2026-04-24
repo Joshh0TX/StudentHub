@@ -30,7 +30,11 @@ const Login = () => {
   };
 
   const handleRegister = async () => {
-    const res = await fetch("http://localhost:5000/api/auth/register", {
+    if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+    }
+    const res = await fetch("https://studenthub-zs3y.onrender.com/api/auth/register", {
       method: "POST",
       headers: { "Content-Type" : "application/json" },
       body: JSON.stringify(formData),
@@ -42,12 +46,14 @@ const Login = () => {
       return;
     }
 
-    alert("Registered successfully");
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/profile";
   };
 
 
   const handleLogin = async () => {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
+    const res = await fetch("https://studenthub-zs3y.onrender.com/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
