@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Plus,
   X,
@@ -9,6 +9,8 @@ import {
   ChevronUp,
 } from "lucide-react";
 import "./Timetable.css";
+
+const API = import.meta.env.VITE_API_URL;
 
 // ── Constants ─────────────────────────────────────────────────────
 const DAYS = [
@@ -331,12 +333,12 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
 const TimetableGrid = ({ timetable, onDelete }) => {
   const [collapsed, setCollapsed] = useState(false);
 
-  // Get only days that have classes
+  // Only show days that have at least one class
   const activeDays = DAYS.filter((d) =>
     timetable.classes.some((c) => c.day === d),
   );
 
-  // Get min and max times for the grid range
+  // Find the earliest start and latest end across all classes
   const allStarts = timetable.classes.map((c) => c.startTime);
   const allEnds = timetable.classes.map((c) => c.endTime);
   const minTime = allStarts.length
@@ -346,12 +348,30 @@ const TimetableGrid = ({ timetable, onDelete }) => {
     ? allEnds.reduce((a, b) => (a > b ? a : b))
     : "17:00";
 
-  // Build visible time slots between min and max
+  // Build the visible 30-min slots between min and max
   const visibleSlots = TIME_SLOTS.filter((t) => t >= minTime && t <= maxTime);
+
+  // ── Row index helpers ─────────────────────────────────────────
+  // Each slot occupies one grid row (after the header row)
+  // Header = row 1, first slot = row 2, second slot = row 3 ...
+  const slotToRow = (time) => {
+    const idx = visibleSlots.indexOf(time);
+    return idx === -1 ? null : idx + 2; // +2 because row 1 is the header
+  };
+
+  // How many 30-min slots does a class span?
+  const spanCount = (startTime, endTime) => {
+    const startIdx = visibleSlots.indexOf(startTime);
+    const endIdx = visibleSlots.indexOf(endTime);
+    if (startIdx === -1) return 1;
+    // If endTime is beyond visibleSlots (e.g. exactly maxTime), count to end
+    const end = endIdx === -1 ? visibleSlots.length : endIdx;
+    return Math.max(1, end - startIdx);
+  };
 
   return (
     <div className="timetable-card">
-      {/* Card Header */}
+      {/* ── Card Header ── */}
       <div className="timetable-card-header">
         <div className="timetable-card-title">
           <h3>{timetable.name}</h3>
@@ -378,76 +398,94 @@ const TimetableGrid = ({ timetable, onDelete }) => {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* ── Grid ── */}
       {!collapsed && (
         <div className="timetable-grid-wrapper">
           <div
             className="timetable-grid"
             style={{
+              // Column 1 = time labels, then one column per active day
               gridTemplateColumns: `80px repeat(${activeDays.length}, 1fr)`,
+              // Row 1 = day headers, then one row per 30-min slot
+              gridTemplateRows: `40px repeat(${visibleSlots.length}, 36px)`,
             }}
           >
-            {/* Corner cell */}
-            <div className="grid-corner">
+            {/* ── Corner cell ── */}
+            <div className="grid-corner" style={{ gridRow: 1, gridColumn: 1 }}>
               <Clock size={14} />
             </div>
 
-            {/* Day headers */}
-            {activeDays.map((day) => (
-              <div key={day} className="grid-day-header">
+            {/* ── Day headers (row 1) ── */}
+            {activeDays.map((day, colIdx) => (
+              <div
+                key={day}
+                className="grid-day-header"
+                style={{ gridRow: 1, gridColumn: colIdx + 2 }}
+              >
                 <span className="grid-day-full">{day}</span>
                 <span className="grid-day-short">{day.slice(0, 3)}</span>
               </div>
             ))}
 
-            {/* Time rows */}
-            {visibleSlots.map((slot) => (
-              <>
-                {/* Time label */}
-                <div key={`time-${slot}`} className="grid-time-label">
-                  {formatTime(slot)}
-                </div>
-
-                {/* Cells per day */}
-                {activeDays.map((day) => {
-                  const classInSlot = timetable.classes.find(
-                    (c) =>
-                      c.day === day && c.startTime <= slot && c.endTime > slot,
-                  );
-                  const isStart = classInSlot?.startTime === slot;
-
-                  return (
-                    <div
-                      key={`${day}-${slot}`}
-                      className={`grid-cell ${classInSlot ? "grid-cell--occupied" : ""}`}
-                    >
-                      {classInSlot && isStart && (
-                        <div
-                          className="grid-class-block"
-                          style={{
-                            backgroundColor:
-                              CLASS_COLORS[classInSlot.colorIdx]?.bg,
-                            borderLeft: `3px solid ${CLASS_COLORS[classInSlot.colorIdx]?.border}`,
-                            color: CLASS_COLORS[classInSlot.colorIdx]?.text,
-                          }}
-                        >
-                          <p className="block-subject">{classInSlot.subject}</p>
-                          {classInSlot.location && (
-                            <p className="block-location">
-                              {classInSlot.location}
-                            </p>
-                          )}
-                          <p className="block-time">
-                            {formatTime(classInSlot.startTime)} –{" "}
-                            {formatTime(classInSlot.endTime)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </>
+            {/* ── Time labels (column 1, one per slot) ── */}
+            {visibleSlots.map((slot, rowIdx) => (
+              <div
+                key={`time-${slot}`}
+                className="grid-time-label"
+                style={{ gridRow: rowIdx + 2, gridColumn: 1 }}
+              >
+                {/* Only show label on the hour */}
+                {slot.endsWith(":00") ? formatTime(slot) : ""}
+              </div>
             ))}
+
+            {/* ── Background grid cells (empty slots) ── */}
+            {visibleSlots.map((slot, rowIdx) =>
+              activeDays.map((day, colIdx) => (
+                <div
+                  key={`bg-${day}-${slot}`}
+                  className={`grid-cell ${slot.endsWith(":00") ? "grid-cell--hour" : ""}`}
+                  style={{
+                    gridRow: rowIdx + 2,
+                    gridColumn: colIdx + 2,
+                  }}
+                />
+              )),
+            )}
+
+            {/* ── Class blocks — span their full duration ── */}
+            {timetable.classes.map((cls) => {
+              const colIdx = activeDays.indexOf(cls.day);
+              if (colIdx === -1) return null;
+
+              const rowStart = slotToRow(cls.startTime);
+              if (rowStart === null) return null;
+
+              const span = spanCount(cls.startTime, cls.endTime);
+              const colors = CLASS_COLORS[cls.colorIdx] || CLASS_COLORS[0];
+
+              return (
+                <div
+                  key={cls.id}
+                  className="grid-class-block"
+                  style={{
+                    gridRow: `${rowStart} / span ${span}`,
+                    gridColumn: colIdx + 2,
+                    backgroundColor: colors.bg,
+                    borderLeft: `4px solid ${colors.border}`,
+                    color: colors.text,
+                  }}
+                >
+                  <p className="block-subject">{cls.subject}</p>
+                  {cls.location && (
+                    <p className="block-location">{cls.location}</p>
+                  )}
+                  <p className="block-time">
+                    {formatTime(cls.startTime)} – {formatTime(cls.endTime)}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -510,5 +548,148 @@ const Timetable = () => {
     </div>
   );
 };
+// ── Main Component (Database Version) ────────────────────────────
+// const Timetable = () => {
+//   const [timetables, setTimetables] = useState([]);
+//   const [showModal, setShowModal] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   const STUDENT_ID = 1; // replace with real auth id
+
+//   // ── Fetch timetables from database ───────────────────────────
+//   const fetchTimetables = useCallback(async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const res = await fetch(`${API}/api/timetables?student_id=${STUDENT_ID}`);
+//       if (!res.ok) throw new Error(`Server error: ${res.status}`);
+//       const data = await res.json();
+
+//       // Normalise classes array — guard against null from LEFT JOIN
+//       const normalised = data.map((tt) => ({
+//         ...tt,
+//         classes: (tt.classes || []).filter((c) => c.id !== null),
+//       }));
+
+//       setTimetables(normalised);
+//     } catch (err) {
+//       setError(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchTimetables();
+//   }, [fetchTimetables]);
+
+//   // ── Post new timetable to database ───────────────────────────
+//   const handleCreated = async (newTimetable) => {
+//     try {
+//       const res = await fetch(`${API}/api/timetables`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           name: newTimetable.name,
+//           student_id: STUDENT_ID,
+//           classes: newTimetable.classes,
+//         }),
+//       });
+//       if (!res.ok) throw new Error("Failed to save timetable");
+//       const saved = await res.json();
+//       setTimetables((prev) => [
+//         { ...saved, classes: saved.classes || [] },
+//         ...prev,
+//       ]);
+//     } catch (err) {
+//       alert(err.message);
+//     }
+//   };
+
+//   // ── Delete timetable from database ───────────────────────────
+//   const handleDelete = async (id) => {
+//     if (!window.confirm("Delete this timetable?")) return;
+//     try {
+//       const res = await fetch(`${API}/api/timetables/${id}`, {
+//         method: "DELETE",
+//       });
+//       if (!res.ok) throw new Error("Failed to delete timetable");
+//       setTimetables((prev) => prev.filter((t) => t.id !== id));
+//     } catch (err) {
+//       alert(err.message);
+//     }
+//   };
+
+//   // ── Render ────────────────────────────────────────────────────
+//   if (loading)
+//     return (
+//       <div className="groups-loading">
+//         <RefreshCw size={20} className="spinner" />
+//         <p>Loading timetables...</p>
+//       </div>
+//     );
+
+//   if (error)
+//     return (
+//       <div className="groups-error">
+//         <AlertCircle size={20} />
+//         <p>{error}</p>
+//         <button className="btn-retry" onClick={fetchTimetables}>
+//           Retry
+//         </button>
+//       </div>
+//     );
+
+//   return (
+//     <div className="timetable-page">
+//       {/* ── Page Header ── */}
+//       <div className="timetable-header">
+//         <div>
+//           <h1>Timetable</h1>
+//           <p>Manage and view your class schedules</p>
+//         </div>
+//         <div style={{ display: "flex", gap: "8px" }}>
+//           <button
+//             className="btn-icon"
+//             onClick={fetchTimetables}
+//             title="Refresh"
+//             style={{ width: "auto", padding: "0 14px" }}
+//           >
+//             <RefreshCw size={16} />
+//           </button>
+//           <button className="btn-create" onClick={() => setShowModal(true)}>
+//             <Plus size={18} /> Add Timetable
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* ── Timetable List ── */}
+//       {timetables.length === 0 ? (
+//         <div className="timetable-empty">
+//           <Clock size={40} color="#d1d5db" />
+//           <p>No timetables yet.</p>
+//           <button className="btn-create" onClick={() => setShowModal(true)}>
+//             <Plus size={16} /> Create your first timetable
+//           </button>
+//         </div>
+//       ) : (
+//         <div className="timetable-list">
+//           {timetables.map((tt) => (
+//             <TimetableGrid key={tt.id} timetable={tt} onDelete={handleDelete} />
+//           ))}
+//         </div>
+//       )}
+
+//       {/* ── Modal ── */}
+//       {showModal && (
+//         <CreateTimetableModal
+//           onClose={() => setShowModal(false)}
+//           onCreated={handleCreated}
+//         />
+//       )}
+//     </div>
+//   );
+// };
 
 export default Timetable;

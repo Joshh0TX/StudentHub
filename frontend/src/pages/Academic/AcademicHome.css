@@ -7,8 +7,10 @@
 
 .academic-layout {
   min-height: 100vh;
+  height: 100vh; /* lock to viewport height */
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* prevent body scroll — only page-content scrolls */
 }
 
 /* ── Header ── */
@@ -118,11 +120,18 @@
 
 /* ── Page Content ── */
 .page-content {
-  flex: 1;
-  padding: 32px;
+  flex: 1; /* fills all remaining height below nav */
   overflow-y: auto;
-  max-width: 100vw;
-  width: 100%;
+  padding: 32px;
+  min-height: 0; /* prevents flex overflow */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make every direct child page fill the full available height */
+.page-content > * {
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Tablet (max 768px) ── */
