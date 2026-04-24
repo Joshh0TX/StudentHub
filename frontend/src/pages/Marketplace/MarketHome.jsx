@@ -109,7 +109,7 @@ export default function MarketHome() {
         {/* Hero */}
         <div className="marketHero">
           <div className="marketHeroContent">
-            <h2 className="marketHeroTitle">Welcome to StudentHub<br />Marketplace</h2>
+            <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
               <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
