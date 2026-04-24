@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { categoriesByType } from "./marketplaceData";
 import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStore } from "./marketplaceApi";
 import { getUser } from "./testUser";
+import API_BASE from "../../config";
 
 const FEATURED_STORES = [
   { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
@@ -100,7 +101,7 @@ export default function MarketHome() {
   ];
   const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
   const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
-  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`) : null;
+  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`) : null;
 
   return (
     <div>
@@ -144,7 +145,7 @@ export default function MarketHome() {
           <div className="popularSliderTrack" ref={sliderRef}>
             {mergedStores.map((store) => {
               const imgSrc = store.image
-                ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`)
+                ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`)
                 : null;
               return (
                 <Link to={`/store/${encodeURIComponent(store.id)}`} className="popularSliderCard" key={store.id}>
@@ -265,7 +266,7 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `http://localhost:5000${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
+              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>

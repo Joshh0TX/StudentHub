@@ -1,6 +1,7 @@
 import { dummyProducts } from "./marketplaceData";
+import API_BASE from "../../config";
 
-const BASE = "http://localhost:5000/api/products";
+const BASE = `${API_BASE}/api/products`;
 
 export const fetchProducts = () =>
   fetch(BASE)

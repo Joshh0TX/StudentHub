@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "./marketplaceApi";
 import { categoriesByType } from "./marketplaceData";
+import API_BASE from "../../config";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -85,7 +86,7 @@ export default function SearchPage() {
           <section className="markettopGird">
             {filtered.map((item) => (
               <Link to={`/marketplace/${item.id}`} key={item.id} className="marketCard" style={{ textDecoration: "none", color: "inherit" }}>
-                {item.images?.[0] && <img src={item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`} alt={item.name} className="marketImage" />}
+                {item.images?.[0] && <img src={item.images[0].startsWith("http") ? item.images[0] : `${API_BASE}${item.images[0]}`} alt={item.name} className="marketImage" />}
                 <div className="marketMeta">
                   <span className="marketTag">{item.type}</span>
                   <span className="marketTag muted">{item.category}</span>
