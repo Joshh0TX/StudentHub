@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "./Login.css";
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -71,11 +74,11 @@ const Login = () => {
 
   return (
     <div className="auth-wrapper">
+      <div className="login-branding">
+         <h1 className="stuudo-logo">stuudo<span>.</span></h1>
+         <p className="login-subtitle">Your campus hub, simplified.</p>
+      </div>
       <div className="auth-card">
-        <h1 className="logo"> Student<span style={{color:'#3B82F6'}}>Hub</span></h1>
-
-        
-
         <form onSubmit={handleSubmit}>
           {!isLogin && (
             <div className="input-group">
@@ -99,25 +102,39 @@ const Login = () => {
             />
           </div>
 
-          <div className="input-group">
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <div className="input-group password-group">
+             <input
+               type={showPassword ? "text" : "password"} // Dynamic type
+               name="password"
+               placeholder="Enter your password"
+               onChange={handleChange}
+               required
+             />
+             <button 
+               type="button" 
+               className="toggle-password"
+               onClick={() => setShowPassword(!showPassword)}
+             >
+               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+             </button>
+           </div>
 
           {!isLogin && (
-            <div className="input-group">
+            <div className="input-group password-group">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} // Using the same state to toggle both
                 name="confirmPassword"
                 placeholder="Confirm password"
                 onChange={handleChange}
                 required
               />
+              <button 
+                type="button" 
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
           )}
 
@@ -138,7 +155,7 @@ const Login = () => {
         <p className="bottom-text">
           {isLogin ? (
             <>
-              New to Students Hub?{" "}
+              New to Stuudo?{" "}
               <span onClick={() => setIsLogin(false)} style={{color:'#3B82F6'}}>
                 Create an account
               </span>

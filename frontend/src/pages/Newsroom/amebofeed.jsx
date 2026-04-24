@@ -1,6 +1,8 @@
 import React from 'react';
-import { Image, Video, BarChart2 } from 'lucide-react';
+import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import './AmeboFeed.css';
+
+
 
 const PostBox = ({ user }) => {
   const displayName = user?.name || "Fred Henry";
@@ -30,15 +32,20 @@ const PostBox = ({ user }) => {
   );
 };
 
+// --- MAIN FEED ---
 export default function AmeboFeed({ user }) {
+  // Sample data to show what it looks like
+
   return (
     <div className="amebo-main-feed">
       <PostBox user={user} />
       
-      {/* Posts list container */}
       <div className="feed-container">
-        {/* Map through posts here later */}
-        <div className="feed-status">No new amebo yet. Start a conversation!</div>
+        {/* We render the sample post here */}
+        
+        
+        {/* Placeholder for more posts */}
+        <div className="feed-status">No more Gist for now.</div>
       </div>
     </div>
   );
