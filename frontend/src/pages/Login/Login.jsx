@@ -34,7 +34,7 @@ const Login = () => {
     alert("Passwords do not match");
     return;
     }
-    const res = await fetch("https://studenthub-zs3y.onrender.com/api/auth/register", {
+    const res = await fetch("https://stuudo.onrender.com/api/auth/register", {
       method: "POST",
       headers: { "Content-Type" : "application/json" },
       body: JSON.stringify(formData),
@@ -53,7 +53,7 @@ const Login = () => {
 
 
   const handleLogin = async () => {
-    const res = await fetch("https://studenthub-zs3y.onrender.com/api/auth/login", {
+    const res = await fetch("https://stuudo.onrender.com/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

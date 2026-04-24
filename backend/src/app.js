@@ -14,8 +14,8 @@ const path = require("path");
 
 const app = express();
 app.use(cors({
-  origin: ["https://student-hub-henna-nu.vercel.app", "http://localhost:5173", "http://localhost:5174"],
-  credentials: true,
+    origin: "https://student-hub-henna-nu.vercel.app",
+    credentials: true,
 }));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
