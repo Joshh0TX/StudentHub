@@ -6,14 +6,14 @@ import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStor
 import { getUser } from "./testUser";
 
 const FEATURED_STORES = [
-  { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f" },
-  { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942" },
-  { id: "s3", name: "Simi's Dispatch", category: "Delivery", bg: "#1a3d2b" },
-  { id: "s4", name: "Josh's Tech Desk", category: "Tech", bg: "#2d1b4e" },
-  { id: "s5", name: "Titi's Mini Mart", category: "Goods", bg: "#3b2a1a" },
-  { id: "s6", name: "Tunde's Treats", category: "Food", bg: "#1a2e3b" },
-  { id: "s7", name: "Sade's Appliances", category: "Appliances", bg: "#2a3b1a" },
-  { id: "s8", name: "Mike's Bookshop", category: "Educational", bg: "#3b1a1a" },
+  { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
+  { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80" },
+  { id: "s3", name: "Simi's Dispatch", category: "Delivery", bg: "#1a3d2b", image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=300&q=80" },
+  { id: "s4", name: "Josh's Tech Desk", category: "Tech", bg: "#2d1b4e", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&q=80" },
+  { id: "s5", name: "Titi's Mini Mart", category: "Goods", bg: "#3b2a1a", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" },
+  { id: "s6", name: "Tunde's Treats", category: "Food", bg: "#1a2e3b", image: "https://images.unsplash.com/photo-1587241321921-91a834d82ffc?w=300&q=80" },
+  { id: "s7", name: "Sade's Appliances", category: "Appliances", bg: "#2a3b1a", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&q=80" },
+  { id: "s8", name: "Mike's Bookshop", category: "Educational", bg: "#3b1a1a", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&q=80" },
 ];
 
 export default function MarketHome() {
@@ -94,6 +94,10 @@ export default function MarketHome() {
   });
 
   const allStores = Array.from(new Map(products.map((p) => [p.store?.id, p.store]).filter(([id]) => id)).values());
+  const mergedStores = [
+    ...allStores.map(s => ({ ...s, image: s.image || FEATURED_STORES.find(f => f.name === s.name)?.image })),
+    ...FEATURED_STORES.filter(f => !allStores.some(s => s.name === f.name)),
+  ];
   const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
   const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
   const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`) : null;
@@ -138,15 +142,22 @@ export default function MarketHome() {
             </div>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
-            {[...allStores, ...FEATURED_STORES.filter(f => !allStores.some(s => s.name === f.name))].map((store) => (
-              <Link to={`/store/${encodeURIComponent(store.id)}`} className="popularSliderCard" key={store.id}>
-                <div className="popularSliderImg">
-                  {storeImg(store) ? <img src={storeImg(store)} alt={store.name} /> : <span>{getInitials(store.name)}</span>}
-                </div>
-                <div className="popularSliderName">{store.name}</div>
-                <div className="popularSliderCat">{store.type || store.category}</div>
-              </Link>
-            ))}
+            {mergedStores.map((store) => {
+              const imgSrc = store.image
+                ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`)
+                : null;
+              return (
+                <Link to={`/store/${encodeURIComponent(store.id)}`} className="popularSliderCard" key={store.id}>
+                  <div className="popularSliderImg">
+                    {imgSrc
+                      ? <img src={imgSrc} alt={store.name} />
+                      : <span>{getInitials(store.name)}</span>}
+                  </div>
+                  <div className="popularSliderName">{store.name}</div>
+                  <div className="popularSliderCat">{store.type || store.category}</div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -254,7 +265,7 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              {item.images?.[0] && <img src={item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`} alt={item.name} className="marketImage" />}
+              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `http://localhost:5000${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>

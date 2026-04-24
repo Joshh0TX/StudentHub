@@ -276,6 +276,7 @@ input[type="button"]:focus-visible {
   padding: 4px 10px;
   font-size: 0.72rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .sellerName {
@@ -491,6 +492,7 @@ input[type="button"]:focus-visible {
 .marketMeta {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
@@ -502,6 +504,7 @@ input[type="button"]:focus-visible {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .marketTag.muted {
