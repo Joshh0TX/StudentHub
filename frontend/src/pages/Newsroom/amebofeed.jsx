@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send } from 'lucide-react';
-import './AmeboFeed.css';
+import './amebofeed.css';
 
 
 
