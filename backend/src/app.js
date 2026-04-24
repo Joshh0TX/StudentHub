@@ -8,21 +8,23 @@ const userRoutes = require('./modules/users/routes');
 const loginRoutes = require('./modules/auth/routes');
 const signupRoutes = require('./modules/auth/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
-
+const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 
 const path = require("path");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "https://student-hub-henna-nu.vercel.app",
+    credentials: true,
+}));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/auth', signupRoutes);
-app.use('/api/auth', loginRoutes);
-
+app.use('/api/auth', require('./modules/auth/routes'));
+app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
 
 const PORT = process.env.PORT || 5000;

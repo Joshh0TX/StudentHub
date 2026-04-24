@@ -4,7 +4,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  height: 55px;
   background: #ffffff;
   border-bottom: 1px solid #edf2f7;
   display: flex;
@@ -16,14 +16,14 @@
 }
 
 /* --- CLICKABLE ANCHORS (Logo & Profile) --- */
-.logo-anchor, 
+.logo-anchor,
 .profile-anchor {
   text-decoration: none;
   color: inherit;
   display: flex;
   align-items: center;
   transition: opacity 0.2s ease;
-  z-index: 10; /* Ensures they stay above the absolute center box */
+  z-index: 10;
 }
 
 .logo-anchor:hover,
@@ -37,7 +37,7 @@
   font-weight: 900;
   color: #1a202c;
   letter-spacing: -2px;
-  font-family: 'Helvetica Neue', sans-serif;
+  font-family: "Helvetica Neue", sans-serif;
   margin: 0;
 }
 
@@ -45,54 +45,46 @@
   color: #3b82f6;
 }
 
-/* --- CENTER NAVIGATION (Absolute Centering Fix) --- */
+/* --- CENTER NAVIGATION (Absolute Centering) --- */
 .header-center {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  pointer-events: none; /* Allows clicks to pass to logo/profile if they overlap */
+  pointer-events: none; 
 }
 
 .icon-hub {
   display: flex;
   gap: 35px;
   align-items: center;
-  pointer-events: auto; /* Re-enables clicks for the nav icons */
+  pointer-events: auto; 
 }
 
-/* --- NAV ICON LINKS --- */
+/* --- NAV ICON LINKS (No Borders, Scale + Color Only) --- */
 .nav-link {
   color: #a0aec0;
-  padding: 8px 16px;
-  border-radius: 99px; /* Pill shape foundation */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
 }
 
-/* Hover State (Not Active) */
 .nav-link:hover:not(.active) {
-  background: #f8fafc;
   color: #3b82f6;
-  padding: 8px 24px;
-  border: 2px solid #e2e8f0;
-  border-radius: 99px;
+  transform: scale(1.1);
 }
 
-/* Active State */
 .nav-link.active {
   color: #3b82f6;
-  background: #eff6ff;
-  border: 2px solid #3b82f6;
-  border-radius: 99px;
-  padding: 8px 32px; /* Increased length for active */
-  transform: scale(1.05);
+  transform: scale(1.4);
+  background: transparent;
+  border: none;
 }
 
-/* --- RIGHT SECTION: PROFILE & TOGGLE --- */
+/* --- RIGHT SECTION: PROFILE & LOGOUT --- */
 .header-right {
   display: flex;
   align-items: center;
@@ -130,46 +122,18 @@
   color: #3b82f6;
 }
 
-/* --- VISIBLE PILL TOGGLE --- */
-.pill-toggle {
-  width: 54px;
-  height: 28px;
-  background: #edf2f7;
-  border-radius: 20px;
-  position: relative;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 6px;
-  transition: background 0.3s ease;
-}
-
-.pill-toggle.is-dark {
-  background: #2d3748;
-}
-
-.toggle-thumb {
-  position: absolute;
-  left: 3px;
-  width: 22px;
-  height: 22px;
-  background: #ffffff;
-  border-radius: 50%;
+/* --- LOGOUT BUTTON --- */
+.logout-btn {
+  color: #a0aec0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 2;
-  color: #3b82f6; /* Sun icon color */
+  text-decoration: none;
+  padding: 8px;
+  transition: all 0.2s ease;
 }
 
-.pill-toggle.is-dark .toggle-thumb {
-  transform: translateX(26px);
-  color: #f6e05e; /* Moon icon color */
-}
-
-.toggle-icon-bg {
-  color: #cbd5e0; /* Colors for the static icons behind the thumb */
+.logout-btn:hover {
+  color: #e53e3e; 
+  transform: scale(1.15); 
 }
