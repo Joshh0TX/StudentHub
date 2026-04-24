@@ -74,7 +74,7 @@ function useProfileData() {
       const fetchProfile = async () => {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("https://stuudo.onrender.com/api/auth/profile", {
+        const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -96,11 +96,12 @@ function useProfileData() {
 function useProfileFetch(setUser) {
   // populate additional data like projects once
   React.useEffect(() => {
-    setUser((prev) =>
+    setUser((prev) => {
+      if (!prev) return prev;
       prev.projects && prev.projects.length > 0
         ? prev
         : ({ ...prev, projects: PROJECTS_DATA.map((p, i) => ({ id: i + 1, ...p })) })
-    );
+  });
   }, [setUser]);
   return setUser;
 }
@@ -737,6 +738,10 @@ function ProfilePage() {
 
   // Data Fetching
   useProfileFetch(setUser);
+
+  if(!user) {
+    return <div>Loading...</div>;
+  }
 
   // Handlers for image upload
   const handleOnCoverChange = (e) =>
