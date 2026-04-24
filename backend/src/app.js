@@ -5,8 +5,6 @@ require('dotenv').config();
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const resourceRoutes = require('./modules/academic/routes/resources.routes');
 const userRoutes = require('./modules/users/routes');
-const loginRoutes = require('./modules/auth/routes');
-const signupRoutes = require('./modules/auth/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 
