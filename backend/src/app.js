@@ -12,7 +12,11 @@ const path = require("path");
 
 const app = express();
 app.use(cors({
-    origin: "https://student-hub-henna-nu.vercel.app",
+    origin: [
+        "https://student-hub-henna-nu.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
     credentials: true,
 }));
 app.use(express.json());

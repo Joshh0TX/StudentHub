@@ -1,0 +1,412 @@
+/* This is the magic that puts Sidebar and Feed next to each other */
+/* --- THE SIDEBAR BOX (No positioning logic here) --- */
+.amebo-sidebar {
+  width: 100%;
+  height: 93%; /* It will now fill the column-left exactly */
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #edf2f7;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+/* --- THE SCROLLABLE INTERNAL PART --- */
+.sidebar-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.sidebar-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* --- THE MINI NAV (Sticky only to its internal container) --- */
+.mini-nav-bar {
+  position: absolute; 
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  z-index: 100;
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.mini-nav-bar.visible {
+  position: sticky; 
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ... keep your ProfileCard, StatsGrid, and List styles below ... */
+.mini-nav-bar button {
+  background: none;
+  border: none; /* Removed the border */
+  padding: 0;
+  cursor: pointer;
+  color: #cbd5e0;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: all 0.2s ease; /* Smooth transition for the color */
+}
+
+
+.mini-nav-bar button:hover svg,
+.mini-nav-bar button.active svg {
+  transform: scale(1.3); 
+  color: #3b82f6;        
+}
+.mini-nav-bar button svg {
+  transition: transform 0.2s ease; 
+  transform-origin: center;        
+  display: block;
+} 
+
+
+/* --- PROFILE HEADER (Locked at top of sidebar) --- */
+.profile-card {
+  flex-shrink: 0;
+  position: relative;
+  text-align: center;
+  z-index: 2;
+  background: white;
+}
+
+.cover-photo {
+  height: 100px;
+  background: #e2e8f0;
+}
+
+.cover-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-wrapper {
+  margin-top: -35px;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-avatar-large {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%; 
+  border: 4px solid #ffffff;
+  object-fit: cover;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.profile-info {
+  padding: 10px 15px 15px;
+}
+
+.profile-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a202c;
+  font-weight: 800;
+}
+
+.profile-info p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+
+/* --- STATS GRID (Changed to scroll naturally) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #fcfcfd;
+  border-top: 1px solid #f1f5f9;
+  
+  /* Change position from sticky to relative or static */
+  position: relative; 
+  top: auto; 
+  z-index: 5;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.stat-box:hover {
+  background: #f8fafc;
+}
+
+.stat-box.active {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.stat-count {
+  font-weight: 800;
+  font-size: 14px;
+  color: #1a202c;
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #a0aec0;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.stat-icon {
+  margin-bottom: 4px;
+  color: #cbd5e0;
+}
+
+.active .stat-icon {
+  color: #3b82f6;
+}
+
+/* --- BUTTON & LIST --- */
+.view-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 15px;
+  padding: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.view-profile-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.dynamic-list-container {
+  padding: 0 15px 20px;
+}
+
+.list-title {
+  font-size: 10px;
+  color: #cbd5e0;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mini-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-img {
+  width: 34px;
+  height: 34px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-name {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.item-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+/* --- FEED WRAPPER GRID --- */
+.amebo-feed-wrapper {
+  display: flex;
+  gap: 24px;
+  flex: 1; /* Takes up remaining space next to your sticky sidebar */
+  max-width: 1100px; /* Limits overall width for readability */
+}
+
+/* --- MAIN CONTENT (Center) --- */
+.amebo-main-content {
+  flex: 0 0 65%; /* This gives it the 60-65% width you wanted */
+  min-width: 500px;
+}
+
+/* --- POST BOX --- */
+.amebo-post-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.post-input-row {
+  display: flex;
+  gap: 15px;
+}
+
+.mini-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-input-row textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  font-size: 1.1rem;
+  color: #1a202c;
+  padding-top: 8px;
+  min-height: 50px;
+}
+
+.post-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #f8fafc;
+}
+
+.action-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.action-icons button {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #718096;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.action-icons button:hover {
+  background: #f1f5f9;
+  color: #3b82f6;
+}
+
+.post-submit-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.post-submit-btn:hover {
+  transform: scale(1.05);
+  background: #2563eb;
+}
+
+/* --- TRENDING SIDEBAR (Right) --- */
+.amebo-trending-sidebar {
+  flex: 1; /* Takes up the remaining 35% */
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: #1a202c;
+}
+
+.trending-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.trending-item:hover {
+  transform: translateX(5px);
+}
+
+.trend-tag {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.trend-count {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  margin-top: 2px;
+}
+
+.feed-placeholder {
+  text-align: center;
+  padding: 40px;
+  color: #a0aec0;
+  border: 2px dashed #edf2f7;
+  border-radius: 20px;
+}

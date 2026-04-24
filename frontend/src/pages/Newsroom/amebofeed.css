@@ -1,0 +1,103 @@
+/* --- COMPACT POST BOX --- */
+.amebo-post-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  padding: 12px 18px; /* Reduced vertical padding from 20px to 12px */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  margin-bottom: 20px;
+  width: 100%; /* Ensures it stretches to the container width */
+}
+
+.post-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: center; /* Centers avatar with the text line */
+}
+
+.mini-avatar {
+  width: 38px; /* Slightly smaller avatar (was 45px) */
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-input-row textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 1rem; /* Slightly smaller text for a sleeker look */
+  font-family: inherit;
+  padding-top: 10px;
+  min-height: 40px; /* Reduced height from 60px to 40px */
+  color: #1e293b;
+}
+
+/* --- TIGHTER ACTIONS ROW --- */
+.post-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px; /* Reduced margin from 15px */
+  padding-top: 8px; /* Reduced padding from 15px */
+  border-top: 1px solid #f1f5f9;
+}
+
+.action-icons {
+  display: flex;
+  gap: 8px; /* Tighter gap between icons */
+}
+
+.action-icons button {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem; /* Smaller font for icons */
+  transition: 0.2s;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.action-icons button:hover {
+  background-color: #f8fafc;
+  color: #3b82f6;
+}
+
+/* --- REDUCED POST BUTTON --- */
+.post-submit-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 16px; /* Smaller button (was 10px 24px) */
+  border-radius: 10px; /* Slightly tighter curves */
+  font-weight: 700;
+  font-size: 0.85rem; /* Smaller text */
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.post-submit-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* --- FEED STATUS --- */
+.feed-status {
+  width: 100%;
+  text-align: center;
+  padding: 60px 40px;
+  color: #94a3b8;
+  font-style: italic;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+}
+
+
+/*For Post*/
