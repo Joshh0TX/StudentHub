@@ -946,10 +946,21 @@ input[type="button"]:focus-visible {
 }
 
 .marketHeroIllustration {
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
-  opacity: 0.9;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  overflow: hidden;
+  border-radius: 0 20px 20px 0;
+}
+
+.marketHeroIllustration img {
+  width: 110%;
+  height: 110%;
+  object-fit: contain;
+  object-position: center bottom;
+  margin-left: 5%;
 }
 
 /* ── Popular Stores Slider ───────────────────────────────── */

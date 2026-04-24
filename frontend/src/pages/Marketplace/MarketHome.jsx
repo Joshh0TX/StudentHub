@@ -5,6 +5,7 @@ import { categoriesByType } from "./marketplaceData";
 import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStore } from "./marketplaceApi";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
+import heroImg from "../../assets/marketplace/hero.png";
 
 const FEATURED_STORES = [
   { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
@@ -118,14 +119,7 @@ export default function MarketHome() {
             </div>
           </div>
           <div className="marketHeroIllustration">
-            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="60" cy="60" r="60" fill="rgba(255,255,255,0.07)" />
-              <circle cx="60" cy="60" r="42" fill="rgba(255,255,255,0.07)" />
-              <path d="M38 48h44l-6 32H44L38 48z" fill="rgba(255,255,255,0.9)" />
-              <path d="M50 48V40a10 10 0 0120 0v8" stroke="rgba(255,255,255,0.9)" strokeWidth="3" strokeLinecap="round" />
-              <circle cx="54" cy="62" r="3" fill="#3b82f6" />
-              <circle cx="66" cy="62" r="3" fill="#3b82f6" />
-            </svg>
+            <img src={heroImg} alt="Marketplace" />
           </div>
         </div>
 
