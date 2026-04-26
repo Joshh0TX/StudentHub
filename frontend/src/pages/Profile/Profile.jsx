@@ -94,18 +94,21 @@ function useProfileData() {
  * Follows Dependency Inversion by abstracting API calls
  */
 function useProfileFetch(setUser) {
-  // populate additional data like projects once
   React.useEffect(() => {
     setUser((prev) => {
       if (!prev) return prev;
-      prev.projects && prev.projects.length > 0
-        ? prev
-        : ({ ...prev, projects: PROJECTS_DATA.map((p, i) => ({ id: i + 1, ...p })) })
-  });
+      return {
+        ...prev,
+        skills: prev.skills || [],
+        interests: prev.interests || [],
+        badges: prev.badges || [],
+        achievements: prev.achievements || [],
+        projects: prev.projects || [],
+        socials: prev.socials || [],
+      };
+    });
   }, [setUser]);
-  return setUser;
 }
-
 /**
  * Hook to handle image file uploads
  * Single Responsibility: handles only file input logic
