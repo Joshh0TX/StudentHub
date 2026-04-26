@@ -726,13 +726,6 @@ function ProfilePage() {
   const { user, setUser } = useProfileData();
   const imageUpload = useImageUpload();
 
-  // Data Fetching
-  useProfileFetch(setUser);
-
-  if(!user) {
-    return <div>Loading...</div>;
-  }
-
   // Handlers for image upload
   const handleOnCoverChange = (e) =>
     imageUpload.onCoverChange(e, setUser);
