@@ -45,7 +45,7 @@ const Login = () => {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error);
+      alert(data.error);
       return;
     }
 
