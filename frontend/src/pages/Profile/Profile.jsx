@@ -70,22 +70,25 @@ function useModalManager() {
  */
 function useProfileData() {
   const [user, setUser] = useState(null);
-    useEffect(() => {
-      const fetchProfile = async () => {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const data = await res.json();
-        setUser(data);
-      };
-
-      fetchProfile();
-    }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setUser({
+        ...data,
+        skills: data.skills || [],
+        interests: data.interests || [],
+        badges: data.badges || [],
+        achievements: data.achievements || [],
+        projects: data.projects || [],
+        socials: data.socials || [],
+      });
+    };
+    fetchProfile();
+  }, []);
   return { user, setUser };
 }
 
@@ -93,22 +96,6 @@ function useProfileData() {
  * Hook to handle profile data fetching
  * Follows Dependency Inversion by abstracting API calls
  */
-function useProfileFetch(setUser) {
-  React.useEffect(() => {
-    setUser((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        skills: prev.skills || [],
-        interests: prev.interests || [],
-        badges: prev.badges || [],
-        achievements: prev.achievements || [],
-        projects: prev.projects || [],
-        socials: prev.socials || [],
-      };
-    });
-  }, [setUser]);
-}
 /**
  * Hook to handle image file uploads
  * Single Responsibility: handles only file input logic
@@ -415,7 +402,7 @@ function ProfileHeader({ user, setIsRequestOpen, socials }) {
   return (
     <div className="profile-main">
       <div className="profile-text">
-        <h1>{user.f_name} (user.l_name)</h1>
+        <h1>{user.f_name} {user.l_name}</h1>
         <p className="profile-course">{user.course || 'Computer Science'}</p>
         <p className="profile-bio">{user.bio || 'Passionate full-stack developer.'}</p>
         <div className="profile-socials-list">
