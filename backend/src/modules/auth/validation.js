@@ -26,10 +26,6 @@ exports.validateRegister = ({ email, password, f_name, l_name }) => {
         throw new Error("Password must contain at least one number");
     }
 
-    if (!name) {
-        throw new Error("Input your name");
-    }
-
     return true;
 };
 
