@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret";
 exports.register = async (data) => {
     validateRegister(data);
 
-    const { email, password, name, department, level } = data;
+    const { email, password, f_name, l_name, department, level } = data;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -29,7 +29,8 @@ exports.register = async (data) => {
         data: {
             email,
             password: hashedPassword,
-            name,
+            f_name,
+            l_name,
             department,
             level,
         },
@@ -48,7 +49,8 @@ exports.register = async (data) => {
         user: {
             id: user.id,
             email: user.email,
-            name: user.name,
+            f_name: user.f_name,
+            l_name: user.l_name,
         },
     };
 };
@@ -87,7 +89,8 @@ exports.login = async ({ email, password }) => {
         user: {
             id: user.id,
             email: user.email,
-            name: user.name,
+            f_name: user.f_name,
+            l_name: user.l_name,
         },
     };
 };

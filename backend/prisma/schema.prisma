@@ -13,10 +13,19 @@ model User {
   password   String
   f_name      String
   l_name      String
-  profilePic String?
+  profileImage String?
+  coverImage String?
   bio        String?
+  location   String?
+  course     String?
   department String?
   level      Int?
+  skills     Json?
+  interests  Json?
+  badges     Json?
+  achievements Json?
+  projects    Json?
+  socials    Json?
   createdAt  DateTime @default(now())
 
   // Academic

@@ -1,5 +1,9 @@
 // Strong but realistic rules
-exports.validateRegister = ({ email, password, name }) => {
+exports.validateRegister = ({ email, password, f_name, l_name }) => {
+    if (!f_name || !l_name) {
+        throw new Error("Input both names");
+    }
+
     if (!email || !password) {
         throw new Error("Email and password are required");
     }
