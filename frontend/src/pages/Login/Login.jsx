@@ -90,12 +90,24 @@ const Login = () => {
             <div className="input-group">
               <input
                 type="text"
-                name="name"
-                placeholder="Full Name"
+                name="f_name"
+                placeholder="First Name"
                 onChange={handleChange}
                 required
               />
             </div>
+          )}
+
+          {!isLogin && (
+            <div className="input-group">
+              <input
+                type="text"
+                name="l_name"
+                placeholder="Last Name"
+                onChange={handleChange}
+                required
+              />
+              </div>
           )}
 
           <div className="input-group">

@@ -412,7 +412,7 @@ function ProfileHeader({ user, setIsRequestOpen, socials }) {
   return (
     <div className="profile-main">
       <div className="profile-text">
-        <h1>{user.name || 'Henry'}</h1>
+        <h1>{user.f_name} (user.l_name)</h1>
         <p className="profile-course">{user.course || 'Computer Science'}</p>
         <p className="profile-bio">{user.bio || 'Passionate full-stack developer.'}</p>
         <div className="profile-socials-list">
