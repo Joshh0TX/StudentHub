@@ -31,7 +31,7 @@ const UserProfile = ({ name, avatarUrl }) => {
 
 
 
-export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Alex Smith" } }) {
+export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred Henry" } }) {
   return (
     <header className="site-header">
       {/* 1. Left Section */}
