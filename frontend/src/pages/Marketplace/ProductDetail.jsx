@@ -3,6 +3,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { fetchProduct, fetchReviews, placeOrder, postReview, toggleFavourite, fetchFavourites } from "./marketplaceApi";
 import { getUser } from "./testUser";
+import API_BASE from "../../config";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -99,7 +100,7 @@ export default function ProductDetail() {
   if (loading) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
   if (notFound) return <Navigate to="/marketplace" replace />;
 
-  const images = item.images?.length ? item.images.map(img => img.startsWith("http") ? img : `http://localhost:5000${img}`) : [];
+  const images = item.images?.length ? item.images.map(img => img.startsWith("http") ? img : `${API_BASE}${img}`) : [];
   const mainImage = images[0] || null;
   const galleryImages = images.length > 1 ? images.slice(1) : [];
   const contacts = item.store?.contacts || [];

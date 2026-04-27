@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { categoriesByType } from "./marketplaceData";
 import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStore } from "./marketplaceApi";
 import { getUser } from "./testUser";
+import API_BASE from "../../config";
+import heroImg from "../../assets/marketplace/hero.png";
 
 const FEATURED_STORES = [
   { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
@@ -100,7 +102,7 @@ export default function MarketHome() {
   ];
   const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
   const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
-  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`) : null;
+  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`) : null;
 
   return (
     <div>
@@ -109,7 +111,7 @@ export default function MarketHome() {
         {/* Hero */}
         <div className="marketHero">
           <div className="marketHeroContent">
-            <h2 className="marketHeroTitle">Welcome to StudentHub<br />Marketplace</h2>
+            <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
               <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
@@ -117,14 +119,7 @@ export default function MarketHome() {
             </div>
           </div>
           <div className="marketHeroIllustration">
-            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="60" cy="60" r="60" fill="rgba(255,255,255,0.07)" />
-              <circle cx="60" cy="60" r="42" fill="rgba(255,255,255,0.07)" />
-              <path d="M38 48h44l-6 32H44L38 48z" fill="rgba(255,255,255,0.9)" />
-              <path d="M50 48V40a10 10 0 0120 0v8" stroke="rgba(255,255,255,0.9)" strokeWidth="3" strokeLinecap="round" />
-              <circle cx="54" cy="62" r="3" fill="#3b82f6" />
-              <circle cx="66" cy="62" r="3" fill="#3b82f6" />
-            </svg>
+            <img src={heroImg} alt="Marketplace" />
           </div>
         </div>
 
@@ -144,7 +139,7 @@ export default function MarketHome() {
           <div className="popularSliderTrack" ref={sliderRef}>
             {mergedStores.map((store) => {
               const imgSrc = store.image
-                ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`)
+                ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`)
                 : null;
               return (
                 <Link to={`/store/${encodeURIComponent(store.id)}`} className="popularSliderCard" key={store.id}>
@@ -265,7 +260,7 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `http://localhost:5000${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
+              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>

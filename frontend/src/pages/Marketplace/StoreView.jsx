@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchProducts, fetchFavourites, toggleFavourite, fetchStoreById } from "./marketplaceApi";
 import { getUser } from "./testUser";
+import API_BASE from "../../config";
 
 export default function StoreView() {
   const { storeId } = useParams();
@@ -69,7 +70,7 @@ export default function StoreView() {
         <div className="storeViewHeaderMain">
           <div className="storeViewAvatar">
             {(storeImage || items[0]?.store?.image)
-              ? (() => { const img = (storeImage || items[0]?.store?.image); const src = img.startsWith("http") ? img : `http://localhost:5000${img}`; return <img src={src} alt={storeName} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />; })()
+              ? (() => { const img = (storeImage || items[0]?.store?.image); const src = img.startsWith("http") ? img : `${API_BASE}${img}`; return <img src={src} alt={storeName} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />; })()
               : storeName.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
           </div>
           <div>
@@ -101,7 +102,7 @@ export default function StoreView() {
         <h2>Top Selling</h2>
         <div className="storeViewGrid">
           {topSelling.map((item) => {
-            const img = item.images?.[0] ? (item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`) : null;
+            const img = item.images?.[0] ? (item.images[0].startsWith("http") ? item.images[0] : `${API_BASE}${item.images[0]}`) : null;
             return (
               <div className="storeProductCard" key={item.id}>
                 {img && <img src={img} alt={item.name} />}
@@ -120,7 +121,7 @@ export default function StoreView() {
         <h2>All Products</h2>
         <div className="storeViewGrid">
           {items.map((item) => {
-            const img = item.images?.[0] ? (item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`) : null;
+            const img = item.images?.[0] ? (item.images[0].startsWith("http") ? item.images[0] : `${API_BASE}${item.images[0]}`) : null;
             return (
               <div className="storeProductCard" key={`all-${item.id}`}>
                 {img && <img src={img} alt={item.name} />}

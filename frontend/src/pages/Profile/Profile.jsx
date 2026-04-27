@@ -70,22 +70,25 @@ function useModalManager() {
  */
 function useProfileData() {
   const [user, setUser] = useState(null);
-    useEffect(() => {
-      const fetchProfile = async () => {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const data = await res.json();
-        setUser(data);
-      };
-
-      fetchProfile();
-    }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setUser({
+        ...data,
+        skills: data.skills || [],
+        interests: data.interests || [],
+        badges: data.badges || [],
+        achievements: data.achievements || [],
+        projects: data.projects || [],
+        socials: data.socials || [],
+      });
+    };
+    fetchProfile();
+  }, []);
   return { user, setUser };
 }
 
@@ -93,19 +96,6 @@ function useProfileData() {
  * Hook to handle profile data fetching
  * Follows Dependency Inversion by abstracting API calls
  */
-function useProfileFetch(setUser) {
-  // populate additional data like projects once
-  React.useEffect(() => {
-    setUser((prev) => {
-      if (!prev) return prev;
-      prev.projects && prev.projects.length > 0
-        ? prev
-        : ({ ...prev, projects: PROJECTS_DATA.map((p, i) => ({ id: i + 1, ...p })) })
-  });
-  }, [setUser]);
-  return setUser;
-}
-
 /**
  * Hook to handle image file uploads
  * Single Responsibility: handles only file input logic
@@ -412,7 +402,7 @@ function ProfileHeader({ user, setIsRequestOpen, socials }) {
   return (
     <div className="profile-main">
       <div className="profile-text">
-        <h1>{user.name || 'Henry'}</h1>
+        <h1>{user.f_name} {user.l_name}</h1>
         <p className="profile-course">{user.course || 'Computer Science'}</p>
         <p className="profile-bio">{user.bio || 'Passionate full-stack developer.'}</p>
         <div className="profile-socials-list">
@@ -736,10 +726,7 @@ function ProfilePage() {
   const { user, setUser } = useProfileData();
   const imageUpload = useImageUpload();
 
-  // Data Fetching
-  useProfileFetch(setUser);
-
-  if(!user) {
+  if (!user) {
     return <div>Loading...</div>;
   }
 

@@ -1,5 +1,9 @@
 // Strong but realistic rules
-exports.validateRegister = ({ email, password, name }) => {
+exports.validateRegister = ({ email, password, f_name, l_name }) => {
+    if (!f_name || !l_name) {
+        throw new Error("Input both names");
+    }
+
     if (!email || !password) {
         throw new Error("Email and password are required");
     }
@@ -20,10 +24,6 @@ exports.validateRegister = ({ email, password, name }) => {
 
     if (!/[0-9]/.test(password)) {
         throw new Error("Password must contain at least one number");
-    }
-
-    if (!name) {
-        throw new Error("Input your name");
     }
 
     return true;

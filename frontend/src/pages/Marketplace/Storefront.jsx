@@ -7,6 +7,7 @@ import {
 } from "./marketplaceApi";
 import { categoriesByType } from "./marketplaceData";
 import { getUser } from "./testUser";
+import API_BASE from "../../config";
 
 export default function Storefront() {
   const user = getUser();
@@ -134,7 +135,7 @@ export default function Storefront() {
   const filteredProducts = categoryFilter === "all" ? products : products.filter((p) => p.category === categoryFilter);
 
   const storeImgUrl = store?.image
-    ? (store.image.startsWith("http") ? store.image : `http://localhost:5000${store.image}`)
+    ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`)
     : null;
 
   if (loading) return <main className="storefrontPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
@@ -211,7 +212,7 @@ export default function Storefront() {
           <div className="productList">
             {filteredProducts.map((item) => {
               const thumb = item.images?.[0]
-                ? (item.images[0].startsWith("http") ? item.images[0] : `http://localhost:5000${item.images[0]}`)
+                ? (item.images[0].startsWith("http") ? item.images[0] : `${API_BASE}${item.images[0]}`)
                 : null;
               return (
                 <div className="productRow" key={item.id}>

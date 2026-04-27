@@ -14,6 +14,7 @@ const app = express();
 app.use(cors({
     origin: [
         "https://student-hub-henna-nu.vercel.app",
+        "https://stuudo.onrender.com",
         "http://localhost:5173",
         "http://localhost:3000",
     ],
