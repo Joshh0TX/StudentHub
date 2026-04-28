@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import './amebofeed.css';
-import PostItem from './PostItem';
+import PostItem from './postItem';
 
 
 
