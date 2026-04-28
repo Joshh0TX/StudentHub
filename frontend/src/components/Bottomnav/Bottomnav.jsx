@@ -55,7 +55,7 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
       {/* 3. Right Section */}
       <div className="header-right">
         <Link to="/profile" className="profile-anchor">
-           <UserProfile name={user.name} avatarUrl={user.avatar} />
+           <UserProfile  avatarUrl={user.avatar} />
         </Link>
         
         <Link to="/" className="logout-btn">

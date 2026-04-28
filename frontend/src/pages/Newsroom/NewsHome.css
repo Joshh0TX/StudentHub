@@ -1,9 +1,10 @@
 /* --- THE MAIN SHELL --- */
 .amebo-shell {
-  background-color: #f8fafc;
-  min-height: 100vh;
+  background-color: transparent; /* Parent .layout already has #f9fafb */
+  min-height: calc(100vh - 64px); /* Subtract nav height */
   display: flex;
   justify-content: center;
+  /* No padding-top here! The .content-area in Layout.js handles it */
 }
 
 /* --- THE GRID CONTAINER --- */
@@ -12,33 +13,42 @@
   width: 100%;
   max-width: 1550px;
   gap: 20px;
-  padding: 5px 15px; /* Creates the outer "floating" gap */
-  align-items: flex-start;
+  padding: 0 15px 24px 15px; /* Added side and bottom padding only */
+  align-items: flex-start; 
 }
 
-/* --- COLUMN 1: LEFT (The Sidebar Wrapper) --- */
+/* --- COLUMN 1: LEFT --- */
 .column-left {
   width: 300px;
   flex-shrink: 0;
   position: sticky;
-  top: 24px; 
-  /* This gives the '93%' something to calculate against */
-  height: calc(100vh - 48px); 
+  /* 64px is the Nav height. We add 20px for a gap = 84px */
+  /* But since .content-area already shifted the whole page down, 
+     we only need enough top to stay visible. */
+  top: 84px; 
+  height: calc(100vh - 84px); 
   z-index: 10;
+  overflow-y: auto;
 }
 
-/* --- COLUMN 2: CENTER (The Feed) --- */
+/* --- COLUMN 2: CENTER --- */
 .column-center {
   flex: 1;
-  min-width: 0; /* Keeps the feed from breaking the layout on small screens */
+  min-width: 0;
 }
 
-/* --- COLUMN 3: RIGHT (The Trending Wrapper) --- */
+/* --- COLUMN 3: RIGHT --- */
 .column-right {
   width: 230px;
   flex-shrink: 0;
   position: sticky;
-  top: 24px;
-  height: calc(100vh - 48px);
+  top: 84px;
+  height: calc(100vh - 84px);
+  overflow-y: auto;
 }
 
+/* Optional: Clean scrollbars for sidebars */
+.column-left::-webkit-scrollbar,
+.column-right::-webkit-scrollbar {
+  display: none;
+}
