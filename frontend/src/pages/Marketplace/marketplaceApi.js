@@ -62,7 +62,15 @@ export const createStore = (data) => {
     else if (key === "contacts") form.append("contacts", JSON.stringify(val));
     else if (val !== undefined && val !== null) form.append(key, val);
   });
-  return fetch(`${BASE}/store`, { method: "POST", body: form }).then((r) => r.json());
+  return fetch(`${BASE}/store`, { method: "POST", body: form })
+    .then((r) => {
+      if (!r.ok) throw new Error(`Server error: ${r.status}`);
+      return r.json();
+    })
+    .catch((err) => {
+      console.error("createStore error:", err);
+      throw err;
+    });
 };
 
 export const updateStore = (id, data) => {

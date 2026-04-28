@@ -5,20 +5,8 @@ const upload = require("../../middleware/upload.middleware");
 
 // ─── STORE ROUTES ─────────────────────────────────────────────────────────────
 
-router.get("/store/:ownerId", async (req, res) => {
-  try {
-    const store = await prisma.store.findUnique({
-      where: { ownerId: req.params.ownerId },
-      include: { contacts: true, products: true },
-    });
-    if (!store) return res.status(404).json({ error: "Store not found" });
-    res.json(store);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // GET store by store ID (for StoreView) — increments visits
+// NOTE: must be defined BEFORE /store/:ownerId to avoid "view" being matched as ownerId
 router.get("/store/view/:storeId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
@@ -27,6 +15,19 @@ router.get("/store/view/:storeId", async (req, res) => {
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
     prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});
+    res.json(store);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/store/:ownerId", async (req, res) => {
+  try {
+    const store = await prisma.store.findUnique({
+      where: { ownerId: req.params.ownerId },
+      include: { contacts: true, products: true },
+    });
+    if (!store) return res.status(404).json({ error: "Store not found" });
     res.json(store);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -143,6 +144,19 @@ router.post("/favourites", async (req, res) => {
   }
 });
 
+// ─── REVIEW ROUTES ────────────────────────────────────────────────────────────
+// NOTE: must be defined BEFORE /:id and /:id/* to avoid "reviews" being matched as a product id
+
+router.delete("/reviews/:id", async (req, res) => {
+  try {
+    await prisma.review.delete({ where: { id: req.params.id } });
+    res.json({ message: "Review deleted" });
+  } catch (error) {
+    if (error.code === "P2025") return res.status(404).json({ error: "Review not found" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── PRODUCT ROUTES ───────────────────────────────────────────────────────────
 
 router.get("/", async (req, res) => {
@@ -155,74 +169,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-router.get("/:id", async (req, res) => {
-  try {
-    const product = await prisma.product.findUnique({
-      where: { id: req.params.id },
-      include: { store: { include: { contacts: true } } },
-    });
-    if (!product) return res.status(404).json({ error: "Product not found" });
-    // increment visits in background, don't block response
-    prisma.product.update({ where: { id: req.params.id }, data: { visits: { increment: 1 } } }).catch(() => {});
-    res.json(product);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.post("/", upload.array("images", 3), async (req, res) => {
-  const { name, description, price, type, category, locations, storeId } = req.body;
-  if (!name || !price || !category || !storeId)
-    return res.status(400).json({ error: "name, price, category and storeId are required" });
-  const images = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
-  try {
-    const product = await prisma.product.create({
-      data: {
-        name, description, price: parseFloat(price), images,
-        type: type || "goods", category,
-        locations: locations ? JSON.parse(locations) : [],
-        storeId,
-      },
-    });
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.put("/:id", upload.array("images", 3), async (req, res) => {
-  const { name, description, price, type, category, locations } = req.body;
-  const newImages = req.files?.length ? req.files.map((f) => `/uploads/${f.filename}`) : undefined;
-  try {
-    const product = await prisma.product.update({
-      where: { id: req.params.id },
-      data: {
-        name, description,
-        price: price ? parseFloat(price) : undefined,
-        type, category,
-        locations: locations ? JSON.parse(locations) : undefined,
-        ...(newImages && { images: newImages }),
-      },
-    });
-    res.json(product);
-  } catch (error) {
-    if (error.code === "P2025") return res.status(404).json({ error: "Product not found" });
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.delete("/:id", async (req, res) => {
-  try {
-    await prisma.product.delete({ where: { id: req.params.id } });
-    res.json({ message: "Product deleted" });
-  } catch (error) {
-    if (error.code === "P2025") return res.status(404).json({ error: "Product not found" });
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ─── REVIEW ROUTES ────────────────────────────────────────────────────────────
 
 router.get("/:id/reviews", async (req, res) => {
   try {
@@ -254,12 +200,68 @@ router.post("/:id/reviews", async (req, res) => {
   }
 });
 
-router.delete("/reviews/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    await prisma.review.delete({ where: { id: req.params.id } });
-    res.json({ message: "Review deleted" });
+    const product = await prisma.product.findUnique({
+      where: { id: req.params.id },
+      include: { store: { include: { contacts: true } } },
+    });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    // increment visits in background, don't block response
+    prisma.product.update({ where: { id: req.params.id }, data: { visits: { increment: 1 } } }).catch(() => {});
+    res.json(product);
   } catch (error) {
-    if (error.code === "P2025") return res.status(404).json({ error: "Review not found" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/", upload.array("images", 4), async (req, res) => {
+  const { name, description, price, type, category, locations, storeId } = req.body;
+  if (!name || !price || !category || !storeId)
+    return res.status(400).json({ error: "name, price, category and storeId are required" });
+  const images = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
+  try {
+    const product = await prisma.product.create({
+      data: {
+        name, description, price: parseFloat(price), images,
+        type: type || "goods", category,
+        locations: locations ? JSON.parse(locations) : [],
+        storeId,
+      },
+    });
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put("/:id", upload.array("images", 4), async (req, res) => {
+  const { name, description, price, type, category, locations } = req.body;
+  const newImages = req.files?.length ? req.files.map((f) => `/uploads/${f.filename}`) : undefined;
+  try {
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: {
+        name, description,
+        price: price ? parseFloat(price) : undefined,
+        type, category,
+        locations: locations ? JSON.parse(locations) : undefined,
+        ...(newImages && { images: newImages }),
+      },
+    });
+    res.json(product);
+  } catch (error) {
+    if (error.code === "P2025") return res.status(404).json({ error: "Product not found" });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    await prisma.product.delete({ where: { id: req.params.id } });
+    res.json({ message: "Product deleted" });
+  } catch (error) {
+    if (error.code === "P2025") return res.status(404).json({ error: "Product not found" });
     res.status(500).json({ error: error.message });
   }
 });

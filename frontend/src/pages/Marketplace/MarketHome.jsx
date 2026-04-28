@@ -7,6 +7,8 @@ import { getUser } from "./testUser";
 import API_BASE from "../../config";
 import heroImg from "../../assets/marketplace/hero.png";
 
+const DEFAULT_PRODUCT_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Crect x='150' y='90' width='100' height='80' rx='8' fill='%23d0d0d0'/%3E%3Ccircle cx='175' cy='115' r='12' fill='%23b0b0b0'/%3E%3Cpolygon points='150,170 185,130 215,155 240,125 270,170' fill='%23c0c0c0'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E`;
+
 const FEATURED_STORES = [
   { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
   { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80" },
@@ -34,7 +36,7 @@ export default function MarketHome() {
   const [storeError, setStoreError] = useState("");
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeForm, setStoreForm] = useState({
-    storeName: "", storeDesc: "", storeType: "goods", storeImage: null,
+    storeName: "", storeDesc: "", storeCategory: "All Categories", storeImage: null,
     contactType: "WhatsApp", contactValue: "", contacts: [],
   });
 
@@ -67,12 +69,12 @@ export default function MarketHome() {
     if (!user) return setStoreError("You must be logged in");
     setStoreError(""); setStoreLoading(true);
     try {
-      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeType, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
+      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeCategory === "All Categories" ? "both" : storeForm.storeCategory, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
       setIsSeller(true);
       setShowStoreForm(false);
       navigate("/storefront");
     } catch (err) {
-      setStoreError(err.message);
+      setStoreError(err.message || "Failed to create store. Make sure the server is running.");
     } finally {
       setStoreLoading(false);
     }
@@ -87,13 +89,15 @@ export default function MarketHome() {
 
   const allCategories = Array.from(new Set([...categoriesByType.goods, ...categoriesByType.services]));
 
-  const filteredItems = products.filter((item) => {
-    const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase()) || item.store?.name?.toLowerCase().includes(query.toLowerCase());
-    const matchesType = typeFilter === "all" || item.type === typeFilter;
-    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
-    const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
-    return matchesQuery && matchesType && matchesCategory && matchesLocation;
-  });
+  const filteredItems = products
+    .filter((item) => {
+      const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase()) || item.store?.name?.toLowerCase().includes(query.toLowerCase());
+      const matchesType = typeFilter === "all" || item.type === typeFilter;
+      const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+      const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
+      return matchesQuery && matchesType && matchesCategory && matchesLocation;
+    })
+    .sort((a, b) => ((b.visits ?? 0) + (b.orders ?? 0)) - ((a.visits ?? 0) + (a.orders ?? 0)));
 
   const allStores = Array.from(new Map(products.map((p) => [p.store?.id, p.store]).filter(([id]) => id)).values());
   const mergedStores = [
@@ -115,7 +119,10 @@ export default function MarketHome() {
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
               <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
-              <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
+              {isSeller
+                ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
+                : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
+              }
             </div>
           </div>
           <div className="marketHeroIllustration">
@@ -171,11 +178,12 @@ export default function MarketHome() {
                   <label>Store Description<textarea name="storeDesc" rows="3" value={storeForm.storeDesc} onChange={handleStoreChange} required /></label>
                   <label>Store Profile Photo (optional)<input name="storeImage" type="file" accept="image/*" onChange={handleStoreChange} /></label>
                   <label>
-                    Store Type
-                    <select name="storeType" value={storeForm.storeType} onChange={handleStoreChange}>
-                      <option value="goods">Goods</option>
-                      <option value="services">Services</option>
-                      <option value="both">Both</option>
+                    Store Category
+                    <select name="storeCategory" value={storeForm.storeCategory} onChange={handleStoreChange}>
+                      <option value="All Categories">All Categories</option>
+                      {[...categoriesByType.goods, ...categoriesByType.services].map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </label>
                   <label>
@@ -260,7 +268,11 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
+              <img
+                src={item.images?.[0] ? (typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]) : DEFAULT_PRODUCT_IMG}
+                alt={item.name}
+                className="marketImage"
+              />
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>
