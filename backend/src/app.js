@@ -8,8 +8,6 @@ const userRoutes = require('./modules/users/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 
-const path = require("path");
-
 const app = express();
 app.use(cors({
     origin: [
@@ -21,6 +19,7 @@ app.use(cors({
     ],
     credentials: true,
 }));
+app.use(express.json());
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);

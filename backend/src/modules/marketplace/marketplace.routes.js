@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const prisma = require("../../config/prisma");
 const upload = require("../../middleware/upload.middleware");
+const { uploadToSupabase } = require("../../middleware/upload.middleware");
 
 // ─── STORE ROUTES ─────────────────────────────────────────────────────────────
 
@@ -38,8 +39,8 @@ router.post("/store", upload.single("image"), async (req, res) => {
   const { name, description, type, ownerId, contacts } = req.body;
   if (!name || !ownerId)
     return res.status(400).json({ error: "name and ownerId are required" });
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
   try {
+    const image = req.file ? await uploadToSupabase(req.file) : null;
     const store = await prisma.store.create({
       data: { name, description, type: type || "goods", image, ownerId, contacts: { create: contacts ? JSON.parse(contacts) : [] } },
       include: { contacts: true },
@@ -52,8 +53,8 @@ router.post("/store", upload.single("image"), async (req, res) => {
 
 router.put("/store/:id", upload.single("image"), async (req, res) => {
   const { name, description, type, contacts } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : undefined;
   try {
+    const image = req.file ? await uploadToSupabase(req.file) : undefined;
     const store = await prisma.store.update({
       where: { id: req.params.id },
       data: {
@@ -90,7 +91,7 @@ router.get("/orders/store/:storeId", async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
       where: { product: { storeId: req.params.storeId } },
-      include: { product: true, buyer: { select: { id: true, name: true } } },
+      include: { product: true, buyer: { select: { id: true, f_name: true, l_name: true } } },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders);
@@ -174,7 +175,7 @@ router.get("/:id/reviews", async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
       where: { productId: req.params.id },
-      include: { user: { select: { id: true, name: true } } },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
       orderBy: { createdAt: "desc" },
     });
     res.json(reviews);
@@ -190,7 +191,7 @@ router.post("/:id/reviews", async (req, res) => {
   try {
     const review = await prisma.review.create({
       data: { productId: req.params.id, userId, text },
-      include: { user: { select: { id: true, name: true } } },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
     });
     res.status(201).json(review);
   } catch (error) {
@@ -207,7 +208,6 @@ router.get("/:id", async (req, res) => {
       include: { store: { include: { contacts: true } } },
     });
     if (!product) return res.status(404).json({ error: "Product not found" });
-    // increment visits in background, don't block response
     prisma.product.update({ where: { id: req.params.id }, data: { visits: { increment: 1 } } }).catch(() => {});
     res.json(product);
   } catch (error) {
@@ -219,8 +219,10 @@ router.post("/", upload.array("images", 4), async (req, res) => {
   const { name, description, price, type, category, locations, storeId } = req.body;
   if (!name || !price || !category || !storeId)
     return res.status(400).json({ error: "name, price, category and storeId are required" });
-  const images = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
   try {
+    const images = req.files?.length
+      ? await Promise.all(req.files.map((f) => uploadToSupabase(f)))
+      : [];
     const product = await prisma.product.create({
       data: {
         name, description, price: parseFloat(price), images,
@@ -237,8 +239,10 @@ router.post("/", upload.array("images", 4), async (req, res) => {
 
 router.put("/:id", upload.array("images", 4), async (req, res) => {
   const { name, description, price, type, category, locations } = req.body;
-  const newImages = req.files?.length ? req.files.map((f) => `/uploads/${f.filename}`) : undefined;
   try {
+    const newImages = req.files?.length
+      ? await Promise.all(req.files.map((f) => uploadToSupabase(f)))
+      : undefined;
     const product = await prisma.product.update({
       where: { id: req.params.id },
       data: {
