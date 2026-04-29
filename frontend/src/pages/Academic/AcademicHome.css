@@ -31,20 +31,8 @@
   gap: 12px;
 }
 
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.brand-name {
-  font-size: 20px;
-  font-weight: bolder;
-  color: #111827;
-}
-
 .brand-sub {
-  font-size: 15px;
+  font-size: 16px;
   color: #6b7280;
 }
 
@@ -99,7 +87,7 @@
   align-items: center;
   gap: 6px;
   padding: 14px 16px;
-  font-size: 18px;
+  font-size: 16px;
   color: #6b7280;
   text-decoration: none;
   border-bottom: 2px solid transparent;

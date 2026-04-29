@@ -7,8 +7,11 @@ import {
   Edit2,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import "./Timetable.css";
+import { useAuth } from "../../context/AuthContext";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -493,20 +496,107 @@ const TimetableGrid = ({ timetable, onDelete }) => {
   );
 };
 
-// ── Main Component ────────────────────────────────────────────────
+// ── Main Component (Database Version) ────────────────────────────
 const Timetable = () => {
   const [timetables, setTimetables] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { user } = useAuth();
 
-  const handleCreated = (newTimetable) => {
-    setTimetables((prev) => [newTimetable, ...prev]);
-  };
+  // ── Fetch timetables from database ───────────────────────────
+  const fetchTimetables = useCallback(async () => {
+    if (!user?.id) return; // guard — do nothing if user not loaded yet
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API}/api/timetables?student_id=${user.id}`);
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
 
-  const handleDelete = (id) => {
-    if (window.confirm("Delete this timetable?")) {
-      setTimetables((prev) => prev.filter((t) => t.id !== id));
+      const normalised = data.map((tt) => ({
+        ...tt,
+        classes: (tt.classes || []).filter((c) => c.id !== null),
+      }));
+
+      setTimetables(normalised);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]); // re-runs if user.id changes
+
+  useEffect(() => {
+    fetchTimetables();
+  }, [fetchTimetables]);
+
+  // ── Post new timetable to database ───────────────────────────
+  const handleCreated = async (newTimetable) => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`${API}/api/timetables`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newTimetable.name,
+          student_id: user.id, // ← direct
+          classes: newTimetable.classes,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save timetable");
+      const saved = await res.json();
+      setTimetables((prev) => [
+        { ...saved, classes: saved.classes || [] },
+        ...prev,
+      ]);
+    } catch (err) {
+      alert(err.message);
     }
   };
+
+  // ── Delete timetable from database ───────────────────────────
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this timetable?")) return;
+    try {
+      const res = await fetch(`${API}/api/timetables/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete timetable");
+      setTimetables((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // ── Guard — user not loaded yet ───────────────────────────────
+  if (!user)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading user...</p>
+      </div>
+    );
+
+  // ── Render ────────────────────────────────────────────────────
+  if (loading)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading timetables...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>{error}</p>
+        <button className="btn-retry" onClick={fetchTimetables}>
+          Retry
+        </button>
+      </div>
+    );
 
   return (
     <div className="timetable-page">
@@ -516,9 +606,19 @@ const Timetable = () => {
           <h1>Timetable</h1>
           <p>Manage and view your class schedules</p>
         </div>
-        <button className="btn-create" onClick={() => setShowModal(true)}>
-          <Plus size={18} /> Add Timetable
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            className="btn-icon"
+            onClick={fetchTimetables}
+            title="Refresh"
+            style={{ width: "auto", padding: "0 14px" }}
+          >
+            <RefreshCw size={16} />
+          </button>
+          <button className="btn-create" onClick={() => setShowModal(true)}>
+            <Plus size={18} /> Add Timetable
+          </button>
+        </div>
       </div>
 
       {/* ── Timetable List ── */}
@@ -526,7 +626,7 @@ const Timetable = () => {
         <div className="timetable-empty">
           <Clock size={40} color="#d1d5db" />
           <p>No timetables yet.</p>
-          <button className="btn-tcreate" onClick={() => setShowModal(true)}>
+          <button className="btn-create" onClick={() => setShowModal(true)}>
             <Plus size={16} /> Create your first timetable
           </button>
         </div>
@@ -548,148 +648,5 @@ const Timetable = () => {
     </div>
   );
 };
-// ── Main Component (Database Version) ────────────────────────────
-// const Timetable = () => {
-//   const [timetables, setTimetables] = useState([]);
-//   const [showModal, setShowModal] = useState(false);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   const STUDENT_ID = 1; // replace with real auth id
-
-//   // ── Fetch timetables from database ───────────────────────────
-//   const fetchTimetables = useCallback(async () => {
-//     setLoading(true);
-//     setError(null);
-//     try {
-//       const res = await fetch(`${API}/api/timetables?student_id=${STUDENT_ID}`);
-//       if (!res.ok) throw new Error(`Server error: ${res.status}`);
-//       const data = await res.json();
-
-//       // Normalise classes array — guard against null from LEFT JOIN
-//       const normalised = data.map((tt) => ({
-//         ...tt,
-//         classes: (tt.classes || []).filter((c) => c.id !== null),
-//       }));
-
-//       setTimetables(normalised);
-//     } catch (err) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     fetchTimetables();
-//   }, [fetchTimetables]);
-
-//   // ── Post new timetable to database ───────────────────────────
-//   const handleCreated = async (newTimetable) => {
-//     try {
-//       const res = await fetch(`${API}/api/timetables`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           name: newTimetable.name,
-//           student_id: STUDENT_ID,
-//           classes: newTimetable.classes,
-//         }),
-//       });
-//       if (!res.ok) throw new Error("Failed to save timetable");
-//       const saved = await res.json();
-//       setTimetables((prev) => [
-//         { ...saved, classes: saved.classes || [] },
-//         ...prev,
-//       ]);
-//     } catch (err) {
-//       alert(err.message);
-//     }
-//   };
-
-//   // ── Delete timetable from database ───────────────────────────
-//   const handleDelete = async (id) => {
-//     if (!window.confirm("Delete this timetable?")) return;
-//     try {
-//       const res = await fetch(`${API}/api/timetables/${id}`, {
-//         method: "DELETE",
-//       });
-//       if (!res.ok) throw new Error("Failed to delete timetable");
-//       setTimetables((prev) => prev.filter((t) => t.id !== id));
-//     } catch (err) {
-//       alert(err.message);
-//     }
-//   };
-
-//   // ── Render ────────────────────────────────────────────────────
-//   if (loading)
-//     return (
-//       <div className="groups-loading">
-//         <RefreshCw size={20} className="spinner" />
-//         <p>Loading timetables...</p>
-//       </div>
-//     );
-
-//   if (error)
-//     return (
-//       <div className="groups-error">
-//         <AlertCircle size={20} />
-//         <p>{error}</p>
-//         <button className="btn-retry" onClick={fetchTimetables}>
-//           Retry
-//         </button>
-//       </div>
-//     );
-
-//   return (
-//     <div className="timetable-page">
-//       {/* ── Page Header ── */}
-//       <div className="timetable-header">
-//         <div>
-//           <h1>Timetable</h1>
-//           <p>Manage and view your class schedules</p>
-//         </div>
-//         <div style={{ display: "flex", gap: "8px" }}>
-//           <button
-//             className="btn-icon"
-//             onClick={fetchTimetables}
-//             title="Refresh"
-//             style={{ width: "auto", padding: "0 14px" }}
-//           >
-//             <RefreshCw size={16} />
-//           </button>
-//           <button className="btn-create" onClick={() => setShowModal(true)}>
-//             <Plus size={18} /> Add Timetable
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* ── Timetable List ── */}
-//       {timetables.length === 0 ? (
-//         <div className="timetable-empty">
-//           <Clock size={40} color="#d1d5db" />
-//           <p>No timetables yet.</p>
-//           <button className="btn-create" onClick={() => setShowModal(true)}>
-//             <Plus size={16} /> Create your first timetable
-//           </button>
-//         </div>
-//       ) : (
-//         <div className="timetable-list">
-//           {timetables.map((tt) => (
-//             <TimetableGrid key={tt.id} timetable={tt} onDelete={handleDelete} />
-//           ))}
-//         </div>
-//       )}
-
-//       {/* ── Modal ── */}
-//       {showModal && (
-//         <CreateTimetableModal
-//           onClose={() => setShowModal(false)}
-//           onCreated={handleCreated}
-//         />
-//       )}
-//     </div>
-//   );
-// };
 
 export default Timetable;
