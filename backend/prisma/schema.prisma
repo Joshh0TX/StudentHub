@@ -42,6 +42,7 @@ model User {
   pastQuestions PastQuestion[]
   studyGroups   StudyGroup[]
   GroupMember   StudyGroupMember[]
+  assignments Assignment[]
 
   // Marketplace
   store      Store?
@@ -85,13 +86,14 @@ model Assignment {
   createdBy   String
   createdAt   DateTime @default(now())
 
+  creator User @relation(fields: [createdBy], references: [id])
   course Course @relation(fields: [courseId], references: [id])
 }
 
 model Timetable {
   id        Int              @id @default(autoincrement())
   name      String           @db.VarChar(100)
-  studentId Int?
+  studentId String?
   createdAt DateTime         @default(now())
   classes   TimetableClass[]
 }

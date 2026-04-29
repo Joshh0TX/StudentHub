@@ -25,8 +25,14 @@ const getResources = async (req, res) => {
       orderBy: [{ courseCode: "asc" }, { createdAt: "desc" }],
       include: {
         uploader: {
-          select: { id: true, name: true, profilePic: true },
-        },
+          select: {
+            id: true,
+            f_name: true,
+            l_name: true,
+            profileImage: true,
+            email: true,
+          }
+        }
       },
     });
 
@@ -118,7 +124,15 @@ const createResource = async (req, res) => {
         uploadedBy,
       },
       include: {
-        uploader: { select: { id: true, name: true } },
+        uploader: {
+          select: {
+            id: true,
+            f_name: true,
+            l_name: true,
+            profileImage: true,
+            email: true,
+          }
+        }
       },
     });
 

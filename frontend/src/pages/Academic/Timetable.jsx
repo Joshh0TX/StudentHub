@@ -497,6 +497,7 @@ const TimetableGrid = ({ timetable, onDelete }) => {
 };
 
 // ── Main Component (Database Version) ────────────────────────────
+// ── Main Component (Database Version) ────────────────────────────
 const Timetable = () => {
   const [timetables, setTimetables] = useState([]);
   const [showModal, setShowModal] = useState(false);

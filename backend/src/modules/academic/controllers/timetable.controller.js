@@ -9,7 +9,7 @@ const getTimetables = async (req, res) => {
 
   try {
     const timetables = await prisma.timetable.findMany({
-      where: { studentId: parseInt(student_id) },
+      where: { studentId:student_id },
       include: {
         classes: {
           orderBy: [{ day: "asc" }, { startTime: "asc" }],
@@ -36,7 +36,7 @@ const createTimetable = async (req, res) => {
     const timetable = await prisma.timetable.create({
       data: {
         name,
-        studentId: student_id ? parseInt(student_id) : null,
+        studentId: student_id ??  null,
         classes: {
           create: classes.map((cls) => ({
             subject: cls.subject,

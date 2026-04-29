@@ -21,9 +21,6 @@ app.use(cors({
     ],
     credentials: true,
 }));
-app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);
