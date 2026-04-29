@@ -21,6 +21,7 @@ export default function Storefront() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formError, setFormError] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
   const [product, setProduct] = useState({
     name: "", desc: "", price: "", type: "goods", category: "Food", locations: "", images: [],
   });
@@ -42,6 +43,13 @@ export default function Storefront() {
       .finally(() => setLoading(false));
   }, []);
 
+  const refreshOrders = () => {
+    if (!store) return;
+    fetchStoreOrders(store.id)
+      .then((o) => setOrders(Array.isArray(o) ? o : []))
+      .catch(console.error);
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "images") {
@@ -54,6 +62,7 @@ export default function Storefront() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
+    setFormLoading(true);
     const payload = {
       name: product.name,
       description: product.desc,
@@ -78,6 +87,8 @@ export default function Storefront() {
       setShowProductForm(false);
     } catch (err) {
       setFormError(err.message || "Something went wrong");
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -342,8 +353,10 @@ export default function Storefront() {
                     )}
                   </label>
                   <div className="storefrontModalActions">
-                    <button type="submit" className="submitButton">{editingId ? "Save Changes" : "Post Product"}</button>
-                    <button type="button" className="btnOutline" onClick={closeProductForm}>Cancel</button>
+                    <button type="submit" className="submitButton" disabled={formLoading}>
+                      {formLoading ? "Saving..." : (editingId ? "Save Changes" : "Post Product")}
+                    </button>
+                    <button type="button" className="btnOutline" onClick={closeProductForm} disabled={formLoading}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -353,14 +366,17 @@ export default function Storefront() {
 
         {/* ── Orders ── */}
         <section className="storefrontCard">
-          <h2>Orders</h2>
+          <div className="storefrontCardHeader">
+            <h2 style={{ margin: 0 }}>Orders</h2>
+            <button type="button" className="btnOutline" style={{ fontSize: "0.8rem", padding: "5px 12px" }} onClick={refreshOrders}>↻ Refresh</button>
+          </div>
           <div className="orderList">
             {orders.map((order) => (
               <div className="orderRow" key={order.id}>
                 <div style={{ flex: 1 }}>
                   <div className="orderTitle">{order.product?.name || "Product"}</div>
                   <div className="orderMeta">
-                    {order.buyer?.name || "Buyer"} · {order.location || "No location"} · Qty: {order.quantity}
+                    {order.buyer ? `${order.buyer.f_name} ${order.buyer.l_name}` : "Buyer"} · {order.location || "No location"} · Qty: {order.quantity}
                   </div>
                   {order.note && <div className="noteMeta" style={{ fontStyle: "italic", color: "#888", fontSize: "0.8rem" }}>"{order.note}"</div>}
                   {order.deliveryTime && <div style={{ fontSize: "0.78rem", color: "#aaa" }}>Delivery: {order.deliveryTime}</div>}

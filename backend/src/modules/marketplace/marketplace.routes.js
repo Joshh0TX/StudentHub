@@ -91,7 +91,7 @@ router.get("/orders/store/:storeId", async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
       where: { product: { storeId: req.params.storeId } },
-      include: { product: true, buyer: { select: { id: true, name: true } } },
+      include: { product: true, buyer: { select: { id: true, f_name: true, l_name: true } } },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders);
@@ -175,7 +175,7 @@ router.get("/:id/reviews", async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
       where: { productId: req.params.id },
-      include: { user: { select: { id: true, name: true } } },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
       orderBy: { createdAt: "desc" },
     });
     res.json(reviews);
@@ -191,7 +191,7 @@ router.post("/:id/reviews", async (req, res) => {
   try {
     const review = await prisma.review.create({
       data: { productId: req.params.id, userId, text },
-      include: { user: { select: { id: true, name: true } } },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
     });
     res.status(201).json(review);
   } catch (error) {

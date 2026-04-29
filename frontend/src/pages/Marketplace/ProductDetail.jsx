@@ -232,7 +232,7 @@ export default function ProductDetail() {
           <div className="reviewList">
             {reviews.map((review) => (
               <div className="reviewCard" key={review.id || `${review.userId}-${review.text}`}>
-                <div className="reviewName">{review.user?.name || "Anonymous"}</div>
+                <div className="reviewName">{review.user ? `${review.user.f_name} ${review.user.l_name}` : "Anonymous"}</div>
                 <div className="reviewText">{review.text}</div>
               </div>
             ))}
