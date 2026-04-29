@@ -1,7 +1,7 @@
 import "./ProductDetail.css";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { fetchProduct, fetchReviews, placeOrder, postReview } from "./marketplaceApi";
+import { fetchProduct, fetchReviews, fetchProducts, placeOrder, postReview } from "./marketplaceApi";
 import { dummyProducts } from "./marketplaceData";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
@@ -14,6 +14,7 @@ export default function ProductDetail() {
 
   const [item, setItem] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
 
@@ -40,6 +41,16 @@ export default function ProductDetail() {
         } else {
           setItem(productData);
           setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+          // fetch similar products — same category, different product
+          fetchProducts()
+            .then((all) => {
+              const similar = all
+                .filter((p) => p.id !== productId && p.category === productData.category)
+                .sort((a, b) => ((b.visits ?? 0) + (b.orders ?? 0)) - ((a.visits ?? 0) + (a.orders ?? 0)))
+                .slice(0, 6);
+              setSimilarProducts(similar);
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {
@@ -241,6 +252,30 @@ export default function ProductDetail() {
           </form>
         )}
       </section>
+
+      {/* Similar Products */}
+      {similarProducts.length > 0 && (
+        <section className="similarProductsSection">
+          <h2>Similar Products</h2>
+          <div className="similarProductsGrid">
+            {similarProducts.map((product) => {
+              const img = product.images?.[0]
+                ? (product.images[0].startsWith("http") ? product.images[0] : `${API_BASE}${product.images[0]}`)
+                : DEFAULT_PRODUCT_IMG;
+              return (
+                <Link to={`/marketplace/${product.id}`} className="similarProductCard" key={product.id}>
+                  <img src={img} alt={product.name} className="similarProductImg" />
+                  <div className="similarProductInfo">
+                    <div className="similarProductName">{product.name}</div>
+                    <div className="similarProductPrice">₦{product.price}</div>
+                    <div className="similarProductStore">{product.store?.name}</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
