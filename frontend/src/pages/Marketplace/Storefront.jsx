@@ -113,6 +113,7 @@ export default function Storefront() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product? This can't be undone.")) return;
     try {
       await deleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));

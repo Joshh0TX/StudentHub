@@ -210,7 +210,7 @@ export default function MarketHome() {
                   </label>
                   <div className="storeModalActions">
                     <button className="submitButton" type="submit" disabled={storeLoading}>{storeLoading ? "Creating..." : "Create Store"}</button>
-                    <button className="btnOutline" type="button" onClick={() => setShowStoreForm(false)}>Cancel</button>
+                    <button className="btnOutline" type="button" onClick={() => setShowStoreForm(false)} disabled={storeLoading}>Cancel</button>
                   </div>
                 </form>
               </div>

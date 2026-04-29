@@ -152,6 +152,10 @@ export default function ProductDetail() {
             <span className="marketTag">{item.type}</span>
             <span className="marketTag muted">{item.category}</span>
           </div>
+          <div className="productDetailStats">
+            <span>👁 {item.visits ?? 0} views</span>
+            <span>🛒 {item._count?.orders ?? 0} orders</span>
+          </div>
           <h1>{item.name}</h1>
           <p className="productDetailPrice">₦{item.price}</p>
           <p className="productDetailDesc">{item.description}</p>

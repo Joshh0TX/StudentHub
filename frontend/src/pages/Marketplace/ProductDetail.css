@@ -129,6 +129,14 @@
   flex-wrap: wrap;
 }
 
+.productDetailStats {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--muted-foreground);
+}
+
 .productDetailMeta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
