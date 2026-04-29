@@ -28,43 +28,82 @@
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
-.productDetailMedia img {
+.productMainImgWrap {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.productMainImg {
   width: 100%;
-  height: 260px;
+  height: 300px;
   object-fit: cover;
   border-radius: 14px;
+  display: block;
+}
+
+.imgArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 150ms;
+  padding: 0;
+}
+
+.imgArrow:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%);
+  box-shadow: none;
+}
+
+.imgArrowLeft { left: 10px; }
+.imgArrowRight { right: 10px; }
+
+.productDetailMedia {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .productDetailGallery {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  width: 80px;
+  flex-shrink: 0;
 }
 
-.productDetailGallery img,
-.productDetailThumbPlaceholder {
-  width: 100%;
-  height: 84px;
+.productThumb {
+  width: 80px;
+  height: 72px;
   object-fit: cover;
   border-radius: 10px;
-  background: var(--muted);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 150ms, opacity 150ms;
+  opacity: 0.7;
 }
 
-.productDetailThumbPlaceholder {
-  display: grid;
-  place-items: center;
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
+.productThumb:hover {
+  opacity: 1;
 }
 
-.productDetailPlaceholder {
-  height: 260px;
-  border-radius: 14px;
-  background: var(--muted);
-  display: grid;
-  place-items: center;
-  color: var(--muted-foreground);
+.productThumbActive {
+  border-color: var(--primary);
+  opacity: 1;
 }
 
 .productDetailInfo h1 {
@@ -117,6 +156,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  align-items: center;
 }
 
 .productDetailActions button {
@@ -126,6 +166,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  margin: 0;
 }
 
 .orderForm {

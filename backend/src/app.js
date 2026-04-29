@@ -17,12 +17,10 @@ app.use(cors({
         "https://stuudo.onrender.com",
         "http://localhost:5173",
         "http://localhost:5174",
+        "http://localhost:3000",
     ],
     credentials: true,
 }));
-app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);

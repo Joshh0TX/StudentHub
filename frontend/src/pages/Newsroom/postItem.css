@@ -1,0 +1,153 @@
+.amebo-post-item {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
+}
+
+/* Header */
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-meta .user-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.post-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.more-options {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.more-options:hover {
+  background-color: #f1f5f9;
+}
+
+/* Body */
+.post-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #334155;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+.post-media img {
+  width: 100%;
+  border-radius: 12px;
+  max-height: 450px;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+/* Interaction Bar */
+.post-interactions {
+  display: flex;
+  gap: 20px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.interact-btn {
+  background: none;
+  border: none !important;      /* Removes any explicit borders */
+  outline: none !important;     /* Removes the browser focus ring */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: none !important;  /* Removes any shadows that look like borders */
+}
+
+.interact-btn:hover {
+  background-color: transparent !important; 
+  color: #3b82f6; /* Only the text and icon change color */
+}
+.interact-btn.active-like:hover {
+  background-color: transparent !important;
+  color: #ef4444;
+}
+
+/* Subtle animation when clicking */
+.interact-btn:active {
+  transform: scale(0.9);
+}
+
+/* Comment Input Section */
+.post-comment-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.comment-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-form {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 25px;
+  padding: 2px 14px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.comment-form:focus-within {
+  background: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.comment-form input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.comment-send-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+}
