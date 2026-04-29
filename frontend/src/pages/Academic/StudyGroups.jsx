@@ -268,21 +268,21 @@ const StudyGroups = () => {
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [joiningId, setJoiningId] = useState(null); // tracks which group is being joined
-  const [departmentId, setDepartmentId] = useState(null);
+  // const [departmentId, setDepartmentId] = useState(null);
 
   // ── Fetch department ID from program name ─────────────────────
   // Needed so the POST body can send a valid department_id foreign key
-  const fetchDepartmentId = useCallback(async (program) => {
-    try {
-      const data = await apiFetch(
-        `/api/departments?name=${encodeURIComponent(program)}`,
-      );
-      // API returns array — take the first match
-      if (data.length > 0) setDepartmentId(data[0].id);
-    } catch (err) {
-      console.error("Could not fetch department ID:", err.message);
-    }
-  }, []);
+  // const fetchDepartmentId = useCallback(async (program) => {
+  //   try {
+  //     const data = await apiFetch(
+  //       `/api/departments?name=${encodeURIComponent(program)}`,
+  //     );
+  //     // API returns array — take the first match
+  //     if (data.length > 0) setDepartmentId(data[0].id);
+  //   } catch (err) {
+  //     console.error("Could not fetch department ID:", err.message);
+  //   }
+  // }, []);
 
   // ── Fetch all groups + student's joined groups ────────────────
   const fetchGroups = useCallback(async () => {
@@ -321,8 +321,8 @@ const StudyGroups = () => {
   // Re-fetch whenever program or year changes
   useEffect(() => {
     fetchGroups();
-    fetchDepartmentId(selectedProgram);
-  }, [fetchGroups, fetchDepartmentId, selectedProgram]);
+    // fetchDepartmentId(selectedProgram);
+  }, [fetchGroups, selectedProgram]);
 
   // ── Join a group ──────────────────────────────────────────────
   const handleJoin = async (groupId) => {
@@ -447,7 +447,7 @@ const StudyGroups = () => {
           onCreated={handleCreated}
           selectedProgram={selectedProgram}
           selectedYear={selectedYear}
-          departmentId={departmentId}
+          // departmentId={departmentId}
         />
       )}
     </div>
