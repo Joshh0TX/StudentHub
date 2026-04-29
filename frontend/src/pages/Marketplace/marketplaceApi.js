@@ -63,9 +63,10 @@ export const createStore = (data) => {
     else if (val !== undefined && val !== null) form.append(key, val);
   });
   return fetch(`${BASE}/store`, { method: "POST", body: form })
-    .then((r) => {
-      if (!r.ok) throw new Error(`Server error: ${r.status}`);
-      return r.json();
+    .then(async (r) => {
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error || `Server error: ${r.status}`);
+      return body;
     })
     .catch((err) => {
       console.error("createStore error:", err);
