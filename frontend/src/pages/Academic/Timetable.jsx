@@ -8,8 +8,10 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import "./Timetable.css";
+import { useAuth } from "../../context/AuthContext";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -500,19 +502,18 @@ const Timetable = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const STUDENT_ID = "test-user-123"; // replace with real auth id
+  const { user } = useAuth();
 
   // ── Fetch timetables from database ───────────────────────────
   const fetchTimetables = useCallback(async () => {
+    if (!user?.id) return; // guard — do nothing if user not loaded yet
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/timetables?student_id=${STUDENT_ID}`);
+      const res = await fetch(`${API}/api/timetables?student_id=${user.id}`);
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
 
-      // Normalise classes array — guard against null from LEFT JOIN
       const normalised = data.map((tt) => ({
         ...tt,
         classes: (tt.classes || []).filter((c) => c.id !== null),
@@ -524,7 +525,7 @@ const Timetable = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]); // re-runs if user.id changes
 
   useEffect(() => {
     fetchTimetables();
@@ -532,13 +533,14 @@ const Timetable = () => {
 
   // ── Post new timetable to database ───────────────────────────
   const handleCreated = async (newTimetable) => {
+    if (!user?.id) return;
     try {
       const res = await fetch(`${API}/api/timetables`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newTimetable.name,
-          student_id: STUDENT_ID,
+          student_id: user.id, // ← direct
           classes: newTimetable.classes,
         }),
       });
@@ -566,6 +568,15 @@ const Timetable = () => {
       alert(err.message);
     }
   };
+
+  // ── Guard — user not loaded yet ───────────────────────────────
+  if (!user)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading user...</p>
+      </div>
+    );
 
   // ── Render ────────────────────────────────────────────────────
   if (loading)

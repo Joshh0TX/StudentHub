@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Users, UserPlus, X, RefreshCw, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import "./StudyGroups.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -259,6 +260,7 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
 
 // ── Main Component ────────────────────────────────────────────────
 const StudyGroups = () => {
+  const { user } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
 
   const [groups, setGroups] = useState([]);
@@ -295,7 +297,7 @@ const StudyGroups = () => {
         apiFetch(
           `/api/groups?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         ),
-        apiFetch(`/api/groups/my-groups?student_id=test-user-123`),
+        apiFetch(`/api/groups/my-groups?student_id=${user.id}`),
       ]);
 
       // ✅ Ensure arrays always
@@ -316,7 +318,7 @@ const StudyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedProgram, selectedYear]);
+  }, [selectedProgram, selectedYear, user]);
 
   // Re-fetch whenever program or year changes
   useEffect(() => {
@@ -330,7 +332,7 @@ const StudyGroups = () => {
     try {
       await apiFetch(`/api/groups/${groupId}/join`, {
         method: "POST",
-        body: JSON.stringify({ student_id: "test-user-123" }), // replace with real auth id
+        body: JSON.stringify({ student_id: user.id }), // replace with real auth id
       });
 
       // Update locally without re-fetching entire list
