@@ -288,7 +288,7 @@ const StudyGroups = () => {
 
   // ── Fetch all groups + student's joined groups ────────────────
   const fetchGroups = useCallback(async () => {
-    if (!selectedProgram || !selectedYear) return;
+    if (!selectedProgram || !selectedYear || !user) return;
     setLoading(true);
     setError(null);
 
@@ -322,9 +322,9 @@ const StudyGroups = () => {
 
   // Re-fetch whenever program or year changes
   useEffect(() => {
-    fetchGroups();
+    if(user) fetchGroups();
     // fetchDepartmentId(selectedProgram);
-  }, [fetchGroups, selectedProgram]);
+  }, [fetchGroups, selectedProgram, user]);
 
   // ── Join a group ──────────────────────────────────────────────
   const handleJoin = async (groupId) => {

@@ -94,3 +94,21 @@ exports.login = async ({ email, password }) => {
         },
     };
 };
+
+// GET ME
+exports.getMe = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      f_name: true,
+      l_name: true,
+      department: true,
+      level: true,
+    },
+  });
+
+  if (!user) throw new Error("User not found");
+  return user;
+};
