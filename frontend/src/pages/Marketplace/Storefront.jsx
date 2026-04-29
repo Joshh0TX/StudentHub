@@ -21,6 +21,7 @@ export default function Storefront() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formError, setFormError] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
   const [product, setProduct] = useState({
     name: "", desc: "", price: "", type: "goods", category: "Food", locations: "", images: [],
   });
@@ -61,6 +62,7 @@ export default function Storefront() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
+    setFormLoading(true);
     const payload = {
       name: product.name,
       description: product.desc,
@@ -85,6 +87,8 @@ export default function Storefront() {
       setShowProductForm(false);
     } catch (err) {
       setFormError(err.message || "Something went wrong");
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -349,8 +353,10 @@ export default function Storefront() {
                     )}
                   </label>
                   <div className="storefrontModalActions">
-                    <button type="submit" className="submitButton">{editingId ? "Save Changes" : "Post Product"}</button>
-                    <button type="button" className="btnOutline" onClick={closeProductForm}>Cancel</button>
+                    <button type="submit" className="submitButton" disabled={formLoading}>
+                      {formLoading ? "Saving..." : (editingId ? "Save Changes" : "Post Product")}
+                    </button>
+                    <button type="button" className="btnOutline" onClick={closeProductForm} disabled={formLoading}>Cancel</button>
                   </div>
                 </form>
               </div>
