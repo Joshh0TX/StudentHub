@@ -500,51 +500,68 @@ const TimetableGrid = ({ timetable, onDelete }) => {
 const Timetable = () => {
   const [timetables, setTimetables] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // false by default — auth loads first
   const [error, setError] = useState(null);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // pull authLoading
 
-  // ── Fetch timetables from database ───────────────────────────
+  // ── Fetch timetables ──────────────────────────────────────────
   const fetchTimetables = useCallback(async () => {
-    if (!user?.id) return; // guard — do nothing if user not loaded yet
+    if (!user?.id) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/timetables?student_id=${user.id}`);
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const data = await res.json();
+      const res = await fetch(`${API}/api/timetables?student_id=${user.id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
+      // Guard against HTML responses
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok || !contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(text.slice(0, 100) || `Server error ${res.status}`);
+      }
+
+      const data = await res.json();
       const normalised = data.map((tt) => ({
         ...tt,
         classes: (tt.classes || []).filter((c) => c.id !== null),
       }));
-
       setTimetables(normalised);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]); // re-runs if user.id changes
+  }, [user?.id]);
 
   useEffect(() => {
     fetchTimetables();
   }, [fetchTimetables]);
 
-  // ── Post new timetable to database ───────────────────────────
+  // ── Post new timetable ────────────────────────────────────────
   const handleCreated = async (newTimetable) => {
     if (!user?.id) return;
     try {
       const res = await fetch(`${API}/api/timetables`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           name: newTimetable.name,
-          student_id: user.id, // ← direct
+          student_id: user.id,
           classes: newTimetable.classes,
         }),
       });
-      if (!res.ok) throw new Error("Failed to save timetable");
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok || !contentType.includes("application/json")) {
+        throw new Error("Failed to save timetable");
+      }
+
       const saved = await res.json();
       setTimetables((prev) => [
         { ...saved, classes: saved.classes || [] },
@@ -555,12 +572,15 @@ const Timetable = () => {
     }
   };
 
-  // ── Delete timetable from database ───────────────────────────
+  // ── Delete timetable ──────────────────────────────────────────
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this timetable?")) return;
     try {
       const res = await fetch(`${API}/api/timetables/${id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       if (!res.ok) throw new Error("Failed to delete timetable");
       setTimetables((prev) => prev.filter((t) => t.id !== id));
@@ -569,16 +589,27 @@ const Timetable = () => {
     }
   };
 
-  // ── Guard — user not loaded yet ───────────────────────────────
-  if (!user)
+  // ── Early returns in correct order ────────────────────────────
+
+  // 1. Auth context still resolving
+  if (authLoading)
     return (
       <div className="groups-loading">
         <RefreshCw size={20} className="spinner" />
-        <p>Loading user...</p>
+        <p>Loading session...</p>
       </div>
     );
 
-  // ── Render ────────────────────────────────────────────────────
+  // 2. No user logged in
+  if (!user)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>You must be logged in to view timetables.</p>
+      </div>
+    );
+
+  // 3. Fetching timetable data
   if (loading)
     return (
       <div className="groups-loading">
@@ -587,6 +618,7 @@ const Timetable = () => {
       </div>
     );
 
+  // 4. Fetch error
   if (error)
     return (
       <div className="groups-error">
@@ -600,7 +632,6 @@ const Timetable = () => {
 
   return (
     <div className="timetable-page">
-      {/* ── Page Header ── */}
       <div className="timetable-header">
         <div>
           <h1>Timetable</h1>
@@ -621,7 +652,6 @@ const Timetable = () => {
         </div>
       </div>
 
-      {/* ── Timetable List ── */}
       {timetables.length === 0 ? (
         <div className="timetable-empty">
           <Clock size={40} color="#d1d5db" />
@@ -638,7 +668,6 @@ const Timetable = () => {
         </div>
       )}
 
-      {/* ── Modal ── */}
       {showModal && (
         <CreateTimetableModal
           onClose={() => setShowModal(false)}

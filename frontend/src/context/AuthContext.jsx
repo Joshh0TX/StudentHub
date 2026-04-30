@@ -6,12 +6,12 @@ const API = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // starts true
 
   useEffect(() => {
-    // On app load, check if a session token exists in localStorage
-    // and fetch the current user's profile from the backend
     const token = localStorage.getItem("token");
+
+    // ── No token — stop loading immediately, no fetch needed
     if (!token) {
       setLoading(false);
       return;
@@ -22,13 +22,21 @@ export const AuthProvider = ({ children }) => {
         const res = await fetch(`${API}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Session expired");
+
+        // Check content type before parsing — prevents HTML parse crash
+        const contentType = res.headers.get("content-type") || "";
+        if (!res.ok || !contentType.includes("application/json")) {
+          throw new Error("Invalid session");
+        }
+
         const data = await res.json();
-        setUser(data); // { id, name, email, department, year, ... }
+        setUser(data);
       } catch {
-        localStorage.removeItem("token"); // clear invalid token
+        // Always clear bad token and stop loading
+        localStorage.removeItem("token");
+        setUser(null);
       } finally {
-        setLoading(false);
+        setLoading(false); // ALWAYS runs — page never stays stuck
       }
     };
 
@@ -41,7 +49,12 @@ export const AuthProvider = ({ children }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error("Invalid credentials");
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!res.ok || !contentType.includes("application/json")) {
+      throw new Error("Invalid credentials");
+    }
+
     const data = await res.json();
     localStorage.setItem("token", data.token);
     setUser(data.user);
@@ -59,5 +72,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook — call this in any component to get the current user
 export const useAuth = () => useContext(AuthContext);
