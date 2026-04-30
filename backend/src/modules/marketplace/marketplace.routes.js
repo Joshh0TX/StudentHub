@@ -185,12 +185,15 @@ router.get("/:id/reviews", async (req, res) => {
 });
 
 router.post("/:id/reviews", async (req, res) => {
-  const { userId, text } = req.body;
-  if (!userId || !text)
-    return res.status(400).json({ error: "userId and text are required" });
+  const { userId, text, rating } = req.body;
+  if (!userId || !rating)
+    return res.status(400).json({ error: "userId and rating are required" });
+  const parsedRating = parseInt(rating);
+  if (parsedRating < 1 || parsedRating > 5)
+    return res.status(400).json({ error: "rating must be between 1 and 5" });
   try {
     const review = await prisma.review.create({
-      data: { productId: req.params.id, userId, text },
+      data: { productId: req.params.id, userId, rating: parsedRating, text: text || null },
       include: { user: { select: { id: true, f_name: true, l_name: true } } },
     });
     res.status(201).json(review);
