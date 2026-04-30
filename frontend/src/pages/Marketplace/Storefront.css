@@ -343,6 +343,11 @@
   font-weight: 600;
 }
 
+.orderStatus option[value="Completed"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
 .noteBuyer {
   font-weight: 700;
 }

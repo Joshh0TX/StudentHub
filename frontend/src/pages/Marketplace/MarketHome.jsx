@@ -69,7 +69,7 @@ export default function MarketHome() {
     if (!user) return setStoreError("You must be logged in");
     setStoreError(""); setStoreLoading(true);
     try {
-      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeCategory === "All Categories" ? "both" : storeForm.storeCategory, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
+      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeCategory === "All Categories" ? "General" : storeForm.storeCategory, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
       setIsSeller(true);
       setShowStoreForm(false);
       navigate("/storefront");
@@ -156,7 +156,7 @@ export default function MarketHome() {
                       : <span>{getInitials(store.name)}</span>}
                   </div>
                   <div className="popularSliderName">{store.name}</div>
-                  <div className="popularSliderCat">{store.type || store.category}</div>
+                  <div className="popularSliderCat">{["both", "goods", "services", "General"].includes(store.type) ? "General" : store.type || store.category || "General"}</div>
                 </Link>
               );
             })}
@@ -181,7 +181,7 @@ export default function MarketHome() {
                     Store Category
                     <select name="storeCategory" value={storeForm.storeCategory} onChange={handleStoreChange}>
                       <option value="All Categories">All Categories</option>
-                      {[...categoriesByType.goods, ...categoriesByType.services].map((cat) => (
+                      {allCategories.map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
@@ -280,7 +280,6 @@ export default function MarketHome() {
               <p className="cardTitle">
                 <Link to={`/marketplace/${item.id}`} className="productLink">{item.name}</Link>
               </p>
-              <p className="itemDesc">{item.description}</p>
               <p className="marketPrice">₦{item.price}</p>
               <div className="locationChips">
                 {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}

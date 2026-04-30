@@ -1080,3 +1080,48 @@ input[type="button"]:focus-visible {
   text-transform: capitalize;
   margin-top: -4px;
 }
+
+/* ── Star Rating ─────────────────────────────────────── */
+.starRatingInput {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.starBtn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #d1d5db;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 100ms, transform 100ms;
+  box-shadow: none;
+}
+
+.starBtn:hover,
+.starBtn.starFilled {
+  color: #f59e0b;
+  transform: scale(1.15);
+  box-shadow: none;
+}
+
+.starLabel {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin-left: 6px;
+}
+
+.starDisplay {
+  display: inline-flex;
+  gap: 1px;
+  line-height: 1;
+}
+
+.starDisplay--sm { font-size: 0.95rem; }
+.starDisplay--md { font-size: 1.2rem; }
+.starDisplay--lg { font-size: 1.5rem; }
+
+.starDisplay .starFilled { color: #f59e0b; }
+.starDisplay .starEmpty  { color: #d1d5db; }

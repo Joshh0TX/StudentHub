@@ -386,8 +386,9 @@ export default function Storefront() {
                   className="orderStatus"
                   value={order.status}
                   onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                  style={order.status === "Completed" ? { background: "#dcfce7", color: "#166534", borderColor: "#86efac" } : {}}
                 >
-                  {["Pending", "Preparing", "Ready", "Shipped"].map((s) => (
+                  {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>

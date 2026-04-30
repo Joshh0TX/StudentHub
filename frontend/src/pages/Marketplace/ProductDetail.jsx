@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { fetchProduct, fetchReviews, fetchProducts, placeOrder, postReview } from "./marketplaceApi";
 import { dummyProducts } from "./marketplaceData";
+import { StarRatingInput, StarRatingDisplay } from "./StarRating";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 
@@ -28,6 +29,7 @@ export default function ProductDetail() {
 
   const [showContacts, setShowContacts] = useState(false);
   const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   useEffect(() => {
@@ -77,12 +79,12 @@ export default function ProductDetail() {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!reviewText.trim()) return;
     setReviewSubmitting(true);
     try {
-      const newReview = await postReview(productId, { userId: user?.id, text: reviewText });
+      const newReview = await postReview(productId, { userId: user?.id, rating: reviewRating, text: reviewText || undefined });
       setReviews((prev) => [...prev, newReview]);
       setReviewText("");
+      setReviewRating(5);
     } catch (err) {
       console.error(err);
     } finally {
@@ -231,12 +233,20 @@ export default function ProductDetail() {
       )}
 
       <section className="productDetailReviews">
-        <h2>Reviews</h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+          <h2 style={{ margin: 0 }}>Reviews {reviews.length > 0 && <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "var(--muted-foreground)" }}>({reviews.length})</span>}</h2>
+          {reviews.length > 3 && (
+            <Link to={`/marketplace/${productId}/reviews`} style={{ fontSize: "0.85rem", color: "var(--primary)", textDecoration: "none", fontWeight: 600 }}>
+              See all {reviews.length} →
+            </Link>
+          )}
+        </div>
         {reviews.length ? (
           <div className="reviewList">
-            {reviews.map((review) => (
+            {reviews.slice(0, 3).map((review) => (
               <div className="reviewCard" key={review.id || `${review.userId}-${review.text}`}>
                 <div className="reviewName">{review.user ? `${review.user.f_name} ${review.user.l_name}` : "Anonymous"}</div>
+                {review.rating && <StarRatingDisplay value={review.rating} size="sm" />}
                 <div className="reviewText">{review.text}</div>
               </div>
             ))}
@@ -244,13 +254,17 @@ export default function ProductDetail() {
         ) : (
           <p className="reviewEmpty">No reviews yet.</p>
         )}
+        {reviews.length > 3 && (
+          <Link to={`/marketplace/${productId}/reviews`} style={{ display: "block", marginTop: "10px", fontSize: "0.85rem", color: "var(--primary)", textDecoration: "none", fontWeight: 600 }}>
+            See all {reviews.length} reviews →
+          </Link>
+        )}
         {user && !isOwnStore && (
           <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
-            <label>
-              Leave a Review
-              <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience..." />
-            </label>
-            <button type="submit" className="submitButton" disabled={reviewSubmitting || !reviewText.trim()}>
+            <label>Leave a Review</label>
+            <StarRatingInput value={reviewRating} onChange={setReviewRating} />
+            <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience... (optional)" style={{ marginTop: "8px", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)", fontSize: "0.95rem", resize: "vertical", outline: "none", width: "100%", boxSizing: "border-box" }} />
+            <button type="submit" className="submitButton" disabled={reviewSubmitting}>
               {reviewSubmitting ? "Posting..." : "Post Review"}
             </button>
           </form>
