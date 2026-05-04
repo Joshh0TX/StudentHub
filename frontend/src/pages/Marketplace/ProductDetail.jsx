@@ -114,6 +114,9 @@ export default function ProductDetail() {
   const next = () => setActiveImg((i) => (i + 1) % images.length);
 
   const contacts = item.store?.contacts || [];
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <main className="productDetailPage">
@@ -234,7 +237,15 @@ export default function ProductDetail() {
 
       <section className="productDetailReviews">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-          <h2 style={{ margin: 0 }}>Reviews {reviews.length > 0 && <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "var(--muted-foreground)" }}>({reviews.length})</span>}</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <h2 style={{ margin: 0 }}>Reviews {reviews.length > 0 && <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "var(--muted-foreground)" }}>({reviews.length})</span>}</h2>
+            {avgRating && (
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <StarRatingDisplay value={Math.round(avgRating)} size="sm" />
+                <span style={{ fontSize: "0.85rem", fontWeight: 700 }}>{avgRating}</span>
+              </span>
+            )}
+          </div>
           {reviews.length > 3 && (
             <Link to={`/marketplace/${productId}/reviews`} style={{ fontSize: "0.85rem", color: "var(--primary)", textDecoration: "none", fontWeight: 600 }}>
               See all {reviews.length} →
