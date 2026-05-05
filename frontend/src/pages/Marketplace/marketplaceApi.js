@@ -5,11 +5,16 @@ const BASE = `${API_BASE}/api/products`;
 
 export const fetchProducts = () =>
   fetch(BASE)
-    .then((r) => r.json())
-    .then((real) => {
-      const realIds = new Set((Array.isArray(real) ? real : []).map((p) => p.id));
+    .then(async (r) => {
+      const data = await r.json();
+      if (!r.ok) {
+        console.error("fetchProducts error:", data);
+        return dummyProducts;
+      }
+      const real = Array.isArray(data) ? data : [];
+      const realIds = new Set(real.map((p) => p.id));
       const extras = dummyProducts.filter((d) => !realIds.has(d.id));
-      return [...(Array.isArray(real) ? real : []), ...extras];
+      return [...real, ...extras];
     })
     .catch(() => dummyProducts);
 

@@ -175,19 +175,11 @@ router.get("/", async (req, res) => {
     const products = await prisma.product.findMany({
       include: {
         store: { include: { contacts: true } },
-        reviews: { select: { rating: true } },
       },
     });
-    // attach avgRating to each product
-    const withRating = products.map((p) => ({
-      ...p,
-      avgRating: p.reviews.length
-        ? parseFloat((p.reviews.reduce((s, r) => s + (r.rating || 0), 0) / p.reviews.length).toFixed(1))
-        : null,
-      reviewCount: p.reviews.length,
-    }));
-    res.json(withRating);
+    res.json(products);
   } catch (error) {
+    console.error("GET /api/products error:", error);
     res.status(500).json({ error: error.message });
   }
 });
