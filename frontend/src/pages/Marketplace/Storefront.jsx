@@ -289,6 +289,7 @@ export default function Storefront() {
                 : null;
               return (
                 <div className="productCard" key={item.id}>
+                  <Link to={`/marketplace/${item.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="productCardImg">
                     {thumb
                       ? <img src={thumb} alt={item.name} />
@@ -300,8 +301,9 @@ export default function Storefront() {
                     {item.locations?.length > 0 && (
                       <div style={{ fontSize: "0.72rem", color: "#999", marginTop: "2px" }}>{item.locations.join(", ")}</div>
                     )}
-                    <div style={{ fontSize: "0.72rem", color: "#aaa", marginTop: "2px" }}>{item.visits ?? 0} views</div>
+                    <div style={{ fontSize: "0.72rem", color: "#aaa", marginTop: "2px" }}>{item.visits ?? 0} views · {item._count?.orders ?? 0} orders</div>
                   </div>
+                  </Link>
                   <div className="productCardActions">
                     <button type="button" className="btnOutline" onClick={() => handleEdit(item)}>Edit</button>
                     <button type="button" className="btnDanger" onClick={() => handleDelete(item.id)}>Delete</button>

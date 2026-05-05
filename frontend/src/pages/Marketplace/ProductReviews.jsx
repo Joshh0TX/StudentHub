@@ -28,6 +28,7 @@ export default function ProductReviews() {
   }, [productId]);
 
   const isOwnProduct = user?.id && product?.store?.ownerId === user.id;
+  const hasReviewed = reviews.some((r) => r.userId === user?.id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ export default function ProductReviews() {
       </div>
 
       {/* Write a review */}
-      {user && !isOwnProduct && (
+      {user && !isOwnProduct && !hasReviewed && (
         <form className="reviewWriteForm" onSubmit={handleSubmit}>
           <label style={{ fontWeight: 600, fontSize: "0.95rem" }}>Your Rating</label>
           <StarRatingInput value={reviewRating} onChange={setReviewRating} />

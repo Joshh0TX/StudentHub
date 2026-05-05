@@ -31,6 +31,7 @@ export default function ProductDetail() {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -80,13 +81,14 @@ export default function ProductDetail() {
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     setReviewSubmitting(true);
+    setReviewError("");
     try {
       const newReview = await postReview(productId, { userId: user?.id, rating: reviewRating, text: reviewText || undefined });
-      setReviews((prev) => [...prev, newReview]);
+      setReviews((prev) => [newReview, ...prev]);
       setReviewText("");
       setReviewRating(5);
     } catch (err) {
-      console.error(err);
+      setReviewError(err.message || "Failed to post review");
     } finally {
       setReviewSubmitting(false);
     }
@@ -114,6 +116,7 @@ export default function ProductDetail() {
   const next = () => setActiveImg((i) => (i + 1) % images.length);
 
   const contacts = item.store?.contacts || [];
+  const hasReviewed = reviews.some((r) => r.userId === user?.id);
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : null;
@@ -270,11 +273,12 @@ export default function ProductDetail() {
             See all {reviews.length} reviews →
           </Link>
         )}
-        {user && !isOwnStore && (
+        {user && !isOwnStore && !hasReviewed && (
           <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
             <label>Leave a Review</label>
             <StarRatingInput value={reviewRating} onChange={setReviewRating} />
             <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience... (optional)" style={{ marginTop: "8px", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)", fontSize: "0.95rem", resize: "vertical", outline: "none", width: "100%", boxSizing: "border-box" }} />
+            {reviewError && <p style={{ color: "red", fontSize: "0.85rem", margin: 0 }}>{reviewError}</p>}
             <button type="submit" className="submitButton" disabled={reviewSubmitting}>
               {reviewSubmitting ? "Posting..." : "Post Review"}
             </button>

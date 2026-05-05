@@ -6,6 +6,7 @@ import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStor
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 import heroImg from "../../assets/marketplace/hero.png";
+import { StarRatingDisplay } from "./StarRating";
 
 const DEFAULT_PRODUCT_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Crect x='150' y='90' width='100' height='80' rx='8' fill='%23d0d0d0'/%3E%3Ccircle cx='175' cy='115' r='12' fill='%23b0b0b0'/%3E%3Cpolygon points='150,170 185,130 215,155 240,125 270,170' fill='%23c0c0c0'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E`;
 
@@ -137,11 +138,9 @@ export default function MarketHome() {
             <div>
               <h2>Popular Stores</h2>
               <p>More trusted sellers you might like.</p>
-            </div>
-            <div className="sliderNavBtns">
               <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
-              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
             </div>
+            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
             {mergedStores.map((store) => {
@@ -281,6 +280,12 @@ export default function MarketHome() {
                 <Link to={`/marketplace/${item.id}`} className="productLink">{item.name}</Link>
               </p>
               <p className="marketPrice">₦{item.price}</p>
+              {item.avgRating && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", margin: "4px 0" }}>
+                  <StarRatingDisplay value={Math.round(item.avgRating)} size="sm" />
+                  <span style={{ fontSize: "0.78rem", color: "var(--muted-foreground)" }}>{item.avgRating} ({item.reviewCount})</span>
+                </div>
+              )}
               <div className="locationChips">
                 {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}
               </div>
