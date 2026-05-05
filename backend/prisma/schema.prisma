@@ -43,6 +43,7 @@ model User {
   studyGroups   StudyGroup[]
   GroupMember   StudyGroupMember[]
   assignments Assignment[]
+  timetables Timetable[]
 
   // Marketplace
   store      Store?
@@ -62,7 +63,6 @@ model Course {
   creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
-  timetableClasses TimetableClass[]
 }
 
 model CourseMember {
@@ -91,25 +91,27 @@ model Assignment {
 }
 
 model Timetable {
-  id        Int              @id @default(autoincrement())
-  name      String           @db.VarChar(100)
-  studentId String?
-  createdAt DateTime         @default(now())
-  classes   TimetableClass[]
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  department String
+  year       Int
+  createdBy  String?
+  createdAt  DateTime @default(now())
+
+  creator User?            @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  classes TimetableClass[]
 }
 
 model TimetableClass {
-  id          Int       @id @default(autoincrement())
-  timetableId Int
-  courseId    String?
-  subject     String    @db.VarChar(60)
-  location    String?   @db.VarChar(60)
-  day         String    @db.VarChar(10)
-  startTime   String    @db.VarChar(5)
-  endTime     String    @db.VarChar(5)
+  id          String    @id @default(cuid())
+  timetableId Int                          // ← must be Int to match Timetable.id
+  subject     String
+  location    String?
+  day         String
+  startTime   String
+  endTime     String
   colorIdx    Int       @default(0)
   timetable   Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
-  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
 }
 
 model Post {
@@ -254,8 +256,7 @@ model Review {
   id        String   @id @default(uuid())
   productId String
   userId    String
-  rating    Int      @default(5)
-  text      String?
+  text      String
   createdAt DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id])
