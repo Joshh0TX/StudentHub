@@ -57,6 +57,9 @@ export default function StoreView() {
   const topSelling = [...items].sort((a, b) => (b.orders || 0) - (a.orders || 0)).slice(0, 3);
 
   const isOwnStore = user?.id && storeData?.ownerId === user.id;
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const categories = ["all", ...Array.from(new Set(items.map((p) => p.category).filter(Boolean)))];
+  const filteredItems = categoryFilter === "all" ? items : items.filter((p) => p.category === categoryFilter);
 
   return (
     <main className="storeViewPage">
@@ -121,9 +124,22 @@ export default function StoreView() {
       </section>
 
       <section className="storeViewSection">
-        <h2>All Products</h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+          <h2 style={{ margin: 0 }}>All Products</h2>
+          {categories.length > 2 && (
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={{ fontSize: "0.85rem", padding: "5px 10px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--foreground)" }}
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat === "all" ? "All Categories" : cat}</option>
+              ))}
+            </select>
+          )}
+        </div>
         <div className="storeViewGrid">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <div className="storeProductCard" key={`all-${item.id}`}>
               <img src={getImgSrc(item.images)} alt={item.name} />
               <div className="storeProductInfo">
@@ -133,7 +149,7 @@ export default function StoreView() {
               </div>
             </div>
           ))}
-          {items.length === 0 && <p style={{ color: "#888" }}>No products in this store yet.</p>}
+          {filteredItems.length === 0 && <p style={{ color: "#888" }}>No products in this category.</p>}
         </div>
       </section>
     </main>

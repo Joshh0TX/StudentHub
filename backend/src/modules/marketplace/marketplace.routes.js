@@ -12,7 +12,12 @@ router.get("/store/view/:storeId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
       where: { id: req.params.storeId },
-      include: { contacts: true, products: true },
+      include: {
+        contacts: true,
+        products: {
+          include: { _count: { select: { orders: true } } },
+        },
+      },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
     prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});
@@ -26,7 +31,12 @@ router.get("/store/:ownerId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
       where: { ownerId: req.params.ownerId },
-      include: { contacts: true, products: true },
+      include: {
+        contacts: true,
+        products: {
+          include: { _count: { select: { orders: true } } },
+        },
+      },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
     res.json(store);
@@ -163,9 +173,20 @@ router.delete("/reviews/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const products = await prisma.product.findMany({
-      include: { store: { include: { contacts: true } } },
+      include: {
+        store: { include: { contacts: true } },
+        reviews: { select: { rating: true } },
+      },
     });
-    res.json(products);
+    // attach avgRating to each product
+    const withRating = products.map((p) => ({
+      ...p,
+      avgRating: p.reviews.length
+        ? parseFloat((p.reviews.reduce((s, r) => s + (r.rating || 0), 0) / p.reviews.length).toFixed(1))
+        : null,
+      reviewCount: p.reviews.length,
+    }));
+    res.json(withRating);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

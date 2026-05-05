@@ -109,7 +109,11 @@ export const postReview = (productId, data) =>
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.error || `Error: ${r.status}`);
+    return body;
+  });
 
 export const deleteReview = (reviewId) =>
   fetch(`${BASE}/reviews/${reviewId}`, { method: "DELETE" }).then((r) => r.json());
