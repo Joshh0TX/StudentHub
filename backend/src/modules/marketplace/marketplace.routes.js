@@ -177,7 +177,28 @@ router.get("/", async (req, res) => {
         store: { include: { contacts: true } },
       },
     });
-    res.json(products);
+
+    // get avg ratings via raw SQL to avoid Prisma client cache issues
+    const ratings = await prisma.$queryRaw`
+      SELECT "productId",
+             ROUND(AVG(rating)::numeric, 1)::float AS "avgRating",
+             COUNT(*)::int AS "reviewCount"
+      FROM "Review"
+      GROUP BY "productId"
+    `;
+
+    const ratingMap = {};
+    ratings.forEach((r) => {
+      ratingMap[r.productId] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
+    });
+
+    const withRating = products.map((p) => ({
+      ...p,
+      avgRating: ratingMap[p.id]?.avgRating ?? null,
+      reviewCount: ratingMap[p.id]?.reviewCount ?? 0,
+    }));
+
+    res.json(withRating);
   } catch (error) {
     console.error("GET /api/products error:", error);
     res.status(500).json({ error: error.message });
