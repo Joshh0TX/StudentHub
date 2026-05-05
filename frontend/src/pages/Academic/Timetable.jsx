@@ -467,25 +467,43 @@ const TimetableGrid = ({ timetable, onDelete }) => {
               const span = spanCount(cls.startTime, cls.endTime);
               const colors = CLASS_COLORS[cls.colorIdx] || CLASS_COLORS[0];
 
+              // Calculate how many rows the block spans to decide what to show
+              const isCompact = span === 1; // single slot — very little space
+
               return (
                 <div
                   key={cls.id}
-                  className="grid-class-block"
+                  className={`grid-class-block ${isCompact ? "grid-class-block--compact" : ""}`}
                   style={{
                     gridRow: `${rowStart} / span ${span}`,
                     gridColumn: colIdx + 2,
                     backgroundColor: colors.bg,
                     borderLeft: `4px solid ${colors.border}`,
+                    borderTop: `2px solid ${colors.border}`,
                     color: colors.text,
                   }}
                 >
+                  {/* Subject — always visible, sticky to top */}
                   <p className="block-subject">{cls.subject}</p>
-                  {cls.location && (
-                    <p className="block-location">{cls.location}</p>
+
+                  {/* Location — only show if not compact */}
+                  {cls.location && !isCompact && (
+                    <p className="block-location">
+                      <span className="block-location-dot">📍</span>
+                      {cls.location}
+                    </p>
                   )}
-                  <p className="block-time">
-                    {formatTime(cls.startTime)} – {formatTime(cls.endTime)}
-                  </p>
+
+                  {/* Compact tooltip shown on hover for small blocks */}
+                  {isCompact && cls.location && (
+                    <div className="block-tooltip">
+                      <strong>{cls.subject}</strong>
+                      <span>{cls.location}</span>
+                      <span>
+                        {formatTime(cls.startTime)} – {formatTime(cls.endTime)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}

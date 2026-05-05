@@ -6,13 +6,22 @@ import "./StudyGroups.css";
 
 const API = import.meta.env.VITE_API_URL;
 
-// ── Reusable fetch helper ─────────────────────────────────────────
 const apiFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${API}${endpoint}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      // Send token on every request if it exists
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
   });
-  if (!res.ok) {
+
+  // Check content type FIRST — prevents the HTML parse error
+  const contentType = res.headers.get("content-type") || "";
+  if (!res.ok || !contentType.includes("application/json")) {
     const text = await res.text();
     let message;
     try {
@@ -23,6 +32,7 @@ const apiFetch = async (endpoint, options = {}) => {
     }
     throw new Error(message);
   }
+
   return res.json();
 };
 
