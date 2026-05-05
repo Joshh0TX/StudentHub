@@ -25,6 +25,19 @@
   color: #6b7280;
 }
 
+.timetable-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.timetable-creator {
+  font-size: 11px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
 /* ── Buttons ── */
 .btn-tcreate {
   display: flex;

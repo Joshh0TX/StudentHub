@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import "./Timetable.css";
 import { useAuth } from "../../context/AuthContext";
+import { useOutletContext } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -333,7 +334,8 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
 };
 
 // ── Timetable Grid View ───────────────────────────────────────────
-const TimetableGrid = ({ timetable, onDelete }) => {
+const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
+  const isOwner = String(timetable.created_by) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
 
   // Only show days that have at least one class
@@ -382,6 +384,11 @@ const TimetableGrid = ({ timetable, onDelete }) => {
             {timetable.classes.length} class
             {timetable.classes.length !== 1 ? "es" : ""}
           </span>
+          {timetable.created_by_name && (
+            <span className="timetable-creator">
+              Created by {isOwner ? "you" : timetable.created_by_name}
+            </span>
+          )}
         </div>
         <div className="timetable-card-actions">
           <button
@@ -391,13 +398,15 @@ const TimetableGrid = ({ timetable, onDelete }) => {
           >
             {collapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
           </button>
-          <button
-            className="btn-icon btn-icon--danger"
-            onClick={() => onDelete(timetable.id)}
-            title="Delete timetable"
-          >
-            <Trash2 size={18} />
-          </button>
+          {isOwner && (
+            <button
+              className="btn-icon btn-icon--danger"
+              onClick={() => onDelete(timetable.id)}
+              title="Delete timetable"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -521,20 +530,24 @@ const Timetable = () => {
   const [loading, setLoading] = useState(false); // false by default — auth loads first
   const [error, setError] = useState(null);
   const { user, loading: authLoading } = useAuth(); // pull authLoading
+  const { selectedProgram, selectedYear } = useOutletContext();
 
   // ── Fetch timetables ──────────────────────────────────────────
   const fetchTimetables = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || !selectedProgram || !selectedYear) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/timetables?student_id=${user.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const res = await fetch(
+        // Fetch by department + year, not student_id
+        `${API}/api/timetables?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
-      // Guard against HTML responses
       const contentType = res.headers.get("content-type") || "";
       if (!res.ok || !contentType.includes("application/json")) {
         const text = await res.text();
@@ -552,7 +565,8 @@ const Timetable = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+    // Re-fetch when program or year changes
+  }, [user?.id, selectedProgram, selectedYear]);
 
   useEffect(() => {
     fetchTimetables();
@@ -570,7 +584,9 @@ const Timetable = () => {
         },
         body: JSON.stringify({
           name: newTimetable.name,
-          student_id: user.id,
+          department: selectedProgram, // ← store department
+          year: selectedYear, // ← store year
+          created_by: user.id, // ← track creator
           classes: newTimetable.classes,
         }),
       });
@@ -597,10 +613,15 @@ const Timetable = () => {
       const res = await fetch(`${API}/api/timetables/${id}`, {
         method: "DELETE",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        body: JSON.stringify({ student_id: user.id }), // backend checks ownership
       });
-      if (!res.ok) throw new Error("Failed to delete timetable");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete timetable");
+      }
       setTimetables((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       alert(err.message);
@@ -681,7 +702,12 @@ const Timetable = () => {
       ) : (
         <div className="timetable-list">
           {timetables.map((tt) => (
-            <TimetableGrid key={tt.id} timetable={tt} onDelete={handleDelete} />
+            <TimetableGrid
+              key={tt.id}
+              timetable={tt}
+              onDelete={handleDelete}
+              currentUserId={user.id}
+            />
           ))}
         </div>
       )}

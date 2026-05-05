@@ -93,8 +93,8 @@ model Assignment {
 model Timetable {
   id         Int      @id @default(autoincrement())
   name       String   @db.VarChar(100)
-  department String
-  year       Int
+  department String?
+  year       Int?
   createdBy  String?
   createdAt  DateTime @default(now())
 
