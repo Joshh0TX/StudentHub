@@ -65,14 +65,14 @@ const getMyGroups = async (req, res) => {
 // POST /api/groups
 // Body: { name, course_code, course_title, description, max_members, year, department }
 const createGroup = async (req, res) => {
-  const createdBy = req.user?.id ?? "test-user-123";
-  const { name, course_code, course_title, description, max_members, year, department } = req.body;
+  const { name, course_code, course_title, description, max_members, year, department, created_by } = req.body;
+  const createdBy = req.user?.id ?? created_by; // ← use body as fallback instead of fake ID
+
+  if (!createdBy) return res.status(400).json({ error: "User not authenticated" });
 
   const missing = ["name", "department"].filter((f) => !req.body[f]);
   if (missing.length) {
-    return res
-      .status(400)
-      .json({ error: `Missing required fields: ${missing.join(", ")}` });
+    return res.status(400).json({ error: `Missing required fields: ${missing.join(", ")}` });
   }
 
   try {
