@@ -4,11 +4,11 @@ import {
   X,
   Clock,
   Trash2,
-  Edit2,
   ChevronDown,
   ChevronUp,
   RefreshCw,
   AlertCircle,
+  User,
 } from "lucide-react";
 import "./Timetable.css";
 import { useAuth } from "../../context/AuthContext";
@@ -63,6 +63,31 @@ const formatTime = (time) => {
   const hour = h % 12 || 12;
   return `${hour}:${m.toString().padStart(2, "0")} ${period}`;
 };
+
+/**
+ * Returns a human-readable duration string, e.g. "1 hr", "1 hr 30 min", "45 min".
+ * Works purely from "HH:MM" strings — no Date objects needed.
+ */
+const formatDuration = (startTime, endTime) => {
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  const totalMins = eh * 60 + em - (sh * 60 + sm);
+  if (totalMins <= 0) return "";
+  const hrs = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  if (hrs === 0) return `${mins} min`;
+  if (mins === 0) return `${hrs} hr`;
+  return `${hrs} hr ${mins} min`;
+};
+
+/** Returns the first letter(s) of a name for the avatar */
+const initials = (name = "") =>
+  name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase() || "?";
 
 // ── Empty class entry template ────────────────────────────────────
 const emptyClass = () => ({
@@ -174,23 +199,21 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
   const [name, setName] = useState("");
   const [classes, setClasses] = useState([emptyClass()]);
   const [error, setError] = useState(null);
-  const [step, setStep] = useState(1); // 1 = name, 2 = classes
+  const [step, setStep] = useState(1);
 
-  const handleClassChange = (id, field, value) => {
+  const handleClassChange = (id, field, value) =>
     setClasses((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
     );
-  };
 
-  const handleAddClass = () => {
+  const handleAddClass = () =>
     setClasses((prev) => [
       ...prev,
       { ...emptyClass(), colorIdx: prev.length % CLASS_COLORS.length },
     ]);
-  };
 
   const handleRemoveClass = (id) => {
-    if (classes.length === 1) return; // keep at least one
+    if (classes.length === 1) return;
     setClasses((prev) => prev.filter((c) => c.id !== id));
   };
 
@@ -209,14 +232,12 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
       setError("Please add at least one class with a subject.");
       return;
     }
-
-    // Check for time conflicts on the same day
     for (const day of DAYS) {
       const dayClasses = validClasses.filter((c) => c.day === day);
       for (let i = 0; i < dayClasses.length; i++) {
         for (let j = i + 1; j < dayClasses.length; j++) {
-          const a = dayClasses[i];
-          const b = dayClasses[j];
+          const a = dayClasses[i],
+            b = dayClasses[j];
           if (a.startTime < b.endTime && b.startTime < a.endTime) {
             setError(
               `Time conflict on ${day}: "${a.subject}" and "${b.subject}" overlap.`,
@@ -226,7 +247,6 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
         }
       }
     }
-
     setError(null);
     onCreated({
       id: generateId(),
@@ -252,7 +272,6 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
           </button>
         </div>
 
-        {/* Step indicator */}
         <div className="step-indicator">
           <div className={`step ${step >= 1 ? "step--active" : ""}`}>
             <span>1</span> Name
@@ -269,7 +288,6 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
           </div>
         )}
 
-        {/* ── Step 1: Name ── */}
         {step === 1 && (
           <div className="modal-body">
             <label>
@@ -289,7 +307,6 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
           </div>
         )}
 
-        {/* ── Step 2: Classes ── */}
         {step === 2 && (
           <div className="modal-body modal-body--scroll">
             {classes.map((cls, i) => (
@@ -333,17 +350,34 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
   );
 };
 
+// ── Creator Badge ─────────────────────────────────────────────────
+const CreatorBadge = ({ name, isOwner }) => {
+  const label = isOwner ? "You" : name || "Unknown";
+  const variant = isOwner ? "you" : "other";
+
+  return (
+    <span
+      className={`timetable-creator-badge timetable-creator-badge--${variant}`}
+    >
+      {/* Mini avatar circle */}
+      <span className={`creator-avatar creator-avatar--${variant}`}>
+        {initials(label)}
+      </span>
+      {isOwner ? "Created by you" : `Created by ${label}`}
+    </span>
+  );
+};
+
 // ── Timetable Grid View ───────────────────────────────────────────
 const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
   const isOwner = String(timetable.created_by) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Only show days that have at least one class
   const activeDays = DAYS.filter((d) =>
     timetable.classes.some((c) => c.day === d),
   );
 
-  // Find the earliest start and latest end across all classes
   const allStarts = timetable.classes.map((c) => c.startTime);
   const allEnds = timetable.classes.map((c) => c.endTime);
   const minTime = allStarts.length
@@ -353,25 +387,29 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
     ? allEnds.reduce((a, b) => (a > b ? a : b))
     : "17:00";
 
-  // Build the visible 30-min slots between min and max
   const visibleSlots = TIME_SLOTS.filter((t) => t >= minTime && t <= maxTime);
 
-  // ── Row index helpers ─────────────────────────────────────────
-  // Each slot occupies one grid row (after the header row)
-  // Header = row 1, first slot = row 2, second slot = row 3 ...
   const slotToRow = (time) => {
     const idx = visibleSlots.indexOf(time);
-    return idx === -1 ? null : idx + 2; // +2 because row 1 is the header
+    return idx === -1 ? null : idx + 2;
   };
-
-  // How many 30-min slots does a class span?
   const spanCount = (startTime, endTime) => {
     const startIdx = visibleSlots.indexOf(startTime);
     const endIdx = visibleSlots.indexOf(endTime);
     if (startIdx === -1) return 1;
-    // If endTime is beyond visibleSlots (e.g. exactly maxTime), count to end
     const end = endIdx === -1 ? visibleSlots.length : endIdx;
     return Math.max(1, end - startIdx);
+  };
+
+  const handleDeleteClick = () => {
+    if (confirmDelete) {
+      onDelete(timetable.id);
+      setConfirmDelete(false);
+    } else {
+      setConfirmDelete(true);
+      // Auto-reset confirmation after 3 s if user doesn't confirm
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
   };
 
   return (
@@ -380,33 +418,56 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
       <div className="timetable-card-header">
         <div className="timetable-card-title">
           <h3>{timetable.name}</h3>
-          <span className="timetable-meta">
-            {timetable.classes.length} class
-            {timetable.classes.length !== 1 ? "es" : ""}
-          </span>
-          {timetable.created_by_name && (
-            <span className="timetable-creator">
-              Created by {isOwner ? "you" : timetable.created_by_name}
+
+          {/* Meta row: class count + creator badge */}
+          <div className="timetable-meta-row">
+            <span className="timetable-meta">
+              <Clock size={11} />
+              {timetable.classes.length} class
+              {timetable.classes.length !== 1 ? "es" : ""}
             </span>
-          )}
+
+            {/* Creator badge — always visible */}
+            <CreatorBadge name={timetable.created_by_name} isOwner={isOwner} />
+          </div>
         </div>
+
+        {/* ── Actions ── */}
         <div className="timetable-card-actions">
+          {/* Delete button — ONLY rendered for the owner */}
+          {isOwner && (
+            <button
+              className="btn-delete"
+              onClick={handleDeleteClick}
+              title={
+                confirmDelete
+                  ? "Click again to confirm deletion"
+                  : "Delete timetable"
+              }
+              style={
+                confirmDelete
+                  ? {
+                      background: "#fee2e2",
+                      borderColor: "#dc2626",
+                      color: "#dc2626",
+                    }
+                  : {}
+              }
+            >
+              <Trash2 size={14} />
+              <span>{confirmDelete ? "Confirm delete?" : "Delete"}</span>
+            </button>
+          )}
+
+          {/* Collapse / expand toggle */}
           <button
-            className="btn-icon"
+            className="btn-collapse"
             onClick={() => setCollapsed((p) => !p)}
             title={collapsed ? "Expand" : "Collapse"}
+            style={{ width: "auto", padding: "0 14px" }}
           >
             {collapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
           </button>
-          {isOwner && (
-            <button
-              className="btn-icon btn-icon--danger"
-              onClick={() => onDelete(timetable.id)}
-              title="Delete timetable"
-            >
-              <Trash2 size={18} />
-            </button>
-          )}
         </div>
       </div>
 
@@ -416,18 +477,16 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
           <div
             className="timetable-grid"
             style={{
-              // Column 1 = time labels, then one column per active day
               gridTemplateColumns: `80px repeat(${activeDays.length}, 1fr)`,
-              // Row 1 = day headers, then one row per 30-min slot
               gridTemplateRows: `40px repeat(${visibleSlots.length}, 36px)`,
             }}
           >
-            {/* ── Corner cell ── */}
+            {/* Corner */}
             <div className="grid-corner" style={{ gridRow: 1, gridColumn: 1 }}>
               <Clock size={14} />
             </div>
 
-            {/* ── Day headers (row 1) ── */}
+            {/* Day headers */}
             {activeDays.map((day, colIdx) => (
               <div
                 key={day}
@@ -439,45 +498,39 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
               </div>
             ))}
 
-            {/* ── Time labels (column 1, one per slot) ── */}
+            {/* Time labels */}
             {visibleSlots.map((slot, rowIdx) => (
               <div
                 key={`time-${slot}`}
                 className="grid-time-label"
                 style={{ gridRow: rowIdx + 2, gridColumn: 1 }}
               >
-                {/* Only show label on the hour */}
                 {slot.endsWith(":00") ? formatTime(slot) : ""}
               </div>
             ))}
 
-            {/* ── Background grid cells (empty slots) ── */}
+            {/* Background cells */}
             {visibleSlots.map((slot, rowIdx) =>
               activeDays.map((day, colIdx) => (
                 <div
                   key={`bg-${day}-${slot}`}
                   className={`grid-cell ${slot.endsWith(":00") ? "grid-cell--hour" : ""}`}
-                  style={{
-                    gridRow: rowIdx + 2,
-                    gridColumn: colIdx + 2,
-                  }}
+                  style={{ gridRow: rowIdx + 2, gridColumn: colIdx + 2 }}
                 />
               )),
             )}
 
-            {/* ── Class blocks — span their full duration ── */}
+            {/* Class blocks */}
             {timetable.classes.map((cls) => {
               const colIdx = activeDays.indexOf(cls.day);
               if (colIdx === -1) return null;
-
               const rowStart = slotToRow(cls.startTime);
               if (rowStart === null) return null;
-
               const span = spanCount(cls.startTime, cls.endTime);
               const colors = CLASS_COLORS[cls.colorIdx] || CLASS_COLORS[0];
+              const isCompact = span === 1;
 
-              // Calculate how many rows the block spans to decide what to show
-              const isCompact = span === 1; // single slot — very little space
+              const duration = formatDuration(cls.startTime, cls.endTime);
 
               return (
                 <div
@@ -492,25 +545,43 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
                     color: colors.text,
                   }}
                 >
-                  {/* Subject — always visible, sticky to top */}
                   <p className="block-subject">{cls.subject}</p>
 
-                  {/* Location — only show if not compact */}
-                  {cls.location && !isCompact && (
-                    <p className="block-location">
-                      <span className="block-location-dot">📍</span>
-                      {cls.location}
-                    </p>
+                  {/* Full block: show location + time range below subject */}
+                  {!isCompact && (
+                    <>
+                      {cls.location && (
+                        <p className="block-location">
+                          <span className="block-location-dot">📍</span>
+                          {cls.location}
+                        </p>
+                      )}
+                      <p className="block-time-range">
+                        {formatTime(cls.startTime)} – {formatTime(cls.endTime)}
+                        {duration && (
+                          <span className="block-duration"> · {duration}</span>
+                        )}
+                      </p>
+                    </>
                   )}
 
-                  {/* Compact tooltip shown on hover for small blocks */}
-                  {isCompact && cls.location && (
+                  {/* Compact block: tooltip always shown on hover */}
+                  {isCompact && (
                     <div className="block-tooltip">
                       <strong>{cls.subject}</strong>
-                      <span>{cls.location}</span>
-                      <span>
+                      {cls.location && (
+                        <span className="block-tooltip-location">
+                          📍 {cls.location}
+                        </span>
+                      )}
+                      <span className="block-tooltip-time">
                         {formatTime(cls.startTime)} – {formatTime(cls.endTime)}
                       </span>
+                      {duration && (
+                        <span className="block-tooltip-duration">
+                          {duration}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -523,13 +594,13 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
   );
 };
 
-// ── Main Component (Database Version) ────────────────────────────
+// ── Main Component ────────────────────────────────────────────────
 const Timetable = () => {
   const [timetables, setTimetables] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false); // false by default — auth loads first
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user, loading: authLoading } = useAuth(); // pull authLoading
+  const { user, loading: authLoading } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
 
   // ── Fetch timetables ──────────────────────────────────────────
@@ -539,21 +610,16 @@ const Timetable = () => {
     setError(null);
     try {
       const res = await fetch(
-        // Fetch by department + year, not student_id
         `${API}/api/timetables?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
-
       const contentType = res.headers.get("content-type") || "";
       if (!res.ok || !contentType.includes("application/json")) {
         const text = await res.text();
         throw new Error(text.slice(0, 100) || `Server error ${res.status}`);
       }
-
       const data = await res.json();
       const normalised = data.map((tt) => ({
         ...tt,
@@ -565,7 +631,6 @@ const Timetable = () => {
     } finally {
       setLoading(false);
     }
-    // Re-fetch when program or year changes
   }, [user?.id, selectedProgram, selectedYear]);
 
   useEffect(() => {
@@ -584,18 +649,15 @@ const Timetable = () => {
         },
         body: JSON.stringify({
           name: newTimetable.name,
-          department: selectedProgram, // ← store department
-          year: selectedYear, // ← store year
-          created_by: user.id, // ← track creator
+          department: selectedProgram,
+          year: selectedYear,
+          created_by: user.id,
           classes: newTimetable.classes,
         }),
       });
-
       const contentType = res.headers.get("content-type") || "";
-      if (!res.ok || !contentType.includes("application/json")) {
+      if (!res.ok || !contentType.includes("application/json"))
         throw new Error("Failed to save timetable");
-      }
-
       const saved = await res.json();
       setTimetables((prev) => [
         { ...saved, classes: saved.classes || [] },
@@ -608,7 +670,6 @@ const Timetable = () => {
 
   // ── Delete timetable ──────────────────────────────────────────
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this timetable?")) return;
     try {
       const res = await fetch(`${API}/api/timetables/${id}`, {
         method: "DELETE",
@@ -616,7 +677,7 @@ const Timetable = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ student_id: user.id }), // backend checks ownership
+        body: JSON.stringify({ student_id: user.id }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -628,9 +689,7 @@ const Timetable = () => {
     }
   };
 
-  // ── Early returns in correct order ────────────────────────────
-
-  // 1. Auth context still resolving
+  // ── Guards ────────────────────────────────────────────────────
   if (authLoading)
     return (
       <div className="groups-loading">
@@ -639,7 +698,6 @@ const Timetable = () => {
       </div>
     );
 
-  // 2. No user logged in
   if (!user)
     return (
       <div className="groups-error">
@@ -648,7 +706,6 @@ const Timetable = () => {
       </div>
     );
 
-  // 3. Fetching timetable data
   if (loading)
     return (
       <div className="groups-loading">
@@ -657,7 +714,6 @@ const Timetable = () => {
       </div>
     );
 
-  // 4. Fetch error
   if (error)
     return (
       <div className="groups-error">
