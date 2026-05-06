@@ -104,32 +104,38 @@ function useImageUpload() {
   const coverInputRef = useRef(null);
   const profileInputRef = useRef(null);
 
-  // 1. THE HELPER (Inside the hook, but separate from the handlers)
-  // This is "private" logic that only this hook uses.
-  const processImage = (e, key, setUser) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUser((prev) => ({ ...prev, [key]: imageUrl }));
-      return true;
-    }
-    return false;
-  };
-
   const handleCoverUpdate = () => {
-    if (coverInputRef.current) {
-      coverInputRef.current.click();
+    if (coverInputRef.current) coverInputRef.current.click();
+  };
+
+  const uploadImage = async (file, endpoint, key, setUser) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch(`https://stuudo.onrender.com/api/users/${endpoint}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setUser((prev) => ({ ...prev, [key]: data[key] }));
+    } else {
+      alert("Image upload failed");
     }
   };
 
-  // 2. THE HANDLERS (Much cleaner now!)
   const onCoverChange = (e, setUser) => {
-    processImage(e, 'coverImage', setUser);
+    const file = e.target.files?.[0];
+    if (file) uploadImage(file, "profile/cover", "coverImage", setUser);
   };
 
   const onProfileChange = (e, setUser, setIsProfileMenuOpen) => {
-    const success = processImage(e, 'profileImage', setUser);
-    if (success) {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadImage(file, "profile/image", "profileImage", setUser);
       setIsProfileMenuOpen(false);
     }
   };
@@ -730,52 +736,50 @@ function ProfilePage() {
     return <div>Loading...</div>;
   }
 
-  // Handlers for image upload
-  const handleOnCoverChange = (e) =>
-    imageUpload.onCoverChange(e, setUser);
-  const handleOnProfileChange = (e) =>
-    imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
+  const saveToBackend = async (updatedData) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(updatedData),
+  });
+  if (!res.ok) {
+    alert("Failed to save changes");
+  }
+};
 
-  const handleSaveBadges = (updatedBadges) => {
-    setUser((prev) => ({
-      ...prev,
-      badges: updatedBadges,
-    }));
-    modals.setIsBadgeManagerOpen(false);
-  };
+  const handleSaveInterests = async (updatedInterests) => {
+  await saveToBackend({ interests: updatedInterests });
+  setUser((prev) => ({ ...prev, interests: updatedInterests }));
+  modals.setIsInterestManagerOpen(false);
+};
 
-  const handleSaveSkills = (updatedSkills) => {
-    setUser((prev) => ({
-      ...prev,
-      skills: updatedSkills,
-    }));
-    modals.setIsSkillManagerOpen(false);
-  };
+const handleSaveBadges = async (updatedBadges) => {
+  await saveToBackend({ badges: updatedBadges });
+  setUser((prev) => ({ ...prev, badges: updatedBadges }));
+  modals.setIsBadgeManagerOpen(false);
+};
 
-  const handleSaveInterests = (updatedInterests) => {
-    setUser((prev) => ({
-      ...prev,
-      interests: updatedInterests,
-    }));
-    modals.setIsInterestManagerOpen(false);
-  };
+const handleSaveAchievements = async (updatedAchievements) => {
+  await saveToBackend({ achievements: updatedAchievements });
+  setUser((prev) => ({ ...prev, achievements: updatedAchievements }));
+  modals.setIsAchievementsManagerOpen(false);
+};
 
-  const handleSaveProjects = (updatedProjects) => {
-    setUser((prev) => ({
-      ...prev,
-      projects: updatedProjects,
-    }));
-    modals.setIsProjectsManagerOpen(false);
-  };
+const handleSaveProjects = async (updatedProjects) => {
+  await saveToBackend({ projects: updatedProjects });
+  setUser((prev) => ({ ...prev, projects: updatedProjects }));
+  modals.setIsProjectsManagerOpen(false);
+};
 
-  const handleSaveAchievements = (updatedAchievements) => {
-    setUser((prev) => ({
-      ...prev,
-      achievements: updatedAchievements,
-    }));
-    modals.setIsAchievementsManagerOpen(false);
-  };
-
+const handleSaveSkills = async (updatedSkills) => {
+  await saveToBackend({ skills: updatedSkills });
+  setUser((prev) => ({ ...prev, skills: updatedSkills }));
+  modals.setIsSkillManagerOpen(false);
+};
   // ========================================================================
   // RENDER - Organized by sections
   // ========================================================================

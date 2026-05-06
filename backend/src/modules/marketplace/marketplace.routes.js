@@ -18,6 +18,7 @@ router.get("/store/view/:storeId", async (req, res) => {
     prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});
     res.json(store);
   } catch (error) {
+    console.error("store/view error:", error.message);
     res.status(500).json({ error: error.message });
   }
 });

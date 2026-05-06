@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './EditAbout.css'
 
 export default function EditAbout({ initialData, onSave, onCancel }) {
-  // Local state to hold changes before saving
   const [formData, setFormData] = useState({
     bio: initialData.bio || '',
     course: initialData.course || '',
@@ -13,6 +12,25 @@ export default function EditAbout({ initialData, onSave, onCancel }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+    const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!res.ok) {
+      alert("Failed to save changes");
+      return;
+    }
+
+    onSave(formData);
   };
 
   return (
@@ -65,7 +83,7 @@ export default function EditAbout({ initialData, onSave, onCancel }) {
         <button className="btn-cancel-link" onClick={onCancel}>
           Cancel
         </button>
-        <button className="btn-save-bio" onClick={() => onSave(formData)}>
+        <button className="btn-save-bio" onClick={handleSave}>
           Save Changes
         </button>
       </div>
