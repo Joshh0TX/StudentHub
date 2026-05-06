@@ -8,7 +8,6 @@ import {
   ChevronUp,
   RefreshCw,
   AlertCircle,
-  User,
 } from "lucide-react";
 import "./Timetable.css";
 import { useAuth } from "../../context/AuthContext";
@@ -359,7 +358,6 @@ const CreatorBadge = ({ name, isOwner }) => {
     <span
       className={`timetable-creator-badge timetable-creator-badge--${variant}`}
     >
-      {/* Mini avatar circle */}
       <span className={`creator-avatar creator-avatar--${variant}`}>
         {initials(label)}
       </span>
@@ -370,6 +368,12 @@ const CreatorBadge = ({ name, isOwner }) => {
 
 // ── Timetable Grid View ───────────────────────────────────────────
 const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
+  /**
+   * `currentUserId` is the database-issued ID that came from the server
+   * via AuthContext → /api/auth/me. It is never read from localStorage.
+   * We compare it against `timetable.created_by` (also DB-issued) to
+   * decide ownership.
+   */
   const isOwner = String(timetable.created_by) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -407,7 +411,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
       setConfirmDelete(false);
     } else {
       setConfirmDelete(true);
-      // Auto-reset confirmation after 3 s if user doesn't confirm
       setTimeout(() => setConfirmDelete(false), 3000);
     }
   };
@@ -419,7 +422,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
         <div className="timetable-card-title">
           <h3>{timetable.name}</h3>
 
-          {/* Meta row: class count + creator badge */}
           <div className="timetable-meta-row">
             <span className="timetable-meta">
               <Clock size={11} />
@@ -427,14 +429,12 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
               {timetable.classes.length !== 1 ? "es" : ""}
             </span>
 
-            {/* Creator badge — always visible */}
             <CreatorBadge name={timetable.created_by_name} isOwner={isOwner} />
           </div>
         </div>
 
         {/* ── Actions ── */}
         <div className="timetable-card-actions">
-          {/* Delete button — ONLY rendered for the owner */}
           {isOwner && (
             <button
               className="btn-delete"
@@ -459,7 +459,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
             </button>
           )}
 
-          {/* Collapse / expand toggle */}
           <button
             className="btn-collapse"
             onClick={() => setCollapsed((p) => !p)}
@@ -529,7 +528,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
               const span = spanCount(cls.startTime, cls.endTime);
               const colors = CLASS_COLORS[cls.colorIdx] || CLASS_COLORS[0];
               const isCompact = span === 1;
-
               const duration = formatDuration(cls.startTime, cls.endTime);
 
               return (
@@ -547,7 +545,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
                 >
                   <p className="block-subject">{cls.subject}</p>
 
-                  {/* Full block: show location + time range below subject */}
                   {!isCompact && (
                     <>
                       {cls.location && (
@@ -565,7 +562,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
                     </>
                   )}
 
-                  {/* Compact block: tooltip always shown on hover */}
                   {isCompact && (
                     <div className="block-tooltip">
                       <strong>{cls.subject}</strong>
@@ -600,7 +596,14 @@ const Timetable = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user, loading: authLoading } = useAuth();
+
+  /**
+   * `user`      – object whose `.id` is the database-issued user ID,
+   *               populated from /api/auth/me. Never sourced from localStorage.
+   * `getToken`  – returns the in-memory JWT; components never call
+   *               localStorage.getItem("token") directly.
+   */
+  const { user, loading: authLoading, getToken } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
 
   // ── Fetch timetables ──────────────────────────────────────────
@@ -612,7 +615,8 @@ const Timetable = () => {
       const res = await fetch(
         `${API}/api/timetables?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          // Token comes from memory via getToken(), not from localStorage
+          headers: { Authorization: `Bearer ${getToken()}` },
         },
       );
       const contentType = res.headers.get("content-type") || "";
@@ -631,7 +635,7 @@ const Timetable = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, selectedProgram, selectedYear]);
+  }, [user?.id, selectedProgram, selectedYear, getToken]);
 
   useEffect(() => {
     fetchTimetables();
@@ -645,12 +649,19 @@ const Timetable = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // Token comes from memory via getToken(), not from localStorage
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           name: newTimetable.name,
           department: selectedProgram,
           year: selectedYear,
+          /**
+           * `user.id` is the database-issued ID returned by /api/auth/me
+           * (or /api/auth/login). It was never stored in localStorage and
+           * is never read from there — the server is the single source of
+           * truth for the user's identity.
+           */
           created_by: user.id,
           classes: newTimetable.classes,
         }),
@@ -675,8 +686,13 @@ const Timetable = () => {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // Token comes from memory via getToken(), not from localStorage
+          Authorization: `Bearer ${getToken()}`,
         },
+        /**
+         * `student_id` is user.id — the database-issued ID from the server,
+         * not anything retrieved from localStorage.
+         */
         body: JSON.stringify({ student_id: user.id }),
       });
       if (!res.ok) {
@@ -762,6 +778,11 @@ const Timetable = () => {
               key={tt.id}
               timetable={tt}
               onDelete={handleDelete}
+              /**
+               * Pass the DB-issued user ID down to the grid so it can
+               * determine ownership by comparing against timetable.created_by.
+               * This value never touches localStorage.
+               */
               currentUserId={user.id}
             />
           ))}
