@@ -16,6 +16,7 @@ export default function StoreView() {
   const [storeData, setStoreData] = useState(null);
   const [isFavourited, setIsFavourited] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   useEffect(() => {
     fetchStoreById(decodedStore)
@@ -57,7 +58,6 @@ export default function StoreView() {
   const topSelling = [...items].sort((a, b) => (b.orders || 0) - (a.orders || 0)).slice(0, 3);
 
   const isOwnStore = user?.id && storeData?.ownerId === user.id;
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const categories = ["all", ...Array.from(new Set(items.map((p) => p.category).filter(Boolean)))];
   const filteredItems = categoryFilter === "all" ? items : items.filter((p) => p.category === categoryFilter);
 
