@@ -751,6 +751,9 @@ function ProfilePage() {
   }
 };
 
+const handleOnCoverChange = (e) => imageUpload.onCoverChange(e, setUser);
+const handleOnProfileChange = (e) => imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
+
   const handleSaveInterests = async (updatedInterests) => {
   await saveToBackend({ interests: updatedInterests });
   setUser((prev) => ({ ...prev, interests: updatedInterests }));
