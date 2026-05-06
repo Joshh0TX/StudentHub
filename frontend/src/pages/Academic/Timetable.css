@@ -1,6 +1,8 @@
+/* ── Page ── */
 .timetable-page {
   max-width: 1100px;
   width: 100%;
+  font-family: "Inter", system-ui, sans-serif;
 }
 
 /* ── Page Header ── */
@@ -26,7 +28,7 @@
 }
 
 /* ── Buttons ── */
-.btn-tcreate {
+.btn-create {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -42,7 +44,7 @@
   white-space: nowrap;
 }
 
-.btn-tcreate:hover {
+.btn-create:hover {
   background: #1d4ed8;
 }
 
@@ -50,8 +52,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   background: #f3f4f6;
   border: none;
   border-radius: 8px;
@@ -64,6 +66,7 @@
   background: #e5e7eb;
   color: #111827;
 }
+
 .btn-icon--danger:hover {
   background: #fee2e2;
   color: #dc2626;
@@ -99,32 +102,152 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* ── Card Header ── */
 .timetable-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
+  gap: 12px;
+}
+
+.timetable-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .timetable-card-title h3 {
   font-size: 16px;
   font-weight: 700;
   color: #111827;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timetable-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .timetable-meta {
   font-size: 12px;
   color: #6b7280;
-  margin-top: 2px;
-  display: block;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 
+/* ── Creator Badge ── */
+.timetable-creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* "Created by you" — highlighted in blue */
+.timetable-creator-badge--you {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* "Created by someone else" — muted grey */
+.timetable-creator-badge--other {
+  background: #f9fafb;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.creator-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.creator-avatar--you {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.creator-avatar--other {
+  background: #d1d5db;
+  color: #374151;
+}
+
+/* ── Card Actions ── */
 .timetable-card-actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Delete button — only rendered for owners, styled more prominently ── */
+.btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fff;
+  border: 1.5px solid #fca5a5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+/* ── Collapse toggle ── */
+.btn-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-collapse:hover {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 /* ── Grid Wrapper ── */
@@ -178,7 +301,7 @@
 /* ── Time Labels ── */
 .grid-time-label {
   display: flex;
-  align-items: flex-start; /* align to top of the hour row */
+  align-items: flex-start;
   justify-content: flex-end;
   padding: 2px 8px 0;
   font-size: 10px;
@@ -200,7 +323,6 @@
   min-height: 36px;
 }
 
-/* Stronger horizontal line at the top of each hour */
 .grid-cell--hour {
   border-top: 1px solid #e5e7eb;
 }
@@ -210,7 +332,7 @@
   margin: 2px 3px;
   padding: 0;
   border-radius: 6px;
-  overflow: visible; /* allow tooltip to overflow */
+  overflow: visible;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -221,7 +343,7 @@
     filter 0.15s ease,
     box-shadow 0.15s ease;
   box-sizing: border-box;
-  position: relative; /* needed for tooltip positioning */
+  position: relative;
 }
 
 .grid-class-block:hover {
@@ -230,7 +352,6 @@
   z-index: 10;
 }
 
-/* Subject — always the most prominent element */
 .block-subject {
   font-size: 12px;
   font-weight: 700;
@@ -239,12 +360,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Sticky to top so it's always visible even in tall blocks */
   position: sticky;
   top: 0;
 }
 
-/* Location */
 .block-location {
   font-size: 11px;
   font-weight: 500;
@@ -263,55 +382,98 @@
   flex-shrink: 0;
 }
 
-/* Compact block — single slot, very little vertical space */
+/* Time range shown inside full-height (non-compact) blocks */
+.block-time-range {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.75;
+  padding: 0 7px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.block-duration {
+  opacity: 0.65;
+  font-style: italic;
+}
+
 .grid-class-block--compact .block-subject {
   font-size: 11px;
   padding: 3px 6px;
 }
 
-/* ── Hover Tooltip for compact blocks ── */
+/* ── Hover Tooltip ── */
 .block-tooltip {
-  display: none; /* hidden by default */
+  display: none;
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   z-index: 100;
   background: #1e293b;
   color: #ffffff;
-  border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 160px;
-  max-width: 220px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 180px;
+  max-width: 260px;
   flex-direction: column;
-  gap: 3px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  gap: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   pointer-events: none;
   white-space: nowrap;
 }
 
+/* Subject — bold title */
 .block-tooltip strong {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   display: block;
+  color: #ffffff;
+  margin-bottom: 2px;
 }
 
-.block-tooltip span {
-  font-size: 11px;
-  opacity: 0.8;
+/* Location line */
+.block-tooltip-location {
+  font-size: 12px;
+  color: #cbd5e1;
   display: block;
 }
 
-/* Show tooltip on hover of compact blocks */
+/* Time range — most prominent info line */
+.block-tooltip-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Duration pill */
+.block-tooltip-duration {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #e2e8f0;
+  border-radius: 20px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+
 .grid-class-block--compact:hover .block-tooltip {
   display: flex;
 }
 
-/* Arrow on tooltip */
+/* Caret arrow pointing up at the block */
 .block-tooltip::before {
   content: "";
   position: absolute;
   top: -5px;
-  left: 12px;
+  left: 14px;
   width: 10px;
   height: 10px;
   background: #1e293b;
@@ -319,43 +481,41 @@
   border-radius: 2px;
 }
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .grid-day-full {
-    display: none;
-  }
-  .grid-day-short {
-    display: block;
-  }
-
-  .block-subject {
-    font-size: 10px;
-    padding: 3px 5px 2px;
-  }
-  .block-location {
-    font-size: 10px;
-    padding: 0 5px 3px;
-  }
-  .grid-class-block {
-    margin: 1px 2px;
-  }
+/* ── Loading / Error States ── */
+.groups-loading,
+.groups-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: #6b7280;
+  font-size: 14px;
 }
 
-@media (max-width: 480px) {
-  .timetable-header {
-    flex-direction: column;
-    align-items: flex-start;
+.groups-error {
+  color: #dc2626;
+}
+
+.btn-retry {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #1a3a6b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  .btn-create {
-    width: 100%;
-    justify-content: center;
-  }
-  .modal--large {
-    max-width: 100%;
-  }
-  .block-location {
-    display: none;
-  } /* hide location on very small screens */
 }
 
 /* ── Modal ── */
@@ -491,6 +651,7 @@
   font-family: inherit;
   background: #fff;
   transition: border-color 0.15s;
+  box-sizing: border-box;
 }
 
 .modal-body input:focus,
@@ -595,6 +756,7 @@
 .color-dot:hover {
   transform: scale(1.2);
 }
+
 .color-dot--active {
   border-color: #111827;
   transform: scale(1.15);
@@ -685,6 +847,23 @@
   .grid-day-short {
     display: block;
   }
+  .block-subject {
+    font-size: 10px;
+    padding: 3px 5px 2px;
+  }
+  .block-location {
+    font-size: 10px;
+    padding: 0 5px 3px;
+  }
+  .grid-class-block {
+    margin: 1px 2px;
+  }
+  .btn-delete span {
+    display: none;
+  }
+  .btn-delete {
+    padding: 6px 8px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -698,5 +877,11 @@
   }
   .modal--large {
     max-width: 100%;
+  }
+  .block-location {
+    display: none;
+  }
+  .timetable-meta-row {
+    flex-wrap: wrap;
   }
 }
