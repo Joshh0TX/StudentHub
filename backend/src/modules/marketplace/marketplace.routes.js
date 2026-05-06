@@ -39,7 +39,15 @@ router.get("/store/:ownerId", async (req, res) => {
       },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
-    res.json(store);
+    // normalize _count.orders to plain number
+    const normalized = {
+      ...store,
+      products: store.products.map((p) => ({
+        ...p,
+        _count: { orders: Number(p._count?.orders ?? 0) },
+      })),
+    };
+    res.json(normalized);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -178,19 +186,25 @@ router.get("/", async (req, res) => {
       },
     });
 
-    // get avg ratings via raw SQL to avoid Prisma client cache issues
-    const ratings = await prisma.$queryRaw`
-      SELECT "productId",
-             ROUND(AVG(rating)::numeric, 1)::float AS "avgRating",
-             COUNT(*)::int AS "reviewCount"
-      FROM "Review"
-      GROUP BY "productId"
-    `;
-
-    const ratingMap = {};
-    ratings.forEach((r) => {
-      ratingMap[r.productId] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
-    });
+    // try to get ratings — if it fails, just return products without ratings
+    let ratingMap = {};
+    try {
+      const ratings = await prisma.$queryRaw`
+        SELECT "productId",
+               ROUND(AVG(rating)::numeric, 1) AS "avgRating",
+               COUNT(*) AS "reviewCount"
+        FROM "Review"
+        GROUP BY "productId"
+      `;
+      ratings.forEach((r) => {
+        ratingMap[r.productId] = {
+          avgRating: r.avgRating ? parseFloat(r.avgRating) : null,
+          reviewCount: Number(r.reviewCount),
+        };
+      });
+    } catch (ratingErr) {
+      console.error("ratings fetch failed (non-fatal):", ratingErr.message);
+    }
 
     const withRating = products.map((p) => ({
       ...p,
@@ -207,25 +221,12 @@ router.get("/", async (req, res) => {
 
 router.get("/:id/reviews", async (req, res) => {
   try {
-    const reviews = await prisma.$queryRaw`
-      SELECT r.id, r."productId", r."userId", r.rating, r.text, r."createdAt",
-             u.id AS "user_id", u.f_name AS "user_f_name", u.l_name AS "user_l_name"
-      FROM "Review" r
-      LEFT JOIN "User" u ON u.id = r."userId"
-      WHERE r."productId" = ${req.params.id}
-      ORDER BY r."createdAt" DESC
-    `;
-    // reshape to match expected format
-    const shaped = reviews.map((r) => ({
-      id: r.id,
-      productId: r.productId,
-      userId: r.userId,
-      rating: r.rating,
-      text: r.text,
-      createdAt: r.createdAt,
-      user: r.user_id ? { id: r.user_id, f_name: r.user_f_name, l_name: r.user_l_name } : null,
-    }));
-    res.json(shaped);
+    const reviews = await prisma.review.findMany({
+      where: { productId: req.params.id },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(reviews);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -239,27 +240,13 @@ router.post("/:id/reviews", async (req, res) => {
   if (parsedRating < 1 || parsedRating > 5)
     return res.status(400).json({ error: "rating must be between 1 and 5" });
   try {
-    const id = require("crypto").randomUUID();
-    const safeText = text && text.trim() ? text.trim() : "";
-    await prisma.$executeRaw`
-      INSERT INTO "Review" (id, "productId", "userId", rating, text, "createdAt")
-      VALUES (${id}, ${req.params.id}, ${userId}, ${parsedRating}, ${safeText}, NOW())
-    `;
-    const rows = await prisma.$queryRaw`
-      SELECT r.id, r."productId", r."userId", r.rating, r.text, r."createdAt",
-             u.id AS "user_id", u.f_name AS "user_f_name", u.l_name AS "user_l_name"
-      FROM "Review" r
-      LEFT JOIN "User" u ON u.id = r."userId"
-      WHERE r.id = ${id}
-    `;
-    const r = rows[0];
-    res.status(201).json({
-      id: r.id, productId: r.productId, userId: r.userId,
-      rating: r.rating, text: r.text, createdAt: r.createdAt,
-      user: r.user_id ? { id: r.user_id, f_name: r.user_f_name, l_name: r.user_l_name } : null,
+    const review = await prisma.review.create({
+      data: { productId: req.params.id, userId, rating: parsedRating, text: text?.trim() || "" },
+      include: { user: { select: { id: true, f_name: true, l_name: true } } },
     });
+    res.status(201).json(review);
   } catch (error) {
-    if (error.message?.includes("unique") || error.code === "P2002")
+    if (error.code === "P2002")
       return res.status(409).json({ error: "You have already reviewed this product" });
     res.status(500).json({ error: error.message });
   }
