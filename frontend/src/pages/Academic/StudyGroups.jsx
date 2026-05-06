@@ -209,6 +209,7 @@ const CreateGroupModal = ({
 // ── Group Card ────────────────────────────────────────────────────
 const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId }) => {
   const navigate = useNavigate();
+  const isCreator = group.createdBy === currentUserId;
   const memberCount = isNaN(Number(group.member_count))
     ? 0
     : Number(group.member_count ?? 0);
