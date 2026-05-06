@@ -16,3 +16,11 @@ exports.getProfile = async (userId) => {
         },
     });
 };
+
+exports.updateProfile = async (userId, data) => {
+  const { bio, course, location, email, skills, interests, badges, achievements, projects, socials } = data;
+  return prisma.user.update({
+    where: { id: userId },
+    data: { bio, course, location, email, skills, interests, badges, achievements, projects, socials },
+  });
+};
