@@ -178,19 +178,22 @@ router.get("/", async (req, res) => {
       },
     });
 
-    // get avg ratings via raw SQL to avoid Prisma client cache issues
-    const ratings = await prisma.$queryRaw`
-      SELECT "productId",
-             ROUND(AVG(rating)::numeric, 1)::float AS "avgRating",
-             COUNT(*)::int AS "reviewCount"
-      FROM "Review"
-      GROUP BY "productId"
-    `;
-
-    const ratingMap = {};
-    ratings.forEach((r) => {
-      ratingMap[r.productId] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
-    });
+    // try to get ratings — if it fails, just return products without ratings
+    let ratingMap = {};
+    try {
+      const ratings = await prisma.$queryRaw`
+        SELECT "productId",
+               ROUND(AVG(rating)::numeric, 1)::float AS "avgRating",
+               COUNT(*)::int AS "reviewCount"
+        FROM "Review"
+        GROUP BY "productId"
+      `;
+      ratings.forEach((r) => {
+        ratingMap[r.productId] = { avgRating: r.avgRating, reviewCount: Number(r.reviewCount) };
+      });
+    } catch (ratingErr) {
+      console.error("ratings fetch failed (non-fatal):", ratingErr.message);
+    }
 
     const withRating = products.map((p) => ({
       ...p,
