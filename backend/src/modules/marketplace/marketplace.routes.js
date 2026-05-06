@@ -39,7 +39,15 @@ router.get("/store/:ownerId", async (req, res) => {
       },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
-    res.json(store);
+    // normalize _count.orders to plain number
+    const normalized = {
+      ...store,
+      products: store.products.map((p) => ({
+        ...p,
+        _count: { orders: Number(p._count?.orders ?? 0) },
+      })),
+    };
+    res.json(normalized);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -183,13 +191,16 @@ router.get("/", async (req, res) => {
     try {
       const ratings = await prisma.$queryRaw`
         SELECT "productId",
-               ROUND(AVG(rating)::numeric, 1)::float AS "avgRating",
-               COUNT(*)::int AS "reviewCount"
+               ROUND(AVG(rating)::numeric, 1) AS "avgRating",
+               COUNT(*) AS "reviewCount"
         FROM "Review"
         GROUP BY "productId"
       `;
       ratings.forEach((r) => {
-        ratingMap[r.productId] = { avgRating: r.avgRating, reviewCount: Number(r.reviewCount) };
+        ratingMap[r.productId] = {
+          avgRating: r.avgRating ? parseFloat(r.avgRating) : null,
+          reviewCount: Number(r.reviewCount),
+        };
       });
     } catch (ratingErr) {
       console.error("ratings fetch failed (non-fatal):", ratingErr.message);
