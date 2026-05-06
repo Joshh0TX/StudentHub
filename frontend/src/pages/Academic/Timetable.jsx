@@ -651,7 +651,6 @@ const Timetable = () => {
           name: newTimetable.name,
           department: selectedProgram,
           year: selectedYear,
-          created_by: user.id,
           classes: newTimetable.classes,
         }),
       });
@@ -677,7 +676,7 @@ const Timetable = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ student_id: user.id }),
+        body: JSON.stringify({}),
       });
       if (!res.ok) {
         const data = await res.json();
