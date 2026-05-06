@@ -28,4 +28,9 @@ app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  // log prisma client fields for debugging
+  const { Prisma } = require('@prisma/client');
+  console.log('Prisma Review fields:', Object.keys(Prisma.ReviewScalarFieldEnum || {}));
+});
