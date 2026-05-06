@@ -32,7 +32,8 @@ const getTimetables = async (req, res) => {
 // POST /api/timetables
 // Body: { name, student_id, classes: [{ subject, location, day, startTime, endTime, colorIdx }] }
 const createTimetable = async (req, res) => {
-  const { name, department, year, created_by, classes } = req.body;
+  const { name, department, year, classes } = req.body;
+  const createdBy = req.user.id; // ← from token
 
   if (!name) return res.status(400).json({ error: "name is required" });
   if (!department || !year)
@@ -46,7 +47,7 @@ const createTimetable = async (req, res) => {
         name,
         department,
         year: parseInt(year),
-        createdBy: created_by ?? null,
+        createdBy,
         classes: {
           create: classes.map((cls) => ({
             subject: cls.subject,
@@ -58,7 +59,12 @@ const createTimetable = async (req, res) => {
           })),
         },
       },
-      include: { classes: true },
+      include: {
+        classes: true,
+        creator: {
+          select: { f_name: true, l_name: true },
+        },
+      },
     });
     return res.status(201).json(timetable);
   } catch (err) {
@@ -69,7 +75,7 @@ const createTimetable = async (req, res) => {
 // DELETE /api/timetables/:id
 const deleteTimetable = async (req, res) => {
   const { id } = req.params;
-  const { student_id } = req.body;
+  const requesterId = req.user.id; // ← from token
 
   try {
     const timetable = await prisma.timetable.findUnique({
@@ -77,7 +83,7 @@ const deleteTimetable = async (req, res) => {
     });
     if (!timetable)
       return res.status(404).json({ error: "Timetable not found" });
-    if (String(timetable.createdBy) !== String(student_id))
+    if (String(timetable.createdBy) !== String(requesterId))
       return res.status(403).json({ error: "You can only delete your own timetables" });
 
     await prisma.timetable.delete({ where: { id: parseInt(id) } });
