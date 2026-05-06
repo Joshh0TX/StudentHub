@@ -150,7 +150,10 @@ const deleteGroup = async (req, res) => {
     if (group.createdBy !== requesterId)
       return res.status(403).json({ error: "Not authorised" });
 
+    // ← delete members first
+    await prisma.studyGroupMember.deleteMany({ where: { groupId: id } });
     await prisma.studyGroup.delete({ where: { id } });
+    
     return res.json({ message: "Group deleted" });
   } catch (err) {
     return res.status(500).json({ error: err.message });

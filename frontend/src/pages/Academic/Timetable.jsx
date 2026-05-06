@@ -429,7 +429,15 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
               {timetable.classes.length !== 1 ? "es" : ""}
             </span>
 
-            <CreatorBadge name={timetable.created_by_name} isOwner={isOwner} />
+            {/* Creator badge — always visible */}
+            <CreatorBadge
+              name={
+                timetable.creator
+                  ? `${timetable.creator.f_name} ${timetable.creator.l_name}`
+                  : null
+              }
+              isOwner={isOwner}
+            />
           </div>
         </div>
 

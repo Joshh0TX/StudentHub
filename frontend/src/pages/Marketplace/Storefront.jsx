@@ -2,7 +2,7 @@ import "./Storefront.css";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  fetchStore, fetchProducts, createProduct, updateProduct,
+  fetchStore, createProduct, updateProduct,
   deleteProduct, fetchStoreOrders, updateOrderStatus, updateStore,
 } from "./marketplaceApi";
 import { categoriesByType } from "./marketplaceData";
@@ -32,12 +32,9 @@ export default function Storefront() {
       .then((storeData) => {
         if (!storeData || storeData.error) return;
         setStore(storeData);
-        return Promise.all([
-          fetchProducts().then((all) =>
-            setProducts(all.filter((p) => p.storeId === storeData.id || p.store?.id === storeData.id))
-          ),
-          fetchStoreOrders(storeData.id).then((o) => setOrders(Array.isArray(o) ? o : [])),
-        ]);
+        // use products directly from store fetch (includes _count.orders)
+        setProducts(storeData.products || []);
+        return fetchStoreOrders(storeData.id).then((o) => setOrders(Array.isArray(o) ? o : []));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
