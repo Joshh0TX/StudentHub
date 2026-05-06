@@ -8,24 +8,13 @@ const {
   deleteGroup,
   joinGroup,
 } = require('../controllers/groups.controller');
+const authMiddleware = require('../../auth/authMiddleware');
 
-// Uncomment when auth middleware is ready:
-// const { protect } = require('../../middleware/auth');
-
-// GET  /api/groups?department=CSC&year=300
 router.get('/', getGroups);
-
-// GET  /api/groups/:id
-router.get("/my-groups", getMyGroups);
+router.get("/my-groups", authMiddleware, getMyGroups);
 router.get("/:id", getGroupById);
-
-// POST /api/groups
-router.post('/', /* protect, */ createGroup);
-
-//POST /api/groups/:id
-router.post("/:id/join", joinGroup);
-
-// DELETE /api/groups/:id
-router.delete('/:id', /* protect, */ deleteGroup);
+router.post('/', authMiddleware, createGroup);
+router.post("/:id/join", authMiddleware, joinGroup);
+router.delete('/:id', authMiddleware, deleteGroup);
 
 module.exports = router;

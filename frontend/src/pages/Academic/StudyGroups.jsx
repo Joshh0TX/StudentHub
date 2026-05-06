@@ -207,8 +207,9 @@ const CreateGroupModal = ({
 };
 
 // ── Group Card ────────────────────────────────────────────────────
-const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
+const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId }) => {
   const navigate = useNavigate();
+  const isCreator = group.createdBy === currentUserId;
   const memberCount = isNaN(Number(group.member_count))
     ? 0
     : Number(group.member_count ?? 0);
@@ -239,6 +240,12 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
         {group.description || "No description provided."}
       </p>
 
+      {group.creator && (
+        <p className="group-creator">
+          Created by {group.creator.f_name} {group.creator.l_name}
+        </p>
+      )}
+
       {isMember && <span className="member-badge">✓ You are a member</span>}
       {isFull && !isMember && <span className="full-badge">Group Full</span>}
 
@@ -259,6 +266,11 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
         <button className="btn-details" onClick={handleViewDetails}>
           View Details
         </button>
+        {isCreator && (
+          <button className="btn-delete" onClick={() => onDelete(group.id)}>
+            Delete Group
+          </button>
+        )}
       </div>
     </div>
   );
@@ -290,7 +302,7 @@ const StudyGroups = () => {
         apiFetch(
           `/api/groups?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         ),
-        apiFetch(`/api/groups/my-groups?student_id=${user.id}`), // ← safe: user.id guarded above
+        apiFetch(`/api/groups/my-groups`), 
       ]);
 
       const safeGroups = Array.isArray(allData) ? allData : [];
@@ -322,7 +334,7 @@ const StudyGroups = () => {
     try {
       await apiFetch(`/api/groups/${groupId}/join`, {
         method: "POST",
-        body: JSON.stringify({ student_id: user.id }),
+        body: JSON.stringify({}),
       });
 
       setGroups((prev) =>
@@ -337,6 +349,21 @@ const StudyGroups = () => {
       alert(err.message);
     } finally {
       setJoiningId(null);
+    }
+  };
+
+  const handleDelete = async (groupId) => {
+    if (!window.confirm("Delete this group?")) return;
+    try {
+      await apiFetch(`/api/groups/${groupId}`, { method: "DELETE" });
+      setGroups((prev) => prev.filter((g) => g.id !== groupId));
+      setMyGroupIds((prev) => {
+        const next = new Set(prev);
+        next.delete(groupId);
+        return next;
+      });
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -437,12 +464,14 @@ const StudyGroups = () => {
         <div className="groups-grid">
           {visibleGroups.map((group) => (
             <GroupCard
-              key={group.id}
-              group={group}
-              onJoin={handleJoin}
-              isMember={myGroupIds.has(group.id)}
-              isJoining={joiningId === group.id}
-            />
+            key={group.id}
+            group={group}
+            onJoin={handleJoin}
+            onDelete={handleDelete}
+            isMember={myGroupIds.has(group.id)}
+            isJoining={joiningId === group.id}
+            currentUserId={user.id}
+          />
           ))}
         </div>
       )}

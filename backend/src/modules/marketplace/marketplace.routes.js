@@ -12,17 +12,13 @@ router.get("/store/view/:storeId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
       where: { id: req.params.storeId },
-      include: {
-        contacts: true,
-        products: {
-          include: { _count: { select: { orders: true } } },
-        },
-      },
+      include: { contacts: true, products: true },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
     prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});
     res.json(store);
   } catch (error) {
+    console.error("store/view error:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -31,23 +27,28 @@ router.get("/store/:ownerId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
       where: { ownerId: req.params.ownerId },
-      include: {
-        contacts: true,
-        products: {
-          include: { _count: { select: { orders: true } } },
-        },
-      },
+      include: { contacts: true, products: true },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
-    // normalize _count.orders to plain number
-    const normalized = {
-      ...store,
-      products: store.products.map((p) => ({
-        ...p,
-        _count: { orders: Number(p._count?.orders ?? 0) },
-      })),
-    };
-    res.json(normalized);
+
+    // get order counts per product via raw SQL
+    let orderMap = {};
+    try {
+      const counts = await prisma.$queryRaw`
+        SELECT "productId", COUNT(*) AS cnt
+        FROM "Order"
+        WHERE "productId" = ANY(${store.products.map(p => p.id)})
+        GROUP BY "productId"
+      `;
+      counts.forEach((c) => { orderMap[c.productId] = Number(c.cnt); });
+    } catch (e) { console.error("order count failed:", e.message); }
+
+    const products = store.products.map((p) => ({
+      ...p,
+      _count: { orders: orderMap[p.id] ?? 0 },
+    }));
+
+    res.json({ ...store, products });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
