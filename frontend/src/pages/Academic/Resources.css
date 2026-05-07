@@ -432,8 +432,6 @@
   outline: none;
   transition: border-color 0.15s ease;
   font-family: inherit;
-  background: #fff;
-  box-sizing: border-box;
 }
 
 .modal-Rbody input:focus,
