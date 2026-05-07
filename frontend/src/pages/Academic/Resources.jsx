@@ -179,7 +179,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
       className="modal-overlay"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="modal">
+      <div className="modal--resource">
         <div className="modal-header">
           <h2>Add Resource</h2>
           <button className="modal-close" onClick={onClose}>
@@ -211,31 +211,35 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
           </div>
 
           {/* ── Title ── */}
-          <label>
-            Resource Name <span>*</span>
-          </label>
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="e.g. LeetCode Algorithm Practice"
-            maxLength={100}
-          />
+          <div className="modal-field">
+            <label>
+              Resource Name <span>*</span>
+            </label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="e.g. LeetCode Algorithm Practice"
+              maxLength={100}
+            />
+          </div>
 
           {/* ── Description ── */}
-          <label>Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="What is this resource about?"
-            rows={3}
-            maxLength={300}
-          />
+          <div className="modal-field">
+            <label>Description</label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="What is this resource about?"
+              rows={3}
+              maxLength={300}
+            />
+          </div>
 
           {/* ── Course Code + Title ── */}
           <div className="modal-two-col">
-            <div>
+            <div className="modal-field">
               <label>
                 Course Code <span>*</span>
               </label>
@@ -247,7 +251,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                 maxLength={20}
               />
             </div>
-            <div>
+            <div className="modal-field">
               <label>Course Title</label>
               <input
                 name="course_title"
@@ -260,31 +264,33 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
           </div>
 
           {/* ── Tag selector ── */}
-          <label>Resource Type</label>
-          <div className="tag-selector">
-            {TAGS.map((t) => (
-              <button
-                key={t.label}
-                className={`tag-option ${form.tag === t.label ? "tag-option--active" : ""}`}
-                style={
-                  form.tag === t.label
-                    ? {
-                        backgroundColor: t.bg,
-                        color: t.color,
-                        borderColor: t.color,
-                      }
-                    : {}
-                }
-                onClick={() => setForm((p) => ({ ...p, tag: t.label }))}
-              >
-                <t.Icon size={13} /> {t.label}
-              </button>
-            ))}
+          <div className="modal-field">
+            <label>Resource Type</label>
+            <div className="tag-selector">
+              {TAGS.map((t) => (
+                <button
+                  key={t.label}
+                  className={`tag-option ${form.tag === t.label ? "tag-option--active" : ""}`}
+                  style={
+                    form.tag === t.label
+                      ? {
+                          backgroundColor: t.bg,
+                          color: t.color,
+                          borderColor: t.color,
+                        }
+                      : {}
+                  }
+                  onClick={() => setForm((p) => ({ ...p, tag: t.label }))}
+                >
+                  <t.Icon size={13} /> {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Link input ── */}
           {form.resourceType === "link" && (
-            <>
+            <div className="modal-field">
               <label>
                 URL <span>*</span>
               </label>
@@ -295,12 +301,12 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                 placeholder="https://..."
                 type="url"
               />
-            </>
+            </div>
           )}
 
           {/* ── File upload ── */}
           {form.resourceType === "file" && (
-            <>
+            <div className="modal-field">
               <label>
                 File <span>*</span>
               </label>
@@ -350,7 +356,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                   </div>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {/* ── Context info ── */}

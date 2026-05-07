@@ -345,69 +345,24 @@
   padding: 16px;
 }
 
-/* ── Modal ── */
-.modal--resource {
-  background: #ffffff;
-  border-radius: 14px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 100vh;
-  margin-top: 53px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 0;
-}
-
-.modal-header h2 {
-  font-size: 17px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-}
-
-.modal-close:hover {
-  color: #111827;
-}
-
-.modal-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 24px 0;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 8px;
-}
-
 /* ── Modal Body ── */
 .modal-Rbody {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px; /* increased from 12px for more breathing room */
 }
 
 .modal-Rbody--scroll {
   max-height: 500px;
   overflow-y: auto;
+}
+
+/* ── Field Group (label + input wrapper) ── */
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* tight gap between label and its input */
 }
 
 .modal-Rbody label {
@@ -424,16 +379,17 @@
 .modal-Rbody input,
 .modal-Rbody textarea {
   width: 100%;
-  padding: 9px 12px;
+  padding: 10px 14px;
   font-size: 14px;
   color: #111827;
   border: 1.5px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 10px; /* increased from 8px to match image */
   outline: none;
   transition: border-color 0.15s ease;
   font-family: inherit;
   background: #fff;
   box-sizing: border-box;
+  /* removed resize: none so textarea shows handle like image */
 }
 
 .modal-Rbody input:focus,
@@ -445,6 +401,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+/* each cell in two-col also gets field layout */
+.modal-two-col .modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .modal-context {
