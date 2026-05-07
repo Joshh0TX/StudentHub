@@ -15,7 +15,7 @@ router.get("/store/view/:storeId", async (req, res) => {
       include: {
         contacts: true,
         products: true,
-        owner: { select: { id: true, f_name: true, l_name: true } },
+        owner: { select: { id: true, f_name: true, l_name: true, profileImage: true } },
       },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });

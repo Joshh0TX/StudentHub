@@ -84,6 +84,7 @@
   place-items: center;
   flex-shrink: 0;
   text-transform: uppercase;
+  overflow: hidden;
 }
 
 .storeOwnerName {
