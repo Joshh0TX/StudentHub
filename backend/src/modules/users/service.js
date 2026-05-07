@@ -18,9 +18,17 @@ exports.getProfile = async (userId) => {
 };
 
 exports.updateProfile = async (userId, data) => {
-  const { bio, course, location, email, skills, interests, badges, achievements, projects, socials } = data;
+  const allowedFields = ['bio', 'course', 'location', 'email', 'skills', 'interests', 'badges', 'achievements', 'projects', 'socials', 'profileImage', 'coverImage'];
+  
+  const updateData = {};
+  allowedFields.forEach(field => {
+    if (data[field] !== undefined) {
+      updateData[field] = data[field];
+    }
+  });
+
   return prisma.user.update({
     where: { id: userId },
-    data: { bio, course, location, email, skills, interests, badges, achievements, projects, socials },
+    data: updateData,
   });
 };
