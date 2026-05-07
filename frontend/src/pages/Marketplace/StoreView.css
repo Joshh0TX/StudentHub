@@ -76,8 +76,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: color-mix(in oklch, var(--primary) 25%, var(--secondary));
-  color: var(--primary);
+  background: #4f46e5;
+  color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
   display: grid;
