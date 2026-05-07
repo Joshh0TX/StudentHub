@@ -54,6 +54,43 @@
   margin: 4px 0 2px;
 }
 
+.storeOwnerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  text-decoration: none;
+  color: var(--foreground);
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px 4px 4px;
+  transition: background 150ms;
+}
+
+.storeOwnerChip:hover {
+  background: color-mix(in oklch, var(--primary) 10%, var(--secondary));
+}
+
+.storeOwnerInitials {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--primary) 25%, var(--secondary));
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.storeOwnerName {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .favouriteBtn {
   background: none;
   border: 1.5px solid var(--border);
