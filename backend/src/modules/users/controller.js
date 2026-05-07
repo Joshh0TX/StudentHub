@@ -39,6 +39,7 @@ exports.uploadProfileImage = async (req, res) => {
 
 exports.uploadCoverImage = async (req, res) => {
   try {
+    console.log("req.file:", req.file);
     const userId = req.user.id;
     const imageUrl = req.file.path;
     const updated = await userService.updateProfile(userId, { coverImage: imageUrl });
