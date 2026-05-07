@@ -193,7 +193,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
           </div>
         )}
 
-        <div className="modal-body modal-body--scroll">
+        <div className="modal-Rbody modal-Rbody--scroll">
           {/* ── Resource type toggle ── */}
           <div className="resource-type-toggle">
             <button

@@ -398,31 +398,31 @@
 }
 
 /* ── Modal Body ── */
-.modal-body {
+.modal-Rbody {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.modal-body--scroll {
+.modal-Rbody--scroll {
   max-height: 500px;
   overflow-y: auto;
 }
 
-.modal-body label {
+.modal-Rbody label {
   font-size: 13px;
   font-weight: 600;
   color: #374151;
 }
 
-.modal-body label span {
+.modal-Rbody label span {
   color: #ef4444;
   margin-left: 2px;
 }
 
-.modal-body input,
-.modal-body textarea {
+.modal-Rbody input,
+.modal-Rbody textarea {
   width: 100%;
   padding: 9px 12px;
   font-size: 14px;
@@ -436,8 +436,8 @@
   box-sizing: border-box;
 }
 
-.modal-body input:focus,
-.modal-body textarea:focus {
+.modal-Rbody input:focus,
+.modal-Rbody textarea:focus {
   border-color: #3b82f6;
 }
 
