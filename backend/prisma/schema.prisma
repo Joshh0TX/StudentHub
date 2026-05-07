@@ -27,6 +27,8 @@ model User {
   projects    Json?
   socials    Json?
   createdAt  DateTime @default(now())
+  requestsSent     FriendRequest[] @relation("RequestsSent")
+  requestsReceived FriendRequest[] @relation("RequestsReceived")
 
   // Academic
   courseMemberships CourseMember[]
@@ -276,4 +278,17 @@ model StoreFavourite {
   user  User  @relation(fields: [userId], references: [id])
 
   @@unique([storeId, userId])
+}
+
+model FriendRequest {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("RequestsSent", fields: [senderId], references: [id])
+  receiver User @relation("RequestsReceived", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
 }

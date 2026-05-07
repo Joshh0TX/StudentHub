@@ -79,6 +79,20 @@ export default function StoreView() {
           <div>
             <h1>{storeName}</h1>
             {storeData?.description && <p className="storeViewDesc">{storeData.description}</p>}
+            {storeData?.owner && (
+              <Link
+                to={`/profile`}
+                className="storeOwnerChip"
+                title="View seller profile"
+              >
+                <span className="storeOwnerInitials">
+                  {storeData.owner.profileImage
+                    ? <img src={storeData.owner.profileImage} alt={storeData.owner.f_name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                    : `${storeData.owner.f_name[0]}${storeData.owner.l_name[0]}`}
+                </span>
+                <span className="storeOwnerName">{storeData.owner.f_name} {storeData.owner.l_name}</span>
+              </Link>
+            )}
           </div>
         </div>
         {!isOwnStore && (
