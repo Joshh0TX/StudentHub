@@ -7,6 +7,8 @@ const resourceRoutes = require('./modules/academic/routes/resources.routes');
 const userRoutes = require('./modules/users/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
+const postRoutes = require('./modules/social/post.routes');
+
 
 const app = express();
 app.use(cors({
@@ -39,6 +41,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', require('./modules/auth/routes'));
 app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
+app.use('/api/posts', postRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
