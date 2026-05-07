@@ -22,7 +22,7 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.options('*', cors());
+app.options('/(.*)', cors());
 app.use(express.json());
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
