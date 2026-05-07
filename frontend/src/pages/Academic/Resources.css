@@ -434,7 +434,6 @@
   font-family: inherit;
   background: #fff;
   box-sizing: border-box;
-  resize: none; /* ← add this line */
 }
 
 .modal-Rbody input:focus,
