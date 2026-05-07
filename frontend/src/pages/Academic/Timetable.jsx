@@ -374,7 +374,7 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
    * We compare it against `timetable.created_by` (also DB-issued) to
    * decide ownership.
    */
-  const isOwner = String(timetable.created_by) === String(currentUserId);
+  const isOwner = String(timetable.createdBy) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -430,13 +430,9 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
             </span>
 
             {/* Creator badge — always visible */}
-            <CreatorBadge
-              name={
-                timetable.creator
-                  ? `${timetable.creator.f_name} ${timetable.creator.l_name}`
-                  : null
-              }
-              isOwner={isOwner}
+            <CreatorBadge 
+              name={timetable.creator ? `${timetable.creator.f_name} ${timetable.creator.l_name}` : null} 
+              isOwner={isOwner} 
             />
           </div>
         </div>
