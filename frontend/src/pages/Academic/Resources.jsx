@@ -179,7 +179,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
       className="modal-overlay"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="modal modal--resource">
+      <div className="modal">
         <div className="modal-header">
           <h2>Add Resource</h2>
           <button className="modal-close" onClick={onClose}>
@@ -229,7 +229,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             value={form.description}
             onChange={handleChange}
             placeholder="What is this resource about?"
-            rows={2}
+            rows={3}
             maxLength={300}
           />
 
