@@ -1,12 +1,13 @@
+/* ── Page ── */
 .resources-page {
-  max-width: 860px;
+  max-width: 1100px;
   width: 100%;
 }
 
 /* ── Page Header ── */
 .resources-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
   gap: 16px;
@@ -29,37 +30,37 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
 }
 
+/* ── Buttons ── */
 .btn-add-resource {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
-  font-size: 13px;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background: #2563eb;
+  background-color: #1a3a6b;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease;
   white-space: nowrap;
+  transition: background-color 0.15s ease;
 }
 
 .btn-add-resource:hover {
-  background: #1d4ed8;
+  background-color: #1b54f1;
 }
 
 .btn-refresh-sm {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: #f3f4f6;
-  border: none;
+  width: 48px;
+  height: 38px;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
   color: #6b7280;
@@ -67,28 +68,26 @@
 }
 
 .btn-refresh-sm:hover {
-  background: #e5e7eb;
+  border-color: #9ca3af;
   color: #111827;
 }
 
-/* ── Empty state ── */
-.resources-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 56px 24px;
-  background: #ffffff;
-  border: 1px dashed #d1d5db;
-  border-radius: 12px;
-  color: #9ca3af;
+.btn-retry {
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #dc2626;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.resources-empty-state p {
-  font-size: 14px;
+.btn-retry:hover {
+  background: #b91c1c;
 }
 
-/* ── Loading / Error shared ── */
+/* ── Loading State ── */
 .groups-loading {
   display: flex;
   align-items: center;
@@ -98,6 +97,7 @@
   padding: 32px 0;
 }
 
+/* ── Error State ── */
 .groups-error {
   display: flex;
   flex-direction: column;
@@ -110,17 +110,7 @@
   border-radius: 10px;
 }
 
-.btn-retry {
-  padding: 7px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  background: #dc2626;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
+/* ── Spinner ── */
 .spinner {
   animation: spin 0.8s linear infinite;
 }
@@ -134,13 +124,37 @@
   }
 }
 
-/* ── Cards ── */
+/* ── Empty State ── */
+.resources-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 24px;
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  color: #9ca3af;
+}
+
+.resources-empty-state p {
+  font-size: 15px;
+}
+
+.resources-empty {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 16px;
+}
+
+/* ── Resource List ── */
 .resources-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
+/* ── Resource Card ── */
 .resource-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -152,7 +166,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
   background: #f8f9fb;
 }
@@ -163,7 +177,7 @@
   color: #111827;
 }
 .course-title {
-  font-size: 12px;
+  font-size: 13px;
   color: #6b7280;
 }
 
@@ -177,22 +191,22 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid #f3f4f6;
-  transition: background 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .resource-item:last-child {
   border-bottom: none;
 }
 .resource-item:hover {
-  background: #fafafa;
+  background-color: #fafafa;
 }
 
-/* Icon bubble */
+/* ── Icon Bubble ── */
 .resource-icon-bubble {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -200,17 +214,17 @@
   flex-shrink: 0;
 }
 
-/* Text block */
+/* ── Resource Info ── */
 .resource-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
 }
 
 .resource-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
   white-space: nowrap;
@@ -219,7 +233,7 @@
 }
 
 .resource-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: #6b7280;
   white-space: nowrap;
   overflow: hidden;
@@ -234,14 +248,17 @@
   margin-top: 2px;
 }
 
+/* ── Tag Pill ── */
 .resource-tag {
   display: inline-block;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
   border-radius: 999px;
+  width: fit-content;
 }
 
+/* ── File / Creator meta ── */
 .resource-filename {
   display: flex;
   align-items: center;
@@ -256,7 +273,7 @@
   font-style: italic;
 }
 
-/* ── Action buttons ── */
+/* ── Resource Actions ── */
 .resource-actions {
   display: flex;
   align-items: center;
@@ -268,52 +285,59 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 10px;
-  border-radius: 7px;
-  border: none;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.15s ease;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .resource-action-btn--link {
-  color: #2563eb;
+  color: #1a3a6b;
   background: #eff6ff;
+  border-color: #bfdbfe;
 }
 .resource-action-btn--link:hover {
   background: #dbeafe;
+  border-color: #93c5fd;
 }
 
 .resource-action-btn--download {
   color: #065f46;
   background: #d1fae5;
+  border-color: #6ee7b7;
 }
 .resource-action-btn--download:hover {
   background: #a7f3d0;
+  border-color: #34d399;
 }
 
 .resource-action-btn--delete {
-  color: #9ca3af;
-  background: #f9fafb;
+  color: #6b7280;
+  background: #ffffff;
+  border-color: #e5e7eb;
 }
 .resource-action-btn--delete:hover {
   color: #dc2626;
   background: #fee2e2;
+  border-color: #fca5a5;
 }
 
 .resource-action-btn--confirm {
   color: #dc2626;
   background: #fee2e2;
-  border: 1px solid #fca5a5;
+  border-color: #fca5a5;
 }
 
-/* ── Modal ── */
+/* ── Modal Overlay ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,15 +345,18 @@
   padding: 16px;
 }
 
+/* ── Modal ── */
 .modal--resource {
   background: #ffffff;
   border-radius: 14px;
   width: 100%;
   max-width: 560px;
-  max-height: 92vh;
+  max-height: 100vh;
+  margin-top: 53px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .modal-header {
@@ -370,16 +397,17 @@
   border-radius: 8px;
 }
 
+/* ── Modal Body ── */
 .modal-body {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
 }
 
 .modal-body--scroll {
   max-height: 500px;
+  overflow-y: auto;
 }
 
 .modal-body label {
@@ -402,9 +430,9 @@
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
   outline: none;
+  transition: border-color 0.15s ease;
   font-family: inherit;
   background: #fff;
-  transition: border-color 0.15s;
   box-sizing: border-box;
 }
 
@@ -429,7 +457,7 @@
   color: #6b7280;
 }
 
-/* ── Resource type toggle ── */
+/* ── Resource Type Toggle ── */
 .resource-type-toggle {
   display: flex;
   gap: 8px;
@@ -457,11 +485,12 @@
 
 .type-btn--active {
   background: #ffffff;
-  color: #111827;
+  color: #1a3a6b;
+  font-weight: 600;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* ── Tag selector ── */
+/* ── Tag Selector ── */
 .tag-selector {
   display: flex;
   flex-wrap: wrap;
@@ -484,10 +513,13 @@
 }
 
 .tag-option--active {
-  font-weight: 600;
+  font-weight: 700;
+}
+.tag-option:hover {
+  border-color: #9ca3af;
 }
 
-/* ── File dropzone ── */
+/* ── File Dropzone ── */
 .file-dropzone {
   border: 2px dashed #d1d5db;
   border-radius: 10px;
@@ -498,9 +530,10 @@
 }
 
 .file-dropzone--over {
-  border-color: #3b82f6;
+  border-color: #1a3a6b;
   background: #eff6ff;
 }
+
 .file-dropzone--has-file {
   border-color: #6ee7b7;
   background: #f0fdf4;
@@ -518,7 +551,7 @@
 }
 
 .file-prompt span {
-  color: #2563eb;
+  color: #1a3a6b;
   font-weight: 600;
 }
 
@@ -563,7 +596,7 @@
   background: #fee2e2;
 }
 
-/* ── Modal footer ── */
+/* ── Modal Footer ── */
 .modal-footer {
   display: flex;
   gap: 10px;
@@ -577,7 +610,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #374151;
-  background: #fff;
+  background: #ffffff;
   border: 1.5px solid #d1d5db;
   border-radius: 10px;
   cursor: pointer;
@@ -596,25 +629,26 @@
   padding: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  background: #2563eb;
+  color: #ffffff;
+  background: #1a3a6b;
   border: none;
   border-radius: 10px;
   cursor: pointer;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #1b54f1;
 }
 .btn-submit:disabled {
   background: #93c5fd;
   cursor: not-allowed;
 }
 
-/* ── Responsive ── */
+/* ── Tablet (max 768px) ── */
 @media (max-width: 768px) {
   .resources-header {
     flex-direction: column;
+    align-items: flex-start;
   }
   .modal-two-col {
     grid-template-columns: 1fr;
@@ -622,8 +656,15 @@
   .resource-desc {
     display: none;
   }
+  .resources-header h1 {
+    font-size: 20px;
+  }
+  .resource-name {
+    font-size: 14px;
+  }
 }
 
+/* ── Mobile (max 480px) ── */
 @media (max-width: 480px) {
   .resource-item {
     padding: 12px;
@@ -634,6 +675,13 @@
   }
   .modal--resource {
     max-width: 100%;
-    border-radius: 14px 14px 0 0;
+  }
+  .resources-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-add-resource {
+    width: 100%;
+    justify-content: center;
   }
 }
