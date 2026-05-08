@@ -28,28 +28,37 @@
   margin-bottom: 18px;
 }
 
-.storefrontStats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+.storefrontStatPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.statCard {
+.storefrontStatPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 999px;
   background: var(--secondary);
-  border-radius: 16px;
-  padding: 14px;
   border: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
 }
 
-.statValue {
-  font-size: 1.4rem;
+.storefrontStatPill strong {
+  color: var(--foreground);
   font-weight: 700;
 }
 
-.statLabel {
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
+.storefrontStatPillPending {
+  background: color-mix(in oklch, var(--chart-4) 15%, var(--secondary));
+  border-color: color-mix(in oklch, var(--chart-4) 30%, var(--border));
+}
+
+.storefrontStatPillPending strong {
+  color: color-mix(in oklch, var(--chart-4) 90%, var(--foreground));
 }
 
 .storefrontGrid {

@@ -79,6 +79,10 @@ export default function StoreView() {
           <div>
             <h1>{storeName}</h1>
             {storeData?.description && <p className="storeViewDesc">{storeData.description}</p>}
+            <div className="storeViewStatPills">
+              <span className="storeViewStatPill"><strong>{storeData?.visits ?? 0}</strong> visits</span>
+              <span className="storeViewStatPill"><strong>{items.length}</strong> products</span>
+            </div>
             {storeData?.owner && (
               <Link
                 to={`/profile`}
@@ -110,29 +114,17 @@ export default function StoreView() {
         )}
       </header>
 
-      <section className="storeViewStats">
-        <div className="storeStat">
-          <div className="storeStatValue">{storeData?.visits ?? 0}</div>
-          <div className="storeStatLabel">Visits</div>
-        </div>
-        <div className="storeStat">
-          <div className="storeStatValue">{items.length}</div>
-          <div className="storeStatLabel">Products</div>
-        </div>
-      </section>
-
       <section className="storeViewSection">
         <h2>Top Selling</h2>
         <div className="storeViewGrid">
           {topSelling.map((item) => (
-            <div className="storeProductCard" key={item.id}>
+            <Link to={`/marketplace/${item.id}`} className="storeProductCard storeProductCardLink" key={item.id}>
               <img src={getImgSrc(item.images)} alt={item.name} />
               <div className="storeProductInfo">
                 <div className="storeProductTitle">{item.name}</div>
                 <div className="storeProductMeta">₦{item.price}</div>
-                <Link to={`/marketplace/${item.id}`} className="storeProductLink">View Product</Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -154,14 +146,13 @@ export default function StoreView() {
         </div>
         <div className="storeViewGrid">
           {filteredItems.map((item) => (
-            <div className="storeProductCard" key={`all-${item.id}`}>
+            <Link to={`/marketplace/${item.id}`} className="storeProductCard storeProductCardLink" key={`all-${item.id}`}>
               <img src={getImgSrc(item.images)} alt={item.name} />
               <div className="storeProductInfo">
                 <div className="storeProductTitle">{item.name}</div>
                 <div className="storeProductMeta">₦{item.price} · {item.category}</div>
-                <Link to={`/marketplace/${item.id}`} className="storeProductLink">View Product</Link>
               </div>
-            </div>
+            </Link>
           ))}
           {filteredItems.length === 0 && <p style={{ color: "#888" }}>No products in this category.</p>}
         </div>

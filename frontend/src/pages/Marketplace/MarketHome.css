@@ -188,7 +188,7 @@ input[type="button"]:focus-visible {
 
 .markettopGird {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 220px));
   gap: 20px;
   margin-top: 28px;
 }
@@ -203,6 +203,7 @@ input[type="button"]:focus-visible {
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  width: 220px;
   min-height: 260px;
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
@@ -434,6 +435,7 @@ input[type="button"]:focus-visible {
   border-color: var(--border);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
   background: #fff;
+  outline: none;
 }
 
 .marketSearch input {
@@ -444,6 +446,10 @@ input[type="button"]:focus-visible {
   background: transparent;
   color: var(--foreground);
   font-size: 0.9rem;
+  outline: none;
+}
+
+.marketSearch input:focus {
   outline: none;
 }
 
@@ -487,6 +493,11 @@ input[type="button"]:focus-visible {
   outline: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   cursor: pointer;
+}
+
+.marketFilters select:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .marketMeta {

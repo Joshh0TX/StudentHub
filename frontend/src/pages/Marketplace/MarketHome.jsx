@@ -10,17 +10,6 @@ import { StarRatingDisplay } from "./StarRating";
 
 const DEFAULT_PRODUCT_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Crect x='150' y='90' width='100' height='80' rx='8' fill='%23d0d0d0'/%3E%3Ccircle cx='175' cy='115' r='12' fill='%23b0b0b0'/%3E%3Cpolygon points='150,170 185,130 215,155 240,125 270,170' fill='%23c0c0c0'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E`;
 
-const FEATURED_STORES = [
-  { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
-  { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80" },
-  { id: "s3", name: "Simi's Dispatch", category: "Delivery", bg: "#1a3d2b", image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=300&q=80" },
-  { id: "s4", name: "Josh's Tech Desk", category: "Tech", bg: "#2d1b4e", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&q=80" },
-  { id: "s5", name: "Titi's Mini Mart", category: "Goods", bg: "#3b2a1a", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" },
-  { id: "s6", name: "Tunde's Treats", category: "Food", bg: "#1a2e3b", image: "https://images.unsplash.com/photo-1587241321921-91a834d82ffc?w=300&q=80" },
-  { id: "s7", name: "Sade's Appliances", category: "Appliances", bg: "#2a3b1a", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&q=80" },
-  { id: "s8", name: "Mike's Bookshop", category: "Educational", bg: "#3b1a1a", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&q=80" },
-];
-
 export default function MarketHome() {
   const navigate = useNavigate();
   const user = getUser();
@@ -101,13 +90,8 @@ export default function MarketHome() {
     .sort((a, b) => ((b.visits ?? 0) + (b.orders ?? 0)) - ((a.visits ?? 0) + (a.orders ?? 0)));
 
   const allStores = Array.from(new Map(products.map((p) => [p.store?.id, p.store]).filter(([id]) => id)).values());
-  const mergedStores = [
-    ...allStores.map(s => ({ ...s, image: s.image || FEATURED_STORES.find(f => f.name === s.name)?.image })),
-    ...FEATURED_STORES.filter(f => !allStores.some(s => s.name === f.name)),
-  ];
   const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
   const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
-  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`) : null;
 
   return (
     <div>
@@ -119,7 +103,7 @@ export default function MarketHome() {
             <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
-              <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
+              <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketSearch")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
               {isSeller
                 ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
                 : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
@@ -133,17 +117,18 @@ export default function MarketHome() {
 
       
         {/* Popular Stores Slider */}
+        {allStores.length > 0 && (
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
             <div>
               <h2>Popular Stores</h2>
-              <p>More trusted sellers you might like.</p>
+              <p>Trusted sellers on campus.</p>
               <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
             </div>
             <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
-            {mergedStores.map((store) => {
+            {allStores.map((store) => {
               const imgSrc = store.image
                 ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`)
                 : null;
@@ -161,6 +146,7 @@ export default function MarketHome() {
             })}
           </div>
         </div>
+        )}
 
         {/* Create Store Modal */}
         {showStoreForm && (

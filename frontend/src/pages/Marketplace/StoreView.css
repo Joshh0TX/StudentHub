@@ -48,6 +48,31 @@
   margin-top: 4px;
 }
 
+.storeViewStatPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.storeViewStatPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+.storeViewStatPill strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
 .storeViewDesc {
   color: var(--foreground);
   font-size: 0.92rem;
@@ -112,31 +137,6 @@
   transform: scale(1.1);
 }
 
-.storeViewStats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.storeStat {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 12px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-}
-
-.storeStatValue {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.storeStatLabel {
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
-}
-
 .storeViewSection {
   margin-bottom: 20px;
 }
@@ -158,6 +158,18 @@
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
   display: grid;
+}
+
+.storeProductCardLink {
+  text-decoration: none;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.storeProductCardLink:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.13);
 }
 
 .storeProductCard img {

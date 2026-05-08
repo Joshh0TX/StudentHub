@@ -1,4 +1,3 @@
-import { dummyProducts } from "./marketplaceData";
 import API_BASE from "../../config";
 
 const BASE = `${API_BASE}/api/products`;
@@ -9,14 +8,11 @@ export const fetchProducts = () =>
       const data = await r.json();
       if (!r.ok) {
         console.error("fetchProducts error:", data);
-        return dummyProducts;
+        return [];
       }
-      const real = Array.isArray(data) ? data : [];
-      const realIds = new Set(real.map((p) => p.id));
-      const extras = dummyProducts.filter((d) => !realIds.has(d.id));
-      return [...real, ...extras];
+      return Array.isArray(data) ? data : [];
     })
-    .catch(() => dummyProducts);
+    .catch(() => []);
 
 export const fetchProduct = (id) =>
   fetch(`${BASE}/${id}`).then((r) => r.json());

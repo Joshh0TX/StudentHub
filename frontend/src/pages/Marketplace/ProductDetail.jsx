@@ -170,7 +170,11 @@ export default function ProductDetail() {
           <div className="productDetailMeta">
             <div>
               <div className="metaLabel">Store</div>
-              <div className="metaValue">{item.store?.name}</div>
+              <div className="metaValue">
+                {item.store?.id
+                  ? <Link to={`/store/${encodeURIComponent(item.store.id)}`} style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 700 }} onMouseEnter={e => e.currentTarget.style.textDecoration = "underline"} onMouseLeave={e => e.currentTarget.style.textDecoration = "none"}>{item.store.name}</Link>
+                  : item.store?.name}
+              </div>
             </div>
             <div>
               <div className="metaLabel">Category</div>
