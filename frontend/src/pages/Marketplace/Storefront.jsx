@@ -227,14 +227,16 @@ export default function Storefront() {
           <div>
             <h1 style={{ margin: 0 }}>{store?.name || "Storefront"}</h1>
             <p style={{ margin: "0.2rem 0 0", color: "#888", fontSize: "0.9rem" }}>{store?.description || "Post products and manage your listings."}</p>
-            <div className="storefrontStatPills">
-              <span className="storefrontStatPill"><strong>{products.length}</strong> products</span>
-              <span className="storefrontStatPill"><strong>{orders.length}</strong> orders</span>
-              <span className="storefrontStatPill storefrontStatPillPending"><strong>{orders.filter((o) => o.status === "Pending").length}</strong> pending</span>
-              <span className="storefrontStatPill"><strong>{store?.visits ?? 0}</strong> visits</span>
-            </div>
-            {store && (
-              <button type="button" className="btnOutline" style={{ marginTop: "8px", marginBottom: "12px", fontSize: "0.8rem", padding: "5px 14px" }} onClick={openEditStore}>
+            <p className="storefrontStatLine">
+              <strong>{products.length}</strong> products
+              <span className="statDot"> · </span>
+              <strong>{orders.length}</strong> orders
+              <span className="statDot"> · </span>
+              <strong>{orders.filter((o) => o.status === "Pending").length}</strong> pending
+              <span className="statDot"> · </span>
+              <strong>{store?.visits ?? 0}</strong> visits
+            </p>
+            {store && (              <button type="button" className="btnOutline" style={{ marginTop: "8px", marginBottom: "12px", fontSize: "0.8rem", padding: "5px 14px" }} onClick={openEditStore}>
                 Edit Store Profile
               </button>
             )}

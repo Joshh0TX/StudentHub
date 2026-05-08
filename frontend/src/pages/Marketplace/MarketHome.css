@@ -428,14 +428,13 @@ input[type="button"]:focus-visible {
   background: var(--input-background);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: background 150ms ease;
 }
 
 .marketSearchWrapper:focus-within {
-  border-color: var(--border);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
   background: #fff;
   outline: none;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
 }
 
 .marketSearch input {
@@ -447,10 +446,12 @@ input[type="button"]:focus-visible {
   color: var(--foreground);
   font-size: 0.9rem;
   outline: none;
+  box-shadow: none;
 }
 
 .marketSearch input:focus {
   outline: none;
+  box-shadow: none;
 }
 
 .marketSearchBtn {
@@ -475,6 +476,12 @@ input[type="button"]:focus-visible {
   box-shadow: none;
 }
 
+.marketSearchBtn:focus,
+.marketSearchBtn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .marketFilters {
   display: flex;
   flex-wrap: wrap;
@@ -483,10 +490,16 @@ input[type="button"]:focus-visible {
 
 .marketFilters select {
   height: 30px;
-  padding: 0 10px;
+  padding: 0 22px 0 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--card);
+  background-color: var(--card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23717182' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   color: var(--foreground);
   font-size: 0.78rem;
   font-weight: 500;
@@ -495,9 +508,11 @@ input[type="button"]:focus-visible {
   cursor: pointer;
 }
 
-.marketFilters select:focus {
+.marketFilters select:focus,
+.marketFilters select:focus-visible {
   outline: none;
   box-shadow: none;
+  border-color: var(--border);
 }
 
 .marketMeta {

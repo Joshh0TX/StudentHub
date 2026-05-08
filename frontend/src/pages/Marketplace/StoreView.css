@@ -48,27 +48,14 @@
   margin-top: 4px;
 }
 
-.storeViewStatPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-  margin-bottom: 6px;
-}
-
-.storeViewStatPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--secondary);
-  border: 1px solid var(--border);
-  font-size: 0.78rem;
+.storeViewStatLine {
+  margin: 4px 0 6px;
+  font-size: 0.82rem;
   color: var(--muted-foreground);
+  line-height: 1.5;
 }
 
-.storeViewStatPill strong {
+.storeViewStatLine strong {
   color: var(--foreground);
   font-weight: 700;
 }

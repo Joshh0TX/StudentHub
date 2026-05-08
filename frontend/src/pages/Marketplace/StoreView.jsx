@@ -79,10 +79,11 @@ export default function StoreView() {
           <div>
             <h1>{storeName}</h1>
             {storeData?.description && <p className="storeViewDesc">{storeData.description}</p>}
-            <div className="storeViewStatPills">
-              <span className="storeViewStatPill"><strong>{storeData?.visits ?? 0}</strong> visits</span>
-              <span className="storeViewStatPill"><strong>{items.length}</strong> products</span>
-            </div>
+            <p className="storeViewStatLine">
+              <strong>{storeData?.visits ?? 0}</strong> visits
+              <span className="statDot"> · </span>
+              <strong>{items.length}</strong> products
+            </p>
             {storeData?.owner && (
               <Link
                 to={`/profile`}
@@ -130,13 +131,13 @@ export default function StoreView() {
       </section>
 
       <section className="storeViewSection">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
           <h2 style={{ margin: 0 }}>All Products</h2>
           {categories.length > 2 && (
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              style={{ fontSize: "0.85rem", padding: "5px 10px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--foreground)" }}
+              style={{ fontSize: "0.85rem", padding: "4px 24px 4px 10px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--foreground)", appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23717182' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", outline: "none", cursor: "pointer" }}
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat === "all" ? "All Categories" : cat}</option>
