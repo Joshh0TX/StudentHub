@@ -14,6 +14,7 @@ export default function MarketHome() {
   const navigate = useNavigate();
   const user = getUser();
   const sliderRef = useRef(null);
+  const searchRef = useRef(null);
 
   const [products, setProducts] = useState([]);
   const [showStoreForm, setShowStoreForm] = useState(false);
@@ -103,7 +104,7 @@ export default function MarketHome() {
             <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
-              <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketSearch")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
+              <button className="marketHeroCta" type="button" onClick={() => searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}>Shop Now</button>
               {isSeller
                 ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
                 : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
@@ -202,7 +203,7 @@ export default function MarketHome() {
             </div>
           </div>
         )}
-        <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
+        <div className="marketSearch" style={{ margin: "16px 0 20px" }} ref={searchRef}>
           <div className="marketSearchWrapper">
             <input
               type="text"
