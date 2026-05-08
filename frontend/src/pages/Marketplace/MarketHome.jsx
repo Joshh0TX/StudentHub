@@ -104,7 +104,12 @@ export default function MarketHome() {
             <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
-              <button className="marketHeroCta" type="button" onClick={() => searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}>Shop Now</button>
+              <button className="marketHeroCta" type="button" onClick={() => {
+                if (searchRef.current) {
+                  const top = searchRef.current.getBoundingClientRect().top + window.scrollY - 16;
+                  window.scrollTo({ top, behavior: "smooth" });
+                }
+              }}>Shop Now</button>
               {isSeller
                 ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
                 : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
