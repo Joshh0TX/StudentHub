@@ -666,7 +666,7 @@ const Timetable = () => {
            * is never read from there — the server is the single source of
            * truth for the user's identity.
            */
-          created_by: user.id,
+          createdBy: user.id,
           classes: newTimetable.classes,
         }),
       });

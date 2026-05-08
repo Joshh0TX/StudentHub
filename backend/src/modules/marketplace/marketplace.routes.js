@@ -12,7 +12,11 @@ router.get("/store/view/:storeId", async (req, res) => {
   try {
     const store = await prisma.store.findUnique({
       where: { id: req.params.storeId },
-      include: { contacts: true, products: true },
+      include: {
+        contacts: true,
+        products: true,
+        owner: { select: { id: true, f_name: true, l_name: true, profileImage: true } },
+      },
     });
     if (!store) return res.status(404).json({ error: "Store not found" });
     prisma.store.update({ where: { id: req.params.storeId }, data: { visits: { increment: 1 } } }).catch(() => {});

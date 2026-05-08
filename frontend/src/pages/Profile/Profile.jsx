@@ -752,7 +752,10 @@ function ProfilePage() {
 };
 
 const handleOnCoverChange = (e) => imageUpload.onCoverChange(e, setUser);
-const handleOnProfileChange = (e) => imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
+const handleOnProfileChange = (e) => {
+  console.log("file selected:", e.target.files?.[0]);
+  imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
+};
 
   const handleSaveInterests = async (updatedInterests) => {
   await saveToBackend({ interests: updatedInterests });
