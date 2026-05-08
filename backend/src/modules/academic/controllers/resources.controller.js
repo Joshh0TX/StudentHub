@@ -78,7 +78,7 @@ const getResources = async (req, res) => {
  * During development without auth, falls back to a placeholder.
  */
 const createResource = async (req, res) => {
-  const uploadedBy = req.user?.id ?? "user-unique-id-002"; // swap when auth is live
+  const uploadedBy = req.user?.id; // swap when auth is live
 
   const {
     title,
@@ -162,7 +162,7 @@ const createResource = async (req, res) => {
  */
 const deleteResource = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user?.id ?? "test-user-123";
+  const requesterId = req.user?.id;
 
   try {
     const resource = await prisma.resource.findUnique({ where: { id } });
