@@ -10,5 +10,6 @@ router.get('/profile', authMiddleware, userController.getProfile);
 router.put('/profile', authMiddleware, userController.updateProfile);
 router.post('/profile/image', authMiddleware, upload.single('image'), userController.uploadProfileImage);
 router.post('/profile/cover', authMiddleware, upload.single('image'), userController.uploadCoverImage);
+router.get('/:userId', authMiddleware, userController.getUserProfile);
 
 module.exports = router;

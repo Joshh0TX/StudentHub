@@ -8,6 +8,7 @@ const userRoutes = require('./modules/users/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 const postRoutes = require('./modules/social/post.routes');
+const friendRoutes = require('./modules/social/friend.routes');
 
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/auth', require('./modules/auth/routes'));
 app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/friends', friendRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
