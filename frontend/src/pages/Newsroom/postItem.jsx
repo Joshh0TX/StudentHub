@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './postItem.css';
 
 const PostItem = ({ post, currentUser }) => {
   const [comment, setComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Number(post.likes) || 0);
+  const navigate = useNavigate();
 
   const handleLike = (e) => {
     e.preventDefault();
-    console.log("Button clicked! Current likes:", likeCount); // Debug line
-
     if (isLiked) {
       setLikeCount((prev) => prev - 1);
     } else {
@@ -19,13 +19,33 @@ const PostItem = ({ post, currentUser }) => {
     setIsLiked(!isLiked);
   };
 
+  const handleProfileClick = () => {
+    if (post.userId === currentUser?.id) {
+      navigate('/profile');
+    } else {
+      navigate(`/profile/${post.userId}`);
+    }
+  };
+
   return (
     <div className="amebo-post-item">
       {/* Header */}
       <div className="post-header">
-        <img src={post.userImg} alt={post.userName} className="mini-avatar" />
+        <img
+          src={post.userImg}
+          alt={post.userName}
+          className="mini-avatar"
+          onClick={handleProfileClick}
+          style={{ cursor: 'pointer' }}
+        />
         <div className="user-meta">
-          <h4 className="user-name">{post.userName}</h4>
+          <h4
+            className="user-name"
+            onClick={handleProfileClick}
+            style={{ cursor: 'pointer' }}
+          >
+            {post.userName}
+          </h4>
           <span className="post-time">{post.timestamp}</span>
         </div>
         <button className="more-options"><MoreHorizontal size={18} /></button>
@@ -43,16 +63,16 @@ const PostItem = ({ post, currentUser }) => {
 
       {/* Interactions */}
       <div className="post-interactions">
-        <button 
+        <button
           type="button"
-          className={`interact-btn ${isLiked ? 'active-like' : ''}`} 
+          className={`interact-btn ${isLiked ? 'active-like' : ''}`}
           onClick={handleLike}
         >
-          <Heart 
-            size={18} 
-            fill={isLiked ? "#ef4444" : "none"} 
-            color={isLiked ? "#ef4444" : "currentColor"} 
-          /> 
+          <Heart
+            size={18}
+            fill={isLiked ? "#ef4444" : "none"}
+            color={isLiked ? "#ef4444" : "currentColor"}
+          />
           <span>{likeCount}</span>
         </button>
 
@@ -67,15 +87,15 @@ const PostItem = ({ post, currentUser }) => {
 
       {/* Comment Section */}
       <div className="post-comment-section">
-        <img 
-          src={currentUser?.profileImg || `https://ui-avatars.com/api/?name=User`} 
-          className="comment-avatar" 
-          alt="User" 
+        <img
+          src={currentUser?.profileImage || `https://ui-avatars.com/api/?name=User`}
+          className="comment-avatar"
+          alt="User"
         />
         <form className="comment-form" onSubmit={(e) => e.preventDefault()}>
-          <input 
-            type="text" 
-            placeholder="Add a comment..." 
+          <input
+            type="text"
+            placeholder="Add a comment..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
