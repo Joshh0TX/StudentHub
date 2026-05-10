@@ -73,17 +73,18 @@ export default function AmeboFeed({ user }) {
       <PostBox user={user} />
       <div className="feed-container">
         {posts.map((p) => (
-          <PostItem key={p.id} post={{
-            id: p.id,
-            userName: `${p.user.f_name} ${p.user.l_name}`,
-            userImg: p.user.profileImage || `https://ui-avatars.com/api/?name=${p.user.f_name}+${p.user.l_name}&background=3b82f6&color=fff`,
-            timestamp: new Date(p.createdAt).toLocaleString(),
-            content: p.content,
-            image: p.image,
-            likes: 0,
-            comments: 0,
-          }} currentUser={user} />
-        ))}
+        <PostItem key={p.id} post={{
+          id: p.id,
+          userId: p.user.id,  // ADD THIS
+          userName: `${p.user.f_name} ${p.user.l_name}`,
+          userImg: p.user.profileImage || `https://ui-avatars.com/api/?name=${p.user.f_name}+${p.user.l_name}&background=3b82f6&color=fff`,
+          timestamp: new Date(p.createdAt).toLocaleString(),
+          content: p.content,
+          postImage: p.image,
+          likes: 0,
+          comments: 0,
+        }} currentUser={user} />
+      ))}
         <div className="feed-status">No more Gist for now.</div>
       </div>
     </div>
