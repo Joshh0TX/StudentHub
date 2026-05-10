@@ -49,3 +49,14 @@ exports.uploadCoverImage = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const profile = await userService.getProfile(userId);
+    if (!profile) return res.status(404).json({ message: 'User not found' });
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
