@@ -180,12 +180,6 @@ model Resource {
   uploadedBy  String
   createdAt   DateTime @default(now())
 
-  //for file uploads
-  isFile      Boolean  @default(false)
-  fileName    String?
-  fileSize    Int?
-  mimeType    String?
-
   group    StudyGroup? @relation(fields: [groupId], references: [id])
   uploader User        @relation(fields: [uploadedBy], references: [id])
 }
