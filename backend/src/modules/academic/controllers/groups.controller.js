@@ -44,10 +44,7 @@ const getGroupById = async (req, res) => {
         creator: {
           select: { f_name: true, l_name: true },
         },
-        _count: { select: { members: true } }, // ← member count
-        schedules: {                            // ← meeting schedules
-          orderBy: { dateTime: "asc" },
-        },
+        _count: { select: { members: true } },
       },
     });
     if (!group) return res.status(404).json({ error: "Group not found" });
@@ -55,6 +52,7 @@ const getGroupById = async (req, res) => {
     return res.json({
       ...group,
       member_count: group._count.members,
+      schedules: [],
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
