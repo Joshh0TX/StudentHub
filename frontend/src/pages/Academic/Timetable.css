@@ -253,7 +253,9 @@
 /* ── Grid Wrapper ── */
 .timetable-grid-wrapper {
   overflow-x: auto;
+  overflow-y: visible;
   padding: 16px;
+  padding-bottom: 32px;
 }
 
 .timetable-grid {
@@ -261,7 +263,7 @@
   min-width: 500px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -410,7 +412,8 @@
 .block-tooltip {
   display: none;
   position: absolute;
-  top: calc(100% + 6px);
+  bottom: calc(100% + 6px);
+  top: auto;
   left: 0;
   z-index: 100;
   background: #1e293b;
@@ -472,7 +475,8 @@
 .block-tooltip::before {
   content: "";
   position: absolute;
-  top: -5px;
+  bottom: -5px;
+  top: auto;
   left: 14px;
   width: 10px;
   height: 10px;
