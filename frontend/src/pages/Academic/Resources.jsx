@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -34,6 +34,16 @@ const TAGS = [
 ];
 
 const tagMap = Object.fromEntries(TAGS.map((t) => [t.label, t]));
+
+const TYPE_MAP = {
+  Tutorial: "notes",
+  Article: "notes",
+  Video: "video",
+  Guide: "notes",
+  Docs: "pdf",
+  Tool: "link",
+  Other: "link",
+};
 
 // ── Helpers ───────────────────────────────────────────────────────
 const formatBytes = (bytes) => {
@@ -73,12 +83,13 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    tag: "Tutorial",
-    course_code: "",
-    course_title: "",
-    resourceType: "link", // 'link' | 'file'
+    type: "Tutorial", // UI-facing resource category label
+    courseCode: "",
+    courseTitle: "",
+    mode: "link", // UI toggle: "link" | "file" (not sent to backend)
     url: "",
   });
+
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -107,28 +118,30 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
   const handleSubmit = async () => {
     if (!form.title.trim()) return setError("Title is required.");
-    if (!form.course_code.trim()) return setError("Course code is required.");
-    if (form.resourceType === "link" && !form.url.trim())
+    if (!form.courseCode.trim()) return setError("Course code is required.");
+    if (form.mode === "link" && !form.url.trim())
       return setError("Please enter a URL.");
-    if (form.resourceType === "file" && !file)
-      return setError("Please select a file.");
+    if (form.mode === "file" && !file) return setError("Please select a file.");
 
     setLoading(true);
     setError(null);
+
+    // Option B: translate the friendly UI label into the backend enum value
+    const backendType = TYPE_MAP[form.type] ?? "link";
 
     try {
       const token = getToken?.();
       let data;
 
-      if (form.resourceType === "file") {
+      if (form.mode === "file") {
         // Multipart form for file upload
         const fd = new FormData();
         fd.append("file", file);
         fd.append("title", form.title.trim());
         fd.append("description", form.description.trim());
-        fd.append("tag", form.tag);
-        fd.append("course_code", form.course_code.trim().toUpperCase());
-        fd.append("course_title", form.course_title.trim());
+        fd.append("type", backendType); // ← mapped value
+        fd.append("courseCode", form.courseCode.trim().toUpperCase());
+        fd.append("courseTitle", form.courseTitle.trim());
         fd.append("department", selectedProgram);
         fd.append("year", String(selectedYear));
 
@@ -151,9 +164,9 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             body: JSON.stringify({
               title: form.title.trim(),
               description: form.description.trim(),
-              tag: form.tag,
-              course_code: form.course_code.trim().toUpperCase(),
-              course_title: form.course_title.trim(),
+              type: backendType, // ← mapped value
+              courseCode: form.courseCode.trim().toUpperCase(),
+              courseTitle: form.courseTitle.trim(),
               department: selectedProgram,
               year: selectedYear,
               url: form.url.trim(),
@@ -172,7 +185,8 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
     }
   };
 
-  const selectedTag = tagMap[form.tag] || TAGS[0];
+  // Derive the currently selected tag config for styling
+  const selectedTag = tagMap[form.type] || TAGS[0];
 
   return (
     <div
@@ -194,17 +208,17 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
         )}
 
         <div className="modal-Rbody modal-Rbody--scroll">
-          {/* ── Resource type toggle ── */}
+          {/* ── Resource mode toggle (link vs file) ── */}
           <div className="resource-type-toggle">
             <button
-              className={`type-btn ${form.resourceType === "link" ? "type-btn--active" : ""}`}
-              onClick={() => setForm((p) => ({ ...p, resourceType: "link" }))}
+              className={`type-btn ${form.mode === "link" ? "type-btn--active" : ""}`}
+              onClick={() => setForm((p) => ({ ...p, mode: "link" }))}
             >
               <Link2 size={15} /> Link
             </button>
             <button
-              className={`type-btn ${form.resourceType === "file" ? "type-btn--active" : ""}`}
-              onClick={() => setForm((p) => ({ ...p, resourceType: "file" }))}
+              className={`type-btn ${form.mode === "file" ? "type-btn--active" : ""}`}
+              onClick={() => setForm((p) => ({ ...p, mode: "file" }))}
             >
               <Upload size={15} /> File Upload
             </button>
@@ -244,8 +258,8 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                 Course Code <span>*</span>
               </label>
               <input
-                name="course_code"
-                value={form.course_code}
+                name="courseCode"
+                value={form.courseCode}
                 onChange={handleChange}
                 placeholder="e.g. CS201"
                 maxLength={20}
@@ -254,8 +268,8 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             <div className="modal-field">
               <label>Course Title</label>
               <input
-                name="course_title"
-                value={form.course_title}
+                name="courseTitle"
+                value={form.courseTitle}
                 onChange={handleChange}
                 placeholder="e.g. Data Structures"
                 maxLength={100}
@@ -263,16 +277,16 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           </div>
 
-          {/* ── Tag selector ── */}
+          {/* ── Tag / resource-category selector ── */}
           <div className="modal-field">
             <label>Resource Type</label>
             <div className="tag-selector">
               {TAGS.map((t) => (
                 <button
                   key={t.label}
-                  className={`tag-option ${form.tag === t.label ? "tag-option--active" : ""}`}
+                  className={`tag-option ${form.type === t.label ? "tag-option--active" : ""}`}
                   style={
-                    form.tag === t.label
+                    form.type === t.label
                       ? {
                           backgroundColor: t.bg,
                           color: t.color,
@@ -280,7 +294,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                         }
                       : {}
                   }
-                  onClick={() => setForm((p) => ({ ...p, tag: t.label }))}
+                  onClick={() => setForm((p) => ({ ...p, type: t.label }))}
                 >
                   <t.Icon size={13} /> {t.label}
                 </button>
@@ -289,7 +303,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
           </div>
 
           {/* ── Link input ── */}
-          {form.resourceType === "link" && (
+          {form.mode === "link" && (
             <div className="modal-field">
               <label>
                 URL <span>*</span>
@@ -305,7 +319,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
           )}
 
           {/* ── File upload ── */}
-          {form.resourceType === "file" && (
+          {form.mode === "file" && (
             <div className="modal-field">
               <label>
                 File <span>*</span>
@@ -397,7 +411,17 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
 // ── Resource Item ─────────────────────────────────────────────────
 const ResourceItem = ({ item, currentUserId, onDelete }) => {
-  const tag = tagMap[item.tag] || tagMap["Other"];
+  // Tag lookup checks both `item.type` (new) and `item.tag` (legacy)
+  // so items already in the database still render correctly.
+  // Because the backend now stores a mapped value (e.g. "video", "pdf"),
+  // we also try to reverse-look up a display tag from the friendly label
+  // stored separately, falling back gracefully to "Other".
+  const tag =
+    tagMap[item.type] ||
+    tagMap[item.tag] ||
+    tagMap[item.displayType] ||
+    tagMap["Other"];
+
   const isOwner =
     String(item.createdBy || item.created_by) === String(currentUserId);
   const isFile = item.isFile || item.is_file;
@@ -435,7 +459,8 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
             className="resource-tag"
             style={{ color: tag.color, backgroundColor: tag.bg }}
           >
-            {item.tag}
+            {/* Display whichever field exists — type (new) or tag (legacy) */}
+            {item.type || item.tag}
           </span>
           {isFile && item.fileName && (
             <span className="resource-filename">
@@ -451,7 +476,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 
       {/* Actions */}
       <div className="resource-actions">
-        {/* Download for files, open for links */}
         {isFile ? (
           <a
             href={item.url}
@@ -473,7 +497,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
           </a>
         )}
 
-        {/* Delete — only for owner */}
         {isOwner && (
           <button
             className={`resource-action-btn resource-action-btn--delete ${confirmDelete ? "resource-action-btn--confirm" : ""}`}
@@ -500,7 +523,7 @@ const Resources = () => {
   const [showModal, setShowModal] = useState(false);
 
   // ── Fetch ─────────────────────────────────────────────────────
-  const fetchResources = async () => {
+  const fetchResources = useCallback(async () => {
     if (!selectedProgram || !selectedYear) return;
     setLoading(true);
     setError(null);
@@ -512,9 +535,9 @@ const Resources = () => {
         token,
       );
 
-      // Group by course_code
+      // Group by courseCode
       const grouped = data.reduce((acc, item) => {
-        const key = item.courseCode || item.course_code;
+        const key = item.courseCode || item.course_code || "Unknown";
         if (!acc[key]) {
           acc[key] = {
             course: key,
@@ -532,15 +555,15 @@ const Resources = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedProgram, selectedYear, getToken]);
 
   useEffect(() => {
     fetchResources();
-  }, [selectedProgram, selectedYear]);
+  }, [fetchResources]);
 
   // ── Add new resource to correct section locally ───────────────
   const handleCreated = (newResource) => {
-    const key = newResource.courseCode || newResource.course_code;
+    const key = newResource.courseCode || newResource.course_code || "Unknown";
     setSections((prev) => {
       const existing = prev.find((s) => s.course === key);
       if (existing) {
