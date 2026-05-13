@@ -214,7 +214,19 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
 
   const handleClassChange = (id, field, value) =>
     setClasses((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
+      prev.map((c) => {
+        if (c.id !== id) return c;
+
+        const updated = { ...c, [field]: value };
+
+        // If start time changed, reset end time to first valid slot after it
+        if (field === "startTime") {
+          const firstValidEnd = TIME_SLOTS.find((t) => t > value);
+          updated.endTime = firstValidEnd ?? value;
+        }
+
+        return updated;
+      }),
     );
 
   const handleAddClass = () =>
@@ -394,13 +406,12 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
     timetable.classes.some((c) => c.day === d),
   );
 
-  const allStarts = timetable.classes.map((c) => c.startTime);
-  const allEnds = timetable.classes.map((c) => c.endTime);
-  const minTime = allStarts.length
-    ? allStarts.reduce((a, b) => (a < b ? a : b))
+  const allTimes = timetable.classes.flatMap((c) => [c.startTime, c.endTime]);
+  const minTime = allTimes.length
+    ? allTimes.reduce((a, b) => (a < b ? a : b))
     : "08:00";
-  const maxTime = allEnds.length
-    ? allEnds.reduce((a, b) => (a > b ? a : b))
+  const maxTime = allTimes.length
+    ? allTimes.reduce((a, b) => (a > b ? a : b))
     : "17:00";
 
   const visibleSlots = TIME_SLOTS.filter((t) => t >= minTime && t <= maxTime);

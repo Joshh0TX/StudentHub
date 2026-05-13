@@ -40,17 +40,20 @@ const getResources = async (req, res) => {
     const shaped = resources.map((r) => ({
       id: r.id,
       course_code: r.courseCode,
-      course_title: r.courseTitle ?? r.courseCode, // fallback if title missing
+      course_title: r.courseTitle ?? r.courseCode,
       title: r.title,
-      type: r.type, // "pdf" | "link" | "video" | "notes"
+      type: r.type,
       url: r.url,
       description: r.description,
       department: r.department,
       year: r.year,
+      isFile: r.isFile,        // ← add
+      fileName: r.fileName,    // ← add
+      fileSize: r.fileSize,    // ← add
+      mimeType: r.mimeType,    // ← add
       uploadedBy: r.uploader,
       createdAt: r.createdAt,
     }));
-
     return res.json(shaped);
   } catch (err) {
     console.error("[getResources]", err);
@@ -78,7 +81,7 @@ const getResources = async (req, res) => {
  * During development without auth, falls back to a placeholder.
  */
 const createResource = async (req, res) => {
-  const uploadedBy = req.user?.id; // swap when auth is live
+  const uploadedBy = req.user.id; // swap when auth is live
 
   const {
     title,
@@ -114,7 +117,9 @@ const createResource = async (req, res) => {
       data: {
         title,
         type,
-        url,
+        url: req.file
+          ? `${process.env.BASE_URL}/uploads/resources/${req.file.filename}`
+          : url,
         description: description ?? null,
         department,
         courseCode,
@@ -122,6 +127,10 @@ const createResource = async (req, res) => {
         year: year ? parseInt(year, 10) : null,
         groupId: groupId ?? null,
         uploadedBy,
+        isFile: !!req.file,                    // ← add
+        fileName: req.file?.originalname ?? null, // ← add
+        fileSize: req.file?.size ?? null,         // ← add
+        mimeType: req.file?.mimetype ?? null,     // ← add
       },
       include: {
         uploader: {
@@ -146,6 +155,10 @@ const createResource = async (req, res) => {
       description: resource.description,
       department: resource.department,
       year: resource.year,
+      isFile: resource.isFile,        // ← add
+      fileName: resource.fileName,    // ← add
+      fileSize: resource.fileSize,    // ← add
+      mimeType: resource.mimeType,    // ← add
       uploadedBy: resource.uploader,
       createdAt: resource.createdAt,
     });
@@ -162,7 +175,7 @@ const createResource = async (req, res) => {
  */
 const deleteResource = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user?.id;
+  const requesterId = req.user.id;
 
   try {
     const resource = await prisma.resource.findUnique({ where: { id } });
