@@ -106,7 +106,7 @@ export default function MarketHome() {
             <div className="marketHeroActions">
               <button className="marketHeroCta" type="button" onClick={() => {
                 if (searchRef.current) {
-                  const top = searchRef.current.getBoundingClientRect().top + window.scrollY - 16;
+                  const top = searchRef.current.getBoundingClientRect().top + window.scrollY;
                   window.scrollTo({ top, behavior: "smooth" });
                 }
               }}>Shop Now</button>
@@ -208,9 +208,10 @@ export default function MarketHome() {
             </div>
           </div>
         )}
-        <div className="marketSearch" style={{ margin: "16px 0 20px" }} ref={searchRef}>
+        <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
           <div className="marketSearchWrapper">
             <input
+              ref={searchRef}
               type="text"
               placeholder="Search items, locations..."
               value={query}
@@ -236,22 +237,31 @@ export default function MarketHome() {
         {/* Filters */}
         <div className="marketControls">
           <div className="marketFilters">
-            <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
-              <option value="all">All Types</option>
-              <option value="goods">Goods</option>
-              <option value="services">Services</option>
-            </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-              <option value="all">All Categories</option>
-              {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-              {locations.map((loc) => (
-                <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
-              ))}
-            </select>
+            <label className="filterSelectWrap">
+              <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
+                <option value="all">All Types</option>
+                <option value="goods">Goods</option>
+                <option value="services">Services</option>
+              </select>
+              <span className="filterArrow">▾</span>
+            </label>
+            <label className="filterSelectWrap">
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option value="all">All Categories</option>
+                {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <span className="filterArrow">▾</span>
+            </label>
+            <label className="filterSelectWrap">
+              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+                {locations.map((loc) => (
+                  <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
+                ))}
+              </select>
+              <span className="filterArrow">▾</span>
+            </label>
           </div>
         </div>
 

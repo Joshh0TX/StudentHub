@@ -487,16 +487,20 @@ input[type="button"]:focus-visible {
   gap: 8px;
 }
 
-.marketFilters select {
-  height: 30px;
-  width: fit-content;
-  padding: 0 20px 0 10px;
+.filterSelectWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-background);
   border-radius: 999px;
+  cursor: pointer;
+}
+
+.filterSelectWrap select {
+  height: 30px;
+  padding: 0 8px 0 10px;
   border: none;
-  background-color: var(--input-background);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23717182' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
+  background: transparent;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -504,14 +508,24 @@ input[type="button"]:focus-visible {
   font-size: 0.78rem;
   font-weight: 500;
   outline: none;
-  box-shadow: none;
   cursor: pointer;
+  /* let the select shrink to its content */
+  min-width: 0;
 }
 
-.marketFilters select:focus,
-.marketFilters select:focus-visible {
+.filterSelectWrap select:focus,
+.filterSelectWrap select:focus-visible {
   outline: none;
   box-shadow: none;
+}
+
+.filterArrow {
+  font-size: 0.6rem;
+  color: var(--muted-foreground);
+  padding-right: 10px;
+  pointer-events: none;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .marketMeta {
