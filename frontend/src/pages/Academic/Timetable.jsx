@@ -214,7 +214,19 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
 
   const handleClassChange = (id, field, value) =>
     setClasses((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
+      prev.map((c) => {
+        if (c.id !== id) return c;
+
+        const updated = { ...c, [field]: value };
+
+        // If start time changed, reset end time to first valid slot after it
+        if (field === "startTime") {
+          const firstValidEnd = TIME_SLOTS.find((t) => t > value);
+          updated.endTime = firstValidEnd ?? value;
+        }
+
+        return updated;
+      }),
     );
 
   const handleAddClass = () =>
@@ -425,36 +437,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
       setTimeout(() => setConfirmDelete(false), 3000);
     }
   };
-
-  // ── DEBUG LOGS — remove once issue is resolved ──────────────
-  // Step 1: Check raw time values as stored in the component
-  console.log(
-    "Raw class times:",
-    timetable.classes.map((c) => ({
-      subject: c.subject,
-      start: c.startTime,
-      end: c.endTime,
-    })),
-  );
-
-  // Step 2: Check what the visible slot range resolved to
-  console.log("minTime:", minTime, "| maxTime:", maxTime);
-  console.log("visibleSlots:", visibleSlots);
-
-  // Step 3: Check computed row and span for every class
-  timetable.classes.forEach((c) => {
-    console.log(
-      `"${c.subject}" (${c.day})`,
-      "→ rowStart:",
-      slotToRow(c.startTime),
-      "| span:",
-      spanCount(c.startTime, c.endTime),
-      "| startTime:",
-      c.startTime,
-      "| endTime:",
-      c.endTime,
-    );
-  });
 
   return (
     <div className="timetable-card">
