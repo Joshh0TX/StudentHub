@@ -209,6 +209,69 @@
   padding-right: 4px;
 }
 
+/* ── Order tabs ── */
+.orderTabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.orderTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 120ms, color 120ms;
+}
+
+.orderTab:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+  transform: none;
+  box-shadow: none;
+}
+
+.orderTabActive {
+  background: var(--foreground);
+  color: var(--primary-foreground);
+}
+
+.orderTabActive:hover {
+  background: var(--foreground);
+  transform: none;
+  box-shadow: none;
+}
+
+.orderTabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.orderTabBadgeDone {
+  background: #16a34a;
+}
+
 .productGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

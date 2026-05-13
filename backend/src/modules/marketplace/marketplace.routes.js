@@ -123,6 +123,18 @@ router.get("/orders/store/:storeId", async (req, res) => {
   }
 });
 
+router.get("/orders/buyer/:userId/product/:productId", async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { buyerId: req.params.userId, productId: req.params.productId },
+      select: { id: true, status: true },
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put("/orders/:id/status", async (req, res) => {
   const { status } = req.body;
   if (!status) return res.status(400).json({ error: "status is required" });
@@ -245,6 +257,13 @@ router.post("/:id/reviews", async (req, res) => {
   if (parsedRating < 1 || parsedRating > 5)
     return res.status(400).json({ error: "rating must be between 1 and 5" });
   try {
+    // Only allow reviews from buyers with a completed order for this product
+    const completedOrder = await prisma.order.findFirst({
+      where: { productId: req.params.id, buyerId: userId, status: "Completed" },
+    });
+    if (!completedOrder)
+      return res.status(403).json({ error: "You can only review products you have purchased and received." });
+
     const review = await prisma.review.create({
       data: { productId: req.params.id, userId, rating: parsedRating, text: text?.trim() || "" },
       include: { user: { select: { id: true, f_name: true, l_name: true } } },

@@ -95,6 +95,9 @@ export const placeOrder = (data) =>
 export const fetchStoreOrders = (storeId) =>
   fetch(`${BASE}/orders/store/${storeId}`).then((r) => r.json());
 
+export const fetchUserOrdersForProduct = (productId, userId) =>
+  fetch(`${BASE}/orders/buyer/${userId}/product/${productId}`).then((r) => r.json());
+
 export const updateOrderStatus = (id, status) =>
   fetch(`${BASE}/orders/${id}/status`, {
     method: "PUT",

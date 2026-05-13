@@ -1,7 +1,7 @@
 import "./ProductDetail.css";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { fetchProduct, fetchReviews, fetchProducts, placeOrder, postReview } from "./marketplaceApi";
+import { fetchProduct, fetchReviews, fetchProducts, placeOrder, postReview, fetchUserOrdersForProduct } from "./marketplaceApi";
 import { dummyProducts } from "./marketplaceData";
 import { StarRatingInput, StarRatingDisplay } from "./StarRating";
 import { getUser } from "./testUser";
@@ -32,6 +32,7 @@ export default function ProductDetail() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
+  const [hasCompletedOrder, setHasCompletedOrder] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -44,6 +45,14 @@ export default function ProductDetail() {
         } else {
           setItem(productData);
           setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+          // check if user has a completed order for this product
+          if (user?.id) {
+            fetchUserOrdersForProduct(productData.id, user.id)
+              .then((orders) => {
+                setHasCompletedOrder(Array.isArray(orders) && orders.some((o) => o.status === "Completed"));
+              })
+              .catch(() => {});
+          }
           // fetch similar products — same category, different product
           fetchProducts()
             .then((all) => {
@@ -278,15 +287,23 @@ export default function ProductDetail() {
           </Link>
         )}
         {user && !isOwnStore && !hasReviewed && (
-          <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
-            <label>Leave a Review</label>
-            <StarRatingInput value={reviewRating} onChange={setReviewRating} />
-            <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience... (optional)" style={{ marginTop: "8px", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)", fontSize: "0.95rem", resize: "vertical", outline: "none", width: "100%", boxSizing: "border-box" }} />
-            {reviewError && <p style={{ color: "red", fontSize: "0.85rem", margin: 0 }}>{reviewError}</p>}
-            <button type="submit" className="submitButton" disabled={reviewSubmitting}>
-              {reviewSubmitting ? "Posting..." : "Post Review"}
-            </button>
-          </form>
+          hasCompletedOrder ? (
+            <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
+              <label>Leave a Review</label>
+              <StarRatingInput value={reviewRating} onChange={setReviewRating} />
+              <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience... (optional)" style={{ marginTop: "8px", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)", fontSize: "0.95rem", resize: "vertical", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              {reviewError && <p style={{ color: "red", fontSize: "0.85rem", margin: 0 }}>{reviewError}</p>}
+              <button type="submit" className="submitButton" disabled={reviewSubmitting}>
+                {reviewSubmitting ? "Posting..." : "Post Review"}
+              </button>
+            </form>
+          ) : (
+            user && !isOwnStore && (
+              <p style={{ marginTop: "1rem", fontSize: "0.82rem", color: "var(--muted-foreground)", fontStyle: "italic" }}>
+                Only buyers with a completed order can leave a review.
+              </p>
+            )
+          )
         )}
       </section>
 

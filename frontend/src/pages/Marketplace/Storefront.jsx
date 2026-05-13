@@ -17,6 +17,7 @@ export default function Storefront() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [orderTab, setOrderTab] = useState("Pending");
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -359,8 +360,29 @@ export default function Storefront() {
             <h2 style={{ margin: 0 }}>Orders</h2>
             <button type="button" className="btnOutline" style={{ fontSize: "0.8rem", padding: "5px 12px" }} onClick={refreshOrders}>↻ Refresh</button>
           </div>
+          {/* Status tabs */}
+          <div className="orderTabs">
+            {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((tab) => {
+              const count = orders.filter((o) => o.status === tab).length;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`orderTab${orderTab === tab ? " orderTabActive" : ""}`}
+                  onClick={() => setOrderTab(tab)}
+                >
+                  {tab}
+                  {count > 0 && (
+                    <span className={`orderTabBadge${tab === "Completed" ? " orderTabBadgeDone" : ""}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
           <div className="orderList">
-            {orders.map((order) => (
+            {orders.filter((o) => o.status === orderTab).map((order) => (
               <div className="orderRow" key={order.id}>
                 <div style={{ flex: 1 }}>
                   <div className="orderTitle">{order.product?.name || "Product"}</div>
@@ -382,7 +404,9 @@ export default function Storefront() {
                 </select>
               </div>
             ))}
-            {orders.length === 0 && <p style={{ padding: "1rem", color: "#888" }}>No orders yet.</p>}
+            {orders.filter((o) => o.status === orderTab).length === 0 && (
+              <p style={{ padding: "1rem", color: "#888" }}>No {orderTab.toLowerCase()} orders.</p>
+            )}
           </div>
         </section>
       </section>
