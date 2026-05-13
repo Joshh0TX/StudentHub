@@ -426,6 +426,36 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
     }
   };
 
+  // ── DEBUG LOGS — remove once issue is resolved ──────────────
+  // Step 1: Check raw time values as stored in the component
+  console.log(
+    "Raw class times:",
+    timetable.classes.map((c) => ({
+      subject: c.subject,
+      start: c.startTime,
+      end: c.endTime,
+    })),
+  );
+
+  // Step 2: Check what the visible slot range resolved to
+  console.log("minTime:", minTime, "| maxTime:", maxTime);
+  console.log("visibleSlots:", visibleSlots);
+
+  // Step 3: Check computed row and span for every class
+  timetable.classes.forEach((c) => {
+    console.log(
+      `"${c.subject}" (${c.day})`,
+      "→ rowStart:",
+      slotToRow(c.startTime),
+      "| span:",
+      spanCount(c.startTime, c.endTime),
+      "| startTime:",
+      c.startTime,
+      "| endTime:",
+      c.endTime,
+    );
+  });
+
   return (
     <div className="timetable-card">
       {/* ── Card Header ── */}
