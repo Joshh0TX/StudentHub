@@ -63,6 +63,18 @@ const formatTime = (time) => {
   return `${hour}:${m.toString().padStart(2, "0")} ${period}`;
 };
 
+const normaliseTime = (val) => {
+  if (!val) return "09:00";
+  // Already "HH:MM" — return as-is
+  if (/^\d{2}:\d{2}$/.test(val)) return val;
+  // ISO string like "1970-01-01T09:00:00.000Z"
+  const date = new Date(val);
+  if (!isNaN(date.getTime())) {
+    return date.toISOString().slice(11, 16); // "09:00"
+  }
+  return "09:00";
+};
+
 /**
  * Returns a human-readable duration string, e.g. "1 hr", "1 hr 30 min", "45 min".
  * Works purely from "HH:MM" strings — no Date objects needed.
@@ -430,9 +442,13 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
             </span>
 
             {/* Creator badge — always visible */}
-            <CreatorBadge 
-              name={timetable.creator ? `${timetable.creator.f_name} ${timetable.creator.l_name}` : null} 
-              isOwner={isOwner} 
+            <CreatorBadge
+              name={
+                timetable.creator
+                  ? `${timetable.creator.f_name} ${timetable.creator.l_name}`
+                  : null
+              }
+              isOwner={isOwner}
             />
           </div>
         </div>
@@ -631,7 +647,13 @@ const Timetable = () => {
       const data = await res.json();
       const normalised = data.map((tt) => ({
         ...tt,
-        classes: (tt.classes || []).filter((c) => c.id !== null),
+        classes: (tt.classes || [])
+          .filter((c) => c.id !== null)
+          .map((c) => ({
+            ...c,
+            startTime: normaliseTime(c.startTime ?? c.start_time),
+            endTime: normaliseTime(c.endTime ?? c.end_time),
+          })),
       }));
       setTimetables(normalised);
     } catch (err) {
@@ -675,7 +697,14 @@ const Timetable = () => {
         throw new Error("Failed to save timetable");
       const saved = await res.json();
       setTimetables((prev) => [
-        { ...saved, classes: saved.classes || [] },
+        {
+          ...saved,
+          classes: (saved.classes || []).map((c) => ({
+            ...c,
+            startTime: normaliseTime(c.startTime ?? c.start_time),
+            endTime: normaliseTime(c.endTime ?? c.end_time),
+          })),
+        },
         ...prev,
       ]);
     } catch (err) {
