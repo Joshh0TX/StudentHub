@@ -73,7 +73,7 @@ function useProfileData() {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

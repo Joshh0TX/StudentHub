@@ -1,6 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+
 
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const resourceRoutes = require('./modules/academic/routes/resources.routes');
@@ -24,16 +25,6 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://student-hub-henna-nu.vercel.app");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
 
 app.use(express.json());
 app.use('/api/groups', groupRoutes);

@@ -13,7 +13,7 @@ const PostBox = ({ user }) => {
   const handlePost = async () => {
     if (!content.trim()) return;
     const token = localStorage.getItem("token");
-    const res = await fetch("https://stuudo.onrender.com/api/posts", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
