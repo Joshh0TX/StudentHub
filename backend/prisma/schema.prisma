@@ -36,6 +36,7 @@ model User {
 
   // Social
   posts     Post[]
+  comments  Comment[]
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
 
@@ -109,7 +110,7 @@ model Timetable {
 
 model TimetableClass {
   id          String    @id @default(cuid())
-  timetableId Int                          // ← must be Int to match Timetable.id
+  timetableId Int
   subject     String
   location    String?
   day         String
@@ -126,6 +127,18 @@ model Post {
   userId    String
   createdAt DateTime @default(now())
 
+  user     User      @relation(fields: [userId], references: [id])
+  comments Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 }
 

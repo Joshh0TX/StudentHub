@@ -14,6 +14,8 @@ const PostBox = ({ user }) => {
   const fileInputRef = React.useRef(null);
 
 
+  
+
     const handleImageSelect = (e) => {
   const file = e.target.files[0];
   if (!file) return;
