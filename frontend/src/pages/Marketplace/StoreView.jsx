@@ -86,7 +86,7 @@ export default function StoreView() {
             </p>
             {storeData?.owner && (
               <Link
-                to={`/profile`}
+                to={`/profile/${storeData.owner.id}`}
                 className="storeOwnerChip"
                 title="View seller profile"
               >

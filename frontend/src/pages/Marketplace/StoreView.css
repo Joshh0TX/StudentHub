@@ -70,27 +70,23 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin-top: 8px;
+  margin-top: 6px;
   text-decoration: none;
-  color: var(--foreground);
-  background: var(--secondary);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 4px 12px 4px 4px;
-  transition: background 150ms;
+  color: var(--muted-foreground);
 }
 
-.storeOwnerChip:hover {
-  background: color-mix(in oklch, var(--primary) 10%, var(--secondary));
+.storeOwnerChip:hover .storeOwnerName {
+  text-decoration: underline;
+  color: var(--foreground);
 }
 
 .storeOwnerInitials {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #4f46e5;
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   display: grid;
   place-items: center;
@@ -102,6 +98,7 @@
 .storeOwnerName {
   font-size: 0.82rem;
   font-weight: 600;
+  color: var(--muted-foreground);
 }
 
 .favouriteBtn {
