@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import {
   AlertCircle,
   ExternalLink,
@@ -18,9 +16,8 @@ import {
   HelpCircle,
   File,
 } from "lucide-react";
-import "./Resources.css";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL ?? "";
 
 // ── Tag config ────────────────────────────────────────────────────
 const TAGS = [
@@ -43,6 +40,13 @@ const TYPE_MAP = {
   Docs: "pdf",
   Tool: "link",
   Other: "link",
+};
+
+const BACKEND_TYPE_TO_TAG = {
+  pdf: tagMap["Docs"],
+  video: tagMap["Video"],
+  notes: tagMap["Tutorial"],
+  link: tagMap["Tool"],
 };
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -76,17 +80,22 @@ const apiFetch = async (endpoint, options = {}, token) => {
 };
 
 // ── Upload Resource Modal ─────────────────────────────────────────
-const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
-  const { getToken } = useAuth();
+const UploadModal = ({
+  onClose,
+  onCreated,
+  selectedProgram,
+  selectedYear,
+  getToken,
+}) => {
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "Tutorial", // UI-facing resource category label
+    type: "Tutorial",
     courseCode: "",
     courseTitle: "",
-    mode: "link", // UI toggle: "link" | "file" (not sent to backend)
+    mode: "link",
     url: "",
   });
 
@@ -126,7 +135,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
     setLoading(true);
     setError(null);
 
-    // Option B: translate the friendly UI label into the backend enum value
     const backendType = TYPE_MAP[form.type] ?? "link";
 
     try {
@@ -134,12 +142,11 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
       let data;
 
       if (form.mode === "file") {
-        // Multipart form for file upload
         const fd = new FormData();
         fd.append("file", file);
         fd.append("title", form.title.trim());
         fd.append("description", form.description.trim());
-        fd.append("type", backendType); // ← mapped value
+        fd.append("type", backendType);
         fd.append("courseCode", form.courseCode.trim().toUpperCase());
         fd.append("courseTitle", form.courseTitle.trim());
         fd.append("department", selectedProgram);
@@ -147,15 +154,10 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
         data = await apiFetch(
           "/api/resources",
-          {
-            method: "POST",
-            body: fd,
-            // Do NOT set Content-Type — browser sets it with boundary for FormData
-          },
+          { method: "POST", body: fd },
           token,
         );
       } else {
-        // JSON for link
         data = await apiFetch(
           "/api/resources",
           {
@@ -164,7 +166,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             body: JSON.stringify({
               title: form.title.trim(),
               description: form.description.trim(),
-              type: backendType, // ← mapped value
+              type: backendType,
               courseCode: form.courseCode.trim().toUpperCase(),
               courseTitle: form.courseTitle.trim(),
               department: selectedProgram,
@@ -185,7 +187,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
     }
   };
 
-  // Derive the currently selected tag config for styling
   const selectedTag = tagMap[form.type] || TAGS[0];
 
   return (
@@ -208,7 +209,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
         )}
 
         <div className="modal-Rbody modal-Rbody--scroll">
-          {/* ── Resource mode toggle (link vs file) ── */}
           <div className="resource-type-toggle">
             <button
               className={`type-btn ${form.mode === "link" ? "type-btn--active" : ""}`}
@@ -224,7 +224,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </button>
           </div>
 
-          {/* ── Title ── */}
           <div className="modal-field">
             <label>
               Resource Name <span>*</span>
@@ -238,7 +237,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             />
           </div>
 
-          {/* ── Description ── */}
           <div className="modal-field">
             <label>Description</label>
             <textarea
@@ -251,7 +249,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             />
           </div>
 
-          {/* ── Course Code + Title ── */}
           <div className="modal-two-col">
             <div className="modal-field">
               <label>
@@ -277,7 +274,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           </div>
 
-          {/* ── Tag / resource-category selector ── */}
           <div className="modal-field">
             <label>Resource Type</label>
             <div className="tag-selector">
@@ -302,7 +298,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           </div>
 
-          {/* ── Link input ── */}
           {form.mode === "link" && (
             <div className="modal-field">
               <label>
@@ -318,7 +313,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           )}
 
-          {/* ── File upload ── */}
           {form.mode === "file" && (
             <div className="modal-field">
               <label>
@@ -373,7 +367,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           )}
 
-          {/* ── Context info ── */}
           <div className="modal-context">
             <span>
               Department: <strong>{selectedProgram}</strong>
@@ -411,31 +404,24 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
 // ── Resource Item ─────────────────────────────────────────────────
 const ResourceItem = ({ item, currentUserId, onDelete }) => {
-  // Tag lookup checks both `item.type` (new) and `item.tag` (legacy)
-  // so items already in the database still render correctly.
-  // Because the backend now stores a mapped value (e.g. "video", "pdf"),
-  // we also try to reverse-look up a display tag from the friendly label
-  // stored separately, falling back gracefully to "Other".
   const tag =
     tagMap[item.type] ||
     tagMap[item.tag] ||
     tagMap[item.displayType] ||
+    BACKEND_TYPE_TO_TAG[item.displayType] ||
     tagMap["Other"];
 
+  // Only the original creator may delete this resource
   const isOwner =
-    String(item.createdBy || item.created_by) === String(currentUserId);
-  const isFile = item.isFile || item.is_file;
-  const [confirmDelete, setConfirmDelete] = useState(false);
+    String(item.createdBy ?? item.created_by) === String(currentUserId);
 
+  const isFile = item.isFile || item.is_file;
+
+  // ── Delete handler — mirrors StudyGroups window.confirm pattern ──
   const handleDeleteClick = (e) => {
     e.preventDefault();
-    if (confirmDelete) {
-      onDelete(item.id);
-      setConfirmDelete(false);
-    } else {
-      setConfirmDelete(true);
-      setTimeout(() => setConfirmDelete(false), 3000);
-    }
+    if (!window.confirm("Delete this resource?")) return;
+    onDelete(item.id);
   };
 
   return (
@@ -459,7 +445,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
             className="resource-tag"
             style={{ color: tag.color, backgroundColor: tag.bg }}
           >
-            {/* Display whichever field exists — type (new) or tag (legacy) */}
             {item.type || item.tag}
           </span>
           {isFile && item.fileName && (
@@ -468,9 +453,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
               {item.fileSize ? ` · ${formatBytes(item.fileSize)}` : ""}
             </span>
           )}
-          {item.creator?.name && (
-            <span className="resource-creator">by {item.creator.name}</span>
-          )}
+          {/* creator display intentionally omitted per requirements */}
         </div>
       </div>
 
@@ -497,14 +480,14 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
           </a>
         )}
 
+        {/* Delete button — only rendered for the resource creator */}
         {isOwner && (
           <button
-            className={`resource-action-btn resource-action-btn--delete ${confirmDelete ? "resource-action-btn--confirm" : ""}`}
+            className="resource-action-btn resource-action-btn--delete"
             onClick={handleDeleteClick}
-            title={confirmDelete ? "Click again to confirm" : "Delete resource"}
+            title="Delete resource"
           >
             <Trash2 size={16} />
-            {confirmDelete && <span>Confirm?</span>}
           </button>
         )}
       </div>
@@ -513,10 +496,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 };
 
 // ── Main Component ────────────────────────────────────────────────
-const Resources = () => {
-  const { selectedProgram, selectedYear } = useOutletContext();
-  const { user, getToken } = useAuth();
-
+const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -535,7 +515,6 @@ const Resources = () => {
         token,
       );
 
-      // Group by courseCode
       const grouped = data.reduce((acc, item) => {
         const key = item.courseCode || item.course_code || "Unknown";
         if (!acc[key]) {
@@ -582,11 +561,13 @@ const Resources = () => {
     });
   };
 
-  // ── Delete resource ───────────────────────────────────────────
+  // ── Delete resource — mirrors StudyGroups handleDelete pattern ─
   const handleDelete = async (id) => {
+    // Guard: confirmation is already handled in ResourceItem via window.confirm
     try {
       const token = getToken?.();
       await apiFetch(`/api/resources/${id}`, { method: "DELETE" }, token);
+      // Remove the item locally; drop the section if it becomes empty
       setSections((prev) =>
         prev
           .map((s) => ({ ...s, items: s.items.filter((i) => i.id !== id) }))
@@ -686,6 +667,7 @@ const Resources = () => {
           onCreated={handleCreated}
           selectedProgram={selectedProgram}
           selectedYear={selectedYear}
+          getToken={getToken}
         />
       )}
     </div>
