@@ -254,22 +254,18 @@
 }
 
 .orderTabBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
   line-height: 1;
 }
 
+.orderTabActive .orderTabBadge {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .orderTabBadgeDone {
-  background: #16a34a;
+  color: inherit;
 }
 
 .productGrid {
