@@ -243,12 +243,12 @@
 }
 
 .orderTabActive {
-  background: var(--foreground);
-  color: var(--primary-foreground);
+  background: #4f46e5;
+  color: #fff;
 }
 
 .orderTabActive:hover {
-  background: var(--foreground);
+  background: #4338ca;
   transform: none;
   box-shadow: none;
 }

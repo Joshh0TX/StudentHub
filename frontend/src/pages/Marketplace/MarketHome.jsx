@@ -238,29 +238,32 @@ export default function MarketHome() {
         <div className="marketControls">
           <div className="marketFilters">
             <label className="filterSelectWrap">
+              <span className="filterSelectText">{typeFilter === "all" ? "All Types" : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
                 <option value="all">All Types</option>
                 <option value="goods">Goods</option>
                 <option value="services">Services</option>
               </select>
-              <span className="filterArrow">▾</span>
             </label>
             <label className="filterSelectWrap">
+              <span className="filterSelectText">{categoryFilter === "all" ? "All Categories" : categoryFilter}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
                 <option value="all">All Categories</option>
                 {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
-              <span className="filterArrow">▾</span>
             </label>
             <label className="filterSelectWrap">
+              <span className="filterSelectText">{locationFilter === "all" ? "All Locations" : locationFilter}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
                 {locations.map((loc) => (
                   <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
                 ))}
               </select>
-              <span className="filterArrow">▾</span>
             </label>
           </div>
         </div>
