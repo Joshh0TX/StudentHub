@@ -113,7 +113,7 @@ function useImageUpload() {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch(`https://stuudo.onrender.com/api/users/${endpoint}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${endpoint}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -738,7 +738,7 @@ function ProfilePage() {
 
   const saveToBackend = async (updatedData) => {
   const token = localStorage.getItem("token");
-  const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

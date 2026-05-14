@@ -13,7 +13,7 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`https://stuudo.onrender.com/api/users/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -31,7 +31,7 @@ export default function UserProfile() {
 
   const handleFriendRequest = async () => {
     const token = localStorage.getItem("token");
-    const res = await fetch(`https://stuudo.onrender.com/api/friends/request/${userId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/friends/request/${userId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     });

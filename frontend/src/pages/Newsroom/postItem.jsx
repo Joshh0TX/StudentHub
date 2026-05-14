@@ -3,7 +3,10 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Send } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import './postItem.css';
 
+
+
 const PostItem = ({ post, currentUser }) => {
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [comment, setComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Number(post.likes) || 0);
@@ -88,9 +91,15 @@ const PostItem = ({ post, currentUser }) => {
       {/* Comment Section */}
       <div className="post-comment-section">
         <img
-          src={currentUser?.profileImage || `https://ui-avatars.com/api/?name=User`}
+          src={
+            storedUser?.profile_pic ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`
+          }
           className="comment-avatar"
           alt="User"
+          onError={(e) => {
+            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`;
+          }}
         />
         <form className="comment-form" onSubmit={(e) => e.preventDefault()}>
           <input

@@ -3,6 +3,8 @@ import { NavLink, Link } from 'react-router-dom';
 import { Home, ShoppingBag, BookOpen, User, LogOut } from 'lucide-react';
 import './Bottomnav.css';
 
+const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
 const NavIcon = ({ to, Icon }) => (
   <NavLink 
     to={to} 
@@ -55,7 +57,16 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
       {/* 3. Right Section */}
       <div className="header-right">
         <Link to="/profile" className="profile-anchor">
-           <UserProfile  avatarUrl={user.avatar} />
+           <img src={
+            storedUser?.profile_pic ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`
+          }
+          className="comment-avatar"
+          alt="User"
+          onError={(e) => {
+            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`;
+          }}
+          />
         </Link>
         
         <Link to="/" className="logout-btn">
