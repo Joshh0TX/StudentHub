@@ -16,7 +16,7 @@ export default function EditAbout({ initialData, onSave, onCancel }) {
 
   const handleSave = async () => {
     const token = localStorage.getItem("token");
-    const res = await fetch("https://stuudo.onrender.com/api/users/profile", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}api/users/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

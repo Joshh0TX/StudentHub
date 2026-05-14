@@ -91,6 +91,7 @@ exports.login = async ({ email, password }) => {
             email: user.email,
             f_name: user.f_name,
             l_name: user.l_name,
+            profile_pic: user.profile_pic
         },
     };
 };
