@@ -35,6 +35,7 @@ app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/posts', require('./modules/social/comment.routes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

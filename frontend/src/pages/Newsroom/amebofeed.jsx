@@ -39,7 +39,7 @@ const handlePost = async () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", image);
-    formData.append("upload_preset", "your_upload_preset"); // ← from Cloudinary
+    formData.append("upload_preset", "stuudo_uploads"); // ← from Cloudinary
     formData.append("folder", "studenthub");
 
     const cloudRes = await fetch(

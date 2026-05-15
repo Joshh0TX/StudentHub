@@ -21,3 +21,16 @@ exports.getPosts = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.deletePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    const post = await postService.deletePost(postId, userId);
+    res.json({ message: 'Post deleted' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    res.status(403).json({ message: error.message });
+  }
+};
