@@ -122,13 +122,35 @@ model TimetableClass {
 
 model Post {
   id        String   @id @default(uuid())
-  content   String
+  content   String?
   image     String?
+  video     String?
   userId    String
   createdAt DateTime @default(now())
 
   user     User      @relation(fields: [userId], references: [id])
   comments Comment[]
+  hashtags  PostHashtag[]
+}
+
+model Hashtag {
+  id        String   @id @default(uuid())
+  tag       String   @unique
+  createdAt DateTime @default(now())
+
+  posts PostHashtag[]
+}
+
+model PostHashtag {
+  id        String   @id @default(uuid())
+  postId    String
+  hashtagId String
+  createdAt DateTime @default(now())
+
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  hashtag Hashtag @relation(fields: [hashtagId], references: [id])
+
+  @@unique([postId, hashtagId])
 }
 
 model Comment {

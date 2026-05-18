@@ -224,3 +224,13 @@
   color: #ef4444;
   background-color: #fef2f2;
 }
+
+.hashtag-link {
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hashtag-link:hover {
+  text-decoration: underline;
+}

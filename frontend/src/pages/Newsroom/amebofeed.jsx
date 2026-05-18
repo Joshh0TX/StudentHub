@@ -10,6 +10,9 @@ const PostBox = ({ user }) => {
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [image, setImage] = React.useState(null);
   const [imagePreview, setImagePreview] = React.useState(null);
+  const [video, setVideo] = React.useState(null);
+  const [videoPreview, setVideoPreview] = React.useState(null);
+  const videoInputRef = React.useRef(null);
   const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef(null);
 
@@ -29,17 +32,33 @@ const handleRemoveImage = () => {
   fileInputRef.current.value = null;
 };
 
+  const handleVideoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImage(null);
+    setImagePreview(null);
+    setVideo(file);
+    setVideoPreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveVideo = () => {
+    setVideo(null);
+    setVideoPreview(null);
+    videoInputRef.current.value = null;
+  };
+
 const handlePost = async () => {
-  if (!content.trim() && !image) return;
+  if (!content.trim() && !image && !video) return;
   const token = localStorage.getItem("token");
 
   let imageUrl = null;
+  let videoUrl = null;
 
   if (image) {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", image);
-    formData.append("upload_preset", "stuudo_uploads"); // ← from Cloudinary
+    formData.append("upload_preset", "stuudo_uploads"); 
     formData.append("folder", "studenthub");
 
     const cloudRes = await fetch(
@@ -51,19 +70,35 @@ const handlePost = async () => {
     setUploading(false);
   }
 
+  if (video) {
+      const formData = new FormData();
+      formData.append("file", video);
+      formData.append("upload_preset", "stuudo_uploads");
+      formData.append("folder", "studenthub");
+
+      const cloudRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/video/upload`,
+        { method: "POST", body: formData }
+      );
+      const cloudData = await cloudRes.json();
+      videoUrl = cloudData.secure_url;
+    }
+
   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ content, image: imageUrl }),
+    body: JSON.stringify({ content: content.trim() || "", image: imageUrl, video: videoUrl }),
   });
 
   if (res.ok) {
     setContent('');
     setImage(null);
     setImagePreview(null);
+    setVideo(null);
+    setVideoPreview(null);
     window.location.reload();
   } else {
     alert("Failed to post");
@@ -103,21 +138,43 @@ return (
       </div>
     )}
 
+     {videoPreview && (
+        <div className="video-preview">
+          <video src={videoPreview} controls style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
+          <button type="button" onClick={handleRemoveVideo} style={{ marginTop: '4px', color: 'red' }}>
+            Remove
+          </button>
+        </div>
+      )}
+
     <div className="post-actions-row">
       <div className="action-icons">
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleImageSelect}
-        />
-        <button type="button" onClick={() => fileInputRef.current.click()}>
-          <Image size={18} /> <span>Image</span>
-        </button>
-        <button type="button"><Video size={18} /> <span>Video</span></button>
-        <button type="button"><BarChart2 size={18} /> <span>Poll</span></button>
-      </div>
+  {/* Image input */}
+  <input
+    type="file"
+    accept="image/*"
+    ref={fileInputRef}
+    style={{ display: 'none' }}
+    onChange={handleImageSelect}
+  />
+  <button type="button" onClick={() => fileInputRef.current.click()}>
+    <Image size={18} /> <span>Image</span>
+  </button>
+
+  {/* Video input */}
+  <input
+    type="file"
+    accept="video/*"
+    ref={videoInputRef}
+    style={{ display: 'none' }}
+    onChange={handleVideoSelect}
+  />
+  <button type="button" onClick={() => videoInputRef.current.click()}>
+    <Video size={18} /> <span>Video</span>
+  </button>
+
+  <button type="button"><BarChart2 size={18} /> <span>Poll</span></button>
+</div>
       <button className="post-submit-btn" onClick={handlePost}>
         {uploading ? 'Uploading...' : 'Post'}
       </button>
@@ -154,6 +211,7 @@ export default function AmeboFeed({ user }) {
           timestamp: new Date(p.createdAt).toLocaleString(),
           content: p.content,
           postImage: p.image,
+          postVideo: p.video,
           likes: 0,
           comments: 0,
         }} currentUser={user} />

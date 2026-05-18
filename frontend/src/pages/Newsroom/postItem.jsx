@@ -3,6 +3,24 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Trash2 } from 'luci
 import { useNavigate } from 'react-router-dom';
 import './postItem.css';
 
+const renderContentWithHashtags = (content, navigate) => {
+  if (!content) return null;
+  const parts = content.split(/(#[a-zA-Z0-9_]+)/g);
+  return parts.map((part, i) =>
+    part.startsWith('#') ? (
+      <span
+        key={i}
+        className="hashtag-link"
+        onClick={() => navigate(`/newsroom/hashtag/${part.slice(1).toLowerCase()}`)}
+      >
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+};
+
 const PostItem = ({ post, currentUser }) => {
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [comment, setComment] = useState("");
@@ -109,13 +127,19 @@ const PostItem = ({ post, currentUser }) => {
 
       {/* Body */}
       <div className="post-body">
-        <p className="post-text">{post.content}</p>
+        <p className="post-text">{renderContentWithHashtags(post.content, navigate) || ""}</p>
         {post.postImage && (
           <div className="post-media">
             <img src={post.postImage} alt="Post content" loading="lazy" />
           </div>
         )}
       </div>
+
+      {post.postVideo && (
+  <div className="post-media">
+    <video src={post.postVideo} controls style={{ width: '100%', borderRadius: '12px' }} />
+  </div>
+)}
 
       {/* Interactions */}
       <div className="post-interactions">

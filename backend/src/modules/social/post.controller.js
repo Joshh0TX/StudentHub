@@ -3,8 +3,8 @@ const postService = require('./post.service');
 exports.createPost = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { content, image } = req.body;
-    const post = await postService.createPost(userId, { content, image });
+    const { content, image, video } = req.body;
+    const post = await postService.createPost(userId, { content, image, video });
     res.status(201).json(post);
   } catch (error) {
     console.error('Error creating post:', error);
@@ -32,5 +32,27 @@ exports.deletePost = async (req, res) => {
   } catch (error) {
     console.error('Error deleting post:', error);
     res.status(403).json({ message: error.message });
+  }
+};
+
+exports.getTrending = async (req, res) => {
+  try {
+    const { period } = req.query; // '24h' or '7d'
+    const trending = await postService.getTrending(period || '7d');
+    res.json(trending);
+  } catch (error) {
+    console.error('Error fetching trending:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.getPostsByHashtag = async (req, res) => {
+  try {
+    const { tag } = req.params;
+    const posts = await postService.getPostsByHashtag(tag);
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching posts by hashtag:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
