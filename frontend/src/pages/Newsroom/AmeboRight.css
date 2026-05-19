@@ -130,3 +130,45 @@
 /* --- UTILITIES --- */
 .text-orange { color: #f6ad55; }
 .text-muted { color: #cbd5e0; }
+
+.period-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.toggle-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.trend-rank {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  width: 20px;
+}
+
+.no-trends {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.follow-action-btn.sent {
+  background: #dcfce7;
+  color: #16a34a;
+  border-color: #16a34a;
+}

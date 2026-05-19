@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { UserPlus, Users, Send, ChevronRight, UserCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { UserPlus, Users, Send, ChevronRight, UserCircle, Check, X } from 'lucide-react';
 import './AmeboSide.css';
-import AmeboFeed from './amebofeed.jsx';
 
 const ProfileCard = ({ user }) => (
   <div className="profile-card">
@@ -22,21 +21,57 @@ const ProfileCard = ({ user }) => (
 export default function AmeboSidebar({ user }) {
   const [view, setView] = useState('connections');
   const [showMiniNav, setShowMiniNav] = useState(false);
+  const [inbound, setInbound] = useState([]);
+  const [connections, setConnections] = useState([]);
+  const [sent, setSent] = useState([]);
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
-  const listData = {
-    requests: Array(8).fill({ id: 1, name: "Bisi from Class", status: "Wants to connect" }),
-    connections: Array(20).fill({ id: 3, name: "David O.", status: "Online" }),
-    sent: Array(4).fill({ id: 6, name: "Dean of Faculty", status: "Pending" })
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const headers = { Authorization: `Bearer ${token}` };
+
+    const fetchAll = async () => {
+      const [inboundRes, connectionsRes, sentRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/inbound`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/sent`, { headers }),
+      ]);
+      const [inboundData, connectionsData, sentData] = await Promise.all([
+        inboundRes.json(),
+        connectionsRes.json(),
+        sentRes.json(),
+      ]);
+      setInbound(Array.isArray(inboundData) ? inboundData : []);
+      setConnections(Array.isArray(connectionsData) ? connectionsData : []);
+      setSent(Array.isArray(sentData) ? sentData : []);
+    };
+    fetchAll();
+  }, []);
+
+  const handleRespond = async (requestId, action) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/respond/${requestId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action })
+    });
+    if (res.ok) {
+      setInbound((prev) => prev.filter((r) => r.id !== requestId));
+      if (action === 'accepted') {
+        // Refresh connections
+        const token = localStorage.getItem("token");
+        const connectionsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await connectionsRes.json();
+        setConnections(Array.isArray(data) ? data : []);
+      }
+    }
   };
 
   const handleScroll = (e) => {
-    // If we scroll down more than 80px, show the mini nav
-    if (e.target.scrollTop > 80) {
-      setShowMiniNav(true);
-    } else {
-      setShowMiniNav(false);
-    }
+    setShowMiniNav(e.target.scrollTop > 80);
   };
 
   const scrollToTopAndChangeView = (newView) => {
@@ -44,20 +79,22 @@ export default function AmeboSidebar({ user }) {
     scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const safeUser = {
-    name: user?.name || "Fred Henry ",
-    email: user?.email || "chief@stuudo.app",
+    name: `${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`.trim() || "Student",
+    email: storedUser?.email || "",
     coverImg: user?.coverImg || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500",
-    profileImg: user?.profileImg || "https://ui-avatars.com/api/?name=Fred+Henry&background=3b82f6&color=fff",
+    profileImg: storedUser?.profile_pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`,
   };
+
+  const listData = { requests: inbound, connections, sent };
 
   return (
     <aside className="amebo-sidebar">
       <ProfileCard user={safeUser} />
 
       <div className="sidebar-scroll-container" ref={scrollRef} onScroll={handleScroll}>
-        
-        {/* THE MINI NAV (Hidden by default, slides down) */}
+
         <div className={`mini-nav-bar ${showMiniNav ? 'visible' : ''}`}>
           <button className={view === 'requests' ? 'active' : ''} onClick={() => scrollToTopAndChangeView('requests')}>
             <UserPlus size={18} />
@@ -70,21 +107,20 @@ export default function AmeboSidebar({ user }) {
           </button>
         </div>
 
-        {/* ORIGINAL STATS GRID */}
         <div className="stats-grid">
           <div className={`stat-box ${view === 'requests' ? 'active' : ''}`} onClick={() => setView('requests')}>
             <UserPlus size={18} className="stat-icon" />
-            <span className="stat-count">{listData.requests.length}</span>
+            <span className="stat-count">{inbound.length}</span>
             <span className="stat-label">Inbound</span>
           </div>
           <div className={`stat-box ${view === 'connections' ? 'active' : ''}`} onClick={() => setView('connections')}>
             <Users size={18} className="stat-icon" />
-            <span className="stat-count">{listData.connections.length}</span>
+            <span className="stat-count">{connections.length}</span>
             <span className="stat-label">Fam</span>
           </div>
           <div className={`stat-box ${view === 'sent' ? 'active' : ''}`} onClick={() => setView('sent')}>
             <Send size={18} className="stat-icon" />
-            <span className="stat-count">{listData.sent.length}</span>
+            <span className="stat-count">{sent.length}</span>
             <span className="stat-label">Pending</span>
           </div>
         </div>
@@ -96,19 +132,76 @@ export default function AmeboSidebar({ user }) {
         <div className="dynamic-list-container">
           <h4 className="list-title">{view.toUpperCase()}</h4>
           <div className="mini-list">
-            {listData[view].map((person, i) => (
-              <div key={i} className="mini-list-item">
-                <div className="item-img"><UserCircle size={20} color="#94a3b8" /></div>
+
+            {/* INBOUND REQUESTS */}
+            {view === 'requests' && inbound.map((req) => (
+              <div key={req.id} className="mini-list-item">
+                <img
+                  src={req.sender?.profileImage || `https://ui-avatars.com/api/?name=${req.sender?.f_name}+${req.sender?.l_name}&background=random`}
+                  className="item-img-avatar"
+                  alt={req.sender?.f_name}
+                  onClick={() => navigate(`/profile/${req.sender?.id}`)}
+                  style={{ cursor: 'pointer' }}
+                />
                 <div className="item-text">
-                  <span className="item-name">{person.name}</span>
-                  <span className="item-meta">{person.status}</span>
+                  <span className="item-name">{req.sender?.f_name} {req.sender?.l_name}</span>
+                  <span className="item-meta">{req.sender?.course || 'Student'}</span>
+                </div>
+                <div className="request-actions">
+                  <button className="accept-btn" onClick={() => handleRespond(req.id, 'accepted')}>
+                    <Check size={14} />
+                  </button>
+                  <button className="decline-btn" onClick={() => handleRespond(req.id, 'rejected')}>
+                    <X size={14} />
+                  </button>
                 </div>
               </div>
             ))}
+
+            {/* CONNECTIONS */}
+            {view === 'connections' && connections.map((conn, i) => (
+              <div key={i} className="mini-list-item" onClick={() => navigate(`/profile/${conn.id}`)} style={{ cursor: 'pointer' }}>
+                <img
+                  src={conn.profileImage || `https://ui-avatars.com/api/?name=${conn.f_name}+${conn.l_name}&background=random`}
+                  className="item-img-avatar"
+                  alt={conn.f_name}
+                />
+                <div className="item-text">
+                  <span className="item-name">{conn.f_name} {conn.l_name}</span>
+                  <span className="item-meta">{conn.course || 'Student'}</span>
+                </div>
+              </div>
+            ))}
+
+            {/* SENT REQUESTS */}
+            {view === 'sent' && sent.map((req) => (
+              <div key={req.id} className="mini-list-item">
+                <img
+                  src={req.receiver?.profileImage || `https://ui-avatars.com/api/?name=${req.receiver?.f_name}+${req.receiver?.l_name}&background=random`}
+                  className="item-img-avatar"
+                  alt={req.receiver?.f_name}
+                />
+                <div className="item-text">
+                  <span className="item-name">{req.receiver?.f_name} {req.receiver?.l_name}</span>
+                  <span className="item-meta">Pending</span>
+                </div>
+              </div>
+            ))}
+
+            {/* EMPTY STATES */}
+            {view === 'requests' && inbound.length === 0 && (
+              <p className="empty-state">No pending requests</p>
+            )}
+            {view === 'connections' && connections.length === 0 && (
+              <p className="empty-state">No connections yet</p>
+            )}
+            {view === 'sent' && sent.length === 0 && (
+              <p className="empty-state">No sent requests</p>
+            )}
+
           </div>
         </div>
       </div>
     </aside>
   );
 }
-

@@ -1,9 +1,13 @@
 import "./ProductDetail.css";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { fetchProduct, fetchReviews, placeOrder, postReview, toggleFavourite, fetchFavourites } from "./marketplaceApi";
+import { fetchProduct, fetchReviews, fetchProducts, placeOrder, postReview, fetchUserOrdersForProduct } from "./marketplaceApi";
+import { dummyProducts } from "./marketplaceData";
+import { StarRatingInput, StarRatingDisplay } from "./StarRating";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
+
+const DEFAULT_PRODUCT_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Crect x='150' y='90' width='100' height='80' rx='8' fill='%23d0d0d0'/%3E%3Ccircle cx='175' cy='115' r='12' fill='%23b0b0b0'/%3E%3Cpolygon points='150,170 185,130 215,155 240,125 270,170' fill='%23c0c0c0'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E`;
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -11,8 +15,9 @@ export default function ProductDetail() {
 
   const [item, setItem] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [orderNote, setOrderNote] = useState("");
@@ -24,35 +29,48 @@ export default function ProductDetail() {
 
   const [showContacts, setShowContacts] = useState(false);
   const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [isFavourited, setIsFavourited] = useState(false);
-  const [favLoading, setFavLoading] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const [hasCompletedOrder, setHasCompletedOrder] = useState(false);
 
   useEffect(() => {
     setLoading(true);
+    setActiveImg(0);
     Promise.all([fetchProduct(productId), fetchReviews(productId)])
       .then(([productData, reviewsData]) => {
         if (!productData || productData.error) {
-          setNotFound(true);
+          const dummy = dummyProducts.find((d) => d.id === productId);
+          if (dummy) setItem(dummy);
         } else {
           setItem(productData);
           setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+          // check if user has a completed order for this product
+          if (user?.id) {
+            fetchUserOrdersForProduct(productData.id, user.id)
+              .then((orders) => {
+                setHasCompletedOrder(Array.isArray(orders) && orders.some((o) => o.status === "Completed"));
+              })
+              .catch(() => {});
+          }
+          // fetch similar products — same category, different product
+          fetchProducts()
+            .then((all) => {
+              const similar = all
+                .filter((p) => p.id !== productId && p.category === productData.category)
+                .sort((a, b) => ((b.visits ?? 0) + (b.orders ?? 0)) - ((a.visits ?? 0) + (a.orders ?? 0)))
+                .slice(0, 6);
+              setSimilarProducts(similar);
+            })
+            .catch(() => {});
         }
       })
-      .catch(() => setNotFound(true))
+      .catch(() => {
+        const dummy = dummyProducts.find((d) => d.id === productId);
+        if (dummy) setItem(dummy);
+      })
       .finally(() => setLoading(false));
   }, [productId]);
-
-  useEffect(() => {
-    if (!user) return;
-    fetchFavourites(user.id)
-      .then((favs) => {
-        if (Array.isArray(favs)) {
-          setIsFavourited(favs.some((f) => f.id === productId || f.storeId === productId));
-        }
-      })
-      .catch(() => {});
-  }, [productId, user?.id]);
 
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
@@ -71,39 +89,46 @@ export default function ProductDetail() {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!reviewText.trim()) return;
     setReviewSubmitting(true);
+    setReviewError("");
     try {
-      const newReview = await postReview(productId, { userId: user?.id, text: reviewText });
-      setReviews((prev) => [...prev, newReview]);
+      const newReview = await postReview(productId, { userId: user?.id, rating: reviewRating, text: reviewText || undefined });
+      setReviews((prev) => [newReview, ...prev]);
       setReviewText("");
+      setReviewRating(5);
     } catch (err) {
-      console.error(err);
+      setReviewError(err.message || "Failed to post review");
     } finally {
       setReviewSubmitting(false);
     }
   };
 
-  const handleToggleFavourite = async () => {
-    if (!user || !item?.store?.id) return;
-    setFavLoading(true);
-    try {
-      await toggleFavourite(item.store.id, user.id);
-      setIsFavourited((prev) => !prev);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setFavLoading(false);
-    }
+  if (loading) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
+  if (!item) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Product not found.</p></main>;
+
+  const resolveImg = (img) => {
+    if (!img) return null;
+    if (typeof img !== "string") return img;
+    if (img.startsWith("http") || img.startsWith("/assets")) return img;
+    return `${API_BASE}${img}`;
   };
 
-  if (loading) return <main className="productDetailPage"><p style={{ padding: "2rem" }}>Loading...</p></main>;
-  if (notFound) return <Navigate to="/marketplace" replace />;
+  const isOwnStore = user?.id && item?.store?.ownerId === user.id;
 
-  const images = item.images?.length ? item.images.map(img => img.startsWith("http") ? img : `${API_BASE}${img}`) : [];
-  const mainImage = images[0] || null;
-  const galleryImages = images.length > 1 ? images.slice(1) : [];
+  const rawImages = item.images?.length ? item.images.map(resolveImg).filter(Boolean) : [];
+  // pad to 4 slots with default image
+  const images = rawImages.length > 0
+    ? [...rawImages, ...Array(Math.max(0, 4 - rawImages.length)).fill(DEFAULT_PRODUCT_IMG)]
+    : [DEFAULT_PRODUCT_IMG, DEFAULT_PRODUCT_IMG, DEFAULT_PRODUCT_IMG, DEFAULT_PRODUCT_IMG];
+
+  const prev = () => setActiveImg((i) => (i - 1 + images.length) % images.length);
+  const next = () => setActiveImg((i) => (i + 1) % images.length);
+
   const contacts = item.store?.contacts || [];
+  const hasReviewed = reviews.some((r) => r.userId === user?.id);
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <main className="productDetailPage">
@@ -115,25 +140,38 @@ export default function ProductDetail() {
 
       <section className="productDetailCard">
         <div className="productDetailMedia">
-          {mainImage ? (
-            <img src={mainImage} alt={item.name} />
-          ) : (
-            <div className="productDetailPlaceholder">No image</div>
-          )}
+          {/* Main image with arrows */}
+          <div className="productMainImgWrap">
+            <img src={images[activeImg]} alt={item.name} className="productMainImg" />
+            {images.length > 1 && (
+              <>
+                <button type="button" className="imgArrow imgArrowLeft" onClick={prev} aria-label="Previous image">‹</button>
+                <button type="button" className="imgArrow imgArrowRight" onClick={next} aria-label="Next image">›</button>
+              </>
+            )}
+          </div>
+          {/* Thumbnails — clicking rotates active to that slot */}
           <div className="productDetailGallery">
-            {galleryImages.length
-              ? galleryImages.map((img, idx) => (
-                  <img src={img} alt={`${item.name} view ${idx + 1}`} key={`${item.id}-gallery-${idx}`} />
-                ))
-              : Array.from({ length: 3 }).map((_, idx) => (
-                  <div className="productDetailThumbPlaceholder" key={`placeholder-${idx}`}>Image</div>
-                ))}
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`${item.name} view ${idx + 1}`}
+                className={`productThumb${idx === activeImg ? " productThumbActive" : ""}`}
+                onClick={() => setActiveImg(idx)}
+              />
+            ))}
           </div>
         </div>
+
         <div className="productDetailInfo">
           <div className="productDetailTags">
             <span className="marketTag">{item.type}</span>
             <span className="marketTag muted">{item.category}</span>
+          </div>
+          <div className="productDetailStats">
+            <span>👁 {item.visits ?? 0} views</span>
+            <span>🛒 {item._count?.orders ?? 0} orders</span>
           </div>
           <h1>{item.name}</h1>
           <p className="productDetailPrice">₦{item.price}</p>
@@ -141,7 +179,11 @@ export default function ProductDetail() {
           <div className="productDetailMeta">
             <div>
               <div className="metaLabel">Store</div>
-              <div className="metaValue">{item.store?.name}</div>
+              <div className="metaValue">
+                {item.store?.id
+                  ? <Link to={`/store/${encodeURIComponent(item.store.id)}`} style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 700 }} onMouseEnter={e => e.currentTarget.style.textDecoration = "underline"} onMouseLeave={e => e.currentTarget.style.textDecoration = "none"}>{item.store.name}</Link>
+                  : item.store?.name}
+              </div>
             </div>
             <div>
               <div className="metaLabel">Category</div>
@@ -153,32 +195,23 @@ export default function ProductDetail() {
               <span className="locationChip" key={loc}>{loc}</span>
             ))}
           </div>
+
           <div className="productDetailActions">
-            <button className="mButton" type="button" onClick={() => setShowOrderForm((prev) => !prev)}>
-              {showOrderForm ? "Close Order Form" : "Place Order"}
-            </button>
-            <button className="btnOutline" type="button" onClick={() => setShowContacts((prev) => !prev)}>
-              {showContacts ? "Hide Contacts" : "Contact Seller"}
-            </button>
-            {user && (
-              <button
-                type="button"
-                className={`heartBtn${isFavourited ? " active" : ""}`}
-                onClick={handleToggleFavourite}
-                disabled={favLoading}
-                aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                  fill={isFavourited ? "currentColor" : "none"}
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
+            {!isOwnStore && (
+              <button className="mButton" type="button" onClick={() => setShowOrderForm(true)}>Place Order</button>
+            )}
+            {!isOwnStore && (
+              <button className="btnOutline" type="button" onClick={() => setShowContacts((prev) => !prev)}>
+                {showContacts ? "Hide Contacts" : "Contact Seller"}
               </button>
             )}
+            {isOwnStore && <p style={{ fontSize: "0.82rem", color: "var(--muted-foreground)" }}>This is your product</p>}
           </div>
+
           {orderSuccess && <p style={{ color: "green", fontSize: "0.9rem", marginTop: "0.5rem" }}>Order placed successfully!</p>}
+
           {showContacts && (
-            <div className="contactPanel">
+            <div className="contactPanel" style={{ marginTop: "12px" }}>
               {contacts.length ? (
                 contacts.map((contact) => (
                   <div className="contactRow" key={`${contact.type}-${contact.value}`}>
@@ -191,39 +224,56 @@ export default function ProductDetail() {
               )}
             </div>
           )}
-          {showOrderForm && (
-            <form className="orderForm" onSubmit={handleOrderSubmit}>
-              <label>
-                Quantity
-                <input type="number" min="1" value={orderQty} onChange={(e) => setOrderQty(e.target.value)} />
-              </label>
-              <label>
-                Preferred Delivery Time
-                <input type="text" placeholder="e.g., Today 6pm" value={orderTime} onChange={(e) => setOrderTime(e.target.value)} />
-              </label>
-              <label>
-                Pickup / Delivery Location
-                <input type="text" placeholder="e.g., Queen Esther Hall" value={orderLocation} onChange={(e) => setOrderLocation(e.target.value)} />
-              </label>
-              <label>
-                Buyer Note (optional)
-                <textarea rows="3" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} placeholder="Any instructions for the seller?" />
-              </label>
-              <button type="submit" className="submitButton" disabled={orderSubmitting}>
-                {orderSubmitting ? "Submitting..." : "Submit Order"}
-              </button>
-            </form>
-          )}
         </div>
       </section>
 
+      {/* Order Form Modal */}
+      {showOrderForm && (
+        <div className="storeModal" role="dialog" aria-modal="true" aria-label="Place order">
+          <button className="storeModalBackdrop" type="button" onClick={() => setShowOrderForm(false)} />
+          <div className="storeModalCard" role="document">
+            <button className="storeModalClose" type="button" onClick={() => setShowOrderForm(false)}>×</button>
+            <h3 className="storeModalTitle">Place Order</h3>
+            <p className="storeModalSubtitle">Fill in your order details below.</p>
+            <div className="storeModalBody">
+              <form className="storeForm" onSubmit={handleOrderSubmit}>
+                <label>Quantity<input type="number" min="1" value={orderQty} onChange={(e) => setOrderQty(e.target.value)} /></label>
+                <label>Preferred Delivery Time<input type="text" placeholder="e.g., Today 6pm" value={orderTime} onChange={(e) => setOrderTime(e.target.value)} /></label>
+                <label>Pickup / Delivery Location<input type="text" placeholder="e.g., Queen Esther Hall" value={orderLocation} onChange={(e) => setOrderLocation(e.target.value)} /></label>
+                <label>Buyer Note (optional)<textarea rows="3" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} placeholder="Any instructions for the seller?" /></label>
+                <div className="storeModalActions">
+                  <button type="submit" className="submitButton" disabled={orderSubmitting}>{orderSubmitting ? "Submitting..." : "Submit Order"}</button>
+                  <button type="button" className="btnOutline" onClick={() => setShowOrderForm(false)}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="productDetailReviews">
-        <h2>Reviews</h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <h2 style={{ margin: 0 }}>Reviews {reviews.length > 0 && <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "var(--muted-foreground)" }}>({reviews.length})</span>}</h2>
+            {avgRating && (
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <StarRatingDisplay value={Math.round(avgRating)} size="sm" />
+                <span style={{ fontSize: "0.85rem", fontWeight: 700 }}>{avgRating}</span>
+              </span>
+            )}
+          </div>
+          {reviews.length > 3 && (
+            <Link to={`/marketplace/${productId}/reviews`} style={{ fontSize: "0.85rem", color: "var(--primary)", textDecoration: "none", fontWeight: 600 }}>
+              See all {reviews.length} →
+            </Link>
+          )}
+        </div>
         {reviews.length ? (
           <div className="reviewList">
-            {reviews.map((review) => (
+            {reviews.slice(0, 3).map((review) => (
               <div className="reviewCard" key={review.id || `${review.userId}-${review.text}`}>
-                <div className="reviewName">{review.user?.name || "Anonymous"}</div>
+                <div className="reviewName">{review.user ? `${review.user.f_name} ${review.user.l_name}` : "Anonymous"}</div>
+                {review.rating && <StarRatingDisplay value={review.rating} size="sm" />}
                 <div className="reviewText">{review.text}</div>
               </div>
             ))}
@@ -231,18 +281,55 @@ export default function ProductDetail() {
         ) : (
           <p className="reviewEmpty">No reviews yet.</p>
         )}
-        {user && (
-          <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
-            <label>
-              Leave a Review
-              <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience..." />
-            </label>
-            <button type="submit" className="submitButton" disabled={reviewSubmitting || !reviewText.trim()}>
-              {reviewSubmitting ? "Posting..." : "Post Review"}
-            </button>
-          </form>
+        {reviews.length > 3 && (
+          <Link to={`/marketplace/${productId}/reviews`} style={{ display: "block", marginTop: "10px", fontSize: "0.85rem", color: "var(--primary)", textDecoration: "none", fontWeight: 600 }}>
+            See all {reviews.length} reviews →
+          </Link>
+        )}
+        {user && !isOwnStore && !hasReviewed && (
+          hasCompletedOrder ? (
+            <form className="orderForm" onSubmit={handleReviewSubmit} style={{ marginTop: "1rem" }}>
+              <label>Leave a Review</label>
+              <StarRatingInput value={reviewRating} onChange={setReviewRating} />
+              <textarea rows="3" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share your experience... (optional)" style={{ marginTop: "8px", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)", fontSize: "0.95rem", resize: "vertical", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              {reviewError && <p style={{ color: "red", fontSize: "0.85rem", margin: 0 }}>{reviewError}</p>}
+              <button type="submit" className="submitButton" disabled={reviewSubmitting}>
+                {reviewSubmitting ? "Posting..." : "Post Review"}
+              </button>
+            </form>
+          ) : (
+            user && !isOwnStore && (
+              <p style={{ marginTop: "1rem", fontSize: "0.82rem", color: "var(--muted-foreground)", fontStyle: "italic" }}>
+                Only buyers with a completed order can leave a review.
+              </p>
+            )
+          )
         )}
       </section>
+
+      {/* Similar Products */}
+      {similarProducts.length > 0 && (
+        <section className="similarProductsSection">
+          <h2>Similar Products</h2>
+          <div className="similarProductsGrid">
+            {similarProducts.map((product) => {
+              const img = product.images?.[0]
+                ? (product.images[0].startsWith("http") ? product.images[0] : `${API_BASE}${product.images[0]}`)
+                : DEFAULT_PRODUCT_IMG;
+              return (
+                <Link to={`/marketplace/${product.id}`} className="similarProductCard" key={product.id}>
+                  <img src={img} alt={product.name} className="similarProductImg" />
+                  <div className="similarProductInfo">
+                    <div className="similarProductName">{product.name}</div>
+                    <div className="similarProductPrice">₦{product.price}</div>
+                    <div className="similarProductStore">{product.store?.name}</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

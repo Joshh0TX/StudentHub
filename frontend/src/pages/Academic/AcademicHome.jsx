@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./AcademicHome.css";
 import { Outlet, NavLink } from "react-router-dom";
 import { Users, BookOpen, Link, Calendar } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const programs = {
   Accounting: { years: [1, 2, 3] },
@@ -49,8 +50,13 @@ const programs = {
 };
 
 export default function AcademicHome() {
-  const [selectedProgram, setSelectedProgram] = useState("Agriculture");
-  const [selectedYear, setSelectedYear] = useState(1);
+  const { user } = useAuth();
+
+  // Pre-fill selects from the user's registered department and year
+  const [selectedProgram, setSelectedProgram] = useState(
+    user?.department || "Computer Science",
+  );
+  const [selectedYear, setSelectedYear] = useState(user?.year || 1);
 
   const handleProgramChange = (e) => {
     setSelectedProgram(e.target.value);
@@ -66,12 +72,9 @@ export default function AcademicHome() {
         {/* ── Top Header ── */}
         <header className="header">
           <div className="brand">
-            <div className="brand-text">
-              <span className="brand-name">Study Corner</span>
-              <span className="brand-sub">
-                {selectedProgram} - Year {selectedYear}
-              </span>
-            </div>
+            <span className="brand-sub">
+              {selectedProgram} - Year {selectedYear}
+            </span>
           </div>
           <div className="program-selects">
             <select

@@ -6,22 +6,15 @@ import { fetchProducts, createStore, fetchFavourites, toggleFavourite, fetchStor
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 import heroImg from "../../assets/marketplace/hero.png";
+import { StarRatingDisplay } from "./StarRating";
 
-const FEATURED_STORES = [
-  { id: "s1", name: "Gbemi's Kitchen", category: "Food", bg: "#1e3a5f", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&q=80" },
-  { id: "s2", name: "Kemi's Beauty Bar", category: "Beauty", bg: "#4a1942", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80" },
-  { id: "s3", name: "Simi's Dispatch", category: "Delivery", bg: "#1a3d2b", image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?w=300&q=80" },
-  { id: "s4", name: "Josh's Tech Desk", category: "Tech", bg: "#2d1b4e", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&q=80" },
-  { id: "s5", name: "Titi's Mini Mart", category: "Goods", bg: "#3b2a1a", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" },
-  { id: "s6", name: "Tunde's Treats", category: "Food", bg: "#1a2e3b", image: "https://images.unsplash.com/photo-1587241321921-91a834d82ffc?w=300&q=80" },
-  { id: "s7", name: "Sade's Appliances", category: "Appliances", bg: "#2a3b1a", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&q=80" },
-  { id: "s8", name: "Mike's Bookshop", category: "Educational", bg: "#3b1a1a", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&q=80" },
-];
+const DEFAULT_PRODUCT_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Crect x='150' y='90' width='100' height='80' rx='8' fill='%23d0d0d0'/%3E%3Ccircle cx='175' cy='115' r='12' fill='%23b0b0b0'/%3E%3Cpolygon points='150,170 185,130 215,155 240,125 270,170' fill='%23c0c0c0'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E`;
 
 export default function MarketHome() {
   const navigate = useNavigate();
   const user = getUser();
   const sliderRef = useRef(null);
+  const searchRef = useRef(null);
 
   const [products, setProducts] = useState([]);
   const [showStoreForm, setShowStoreForm] = useState(false);
@@ -34,7 +27,7 @@ export default function MarketHome() {
   const [storeError, setStoreError] = useState("");
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeForm, setStoreForm] = useState({
-    storeName: "", storeDesc: "", storeType: "goods", storeImage: null,
+    storeName: "", storeDesc: "", storeCategory: "All Categories", storeImage: null,
     contactType: "WhatsApp", contactValue: "", contacts: [],
   });
 
@@ -67,12 +60,12 @@ export default function MarketHome() {
     if (!user) return setStoreError("You must be logged in");
     setStoreError(""); setStoreLoading(true);
     try {
-      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeType, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
+      await createStore({ name: storeForm.storeName, description: storeForm.storeDesc, type: storeForm.storeCategory === "All Categories" ? "General" : storeForm.storeCategory, image: storeForm.storeImage, ownerId: user.id, contacts: storeForm.contacts });
       setIsSeller(true);
       setShowStoreForm(false);
       navigate("/storefront");
     } catch (err) {
-      setStoreError(err.message);
+      setStoreError(err.message || "Failed to create store. Make sure the server is running.");
     } finally {
       setStoreLoading(false);
     }
@@ -87,22 +80,19 @@ export default function MarketHome() {
 
   const allCategories = Array.from(new Set([...categoriesByType.goods, ...categoriesByType.services]));
 
-  const filteredItems = products.filter((item) => {
-    const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase()) || item.store?.name?.toLowerCase().includes(query.toLowerCase());
-    const matchesType = typeFilter === "all" || item.type === typeFilter;
-    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
-    const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
-    return matchesQuery && matchesType && matchesCategory && matchesLocation;
-  });
+  const filteredItems = products
+    .filter((item) => {
+      const matchesQuery = item.name?.toLowerCase().includes(query.toLowerCase()) || item.description?.toLowerCase().includes(query.toLowerCase()) || item.store?.name?.toLowerCase().includes(query.toLowerCase());
+      const matchesType = typeFilter === "all" || item.type === typeFilter;
+      const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+      const matchesLocation = locationFilter === "all" || item.locations?.includes(locationFilter);
+      return matchesQuery && matchesType && matchesCategory && matchesLocation;
+    })
+    .sort((a, b) => ((b.visits ?? 0) + (b.orders ?? 0)) - ((a.visits ?? 0) + (a.orders ?? 0)));
 
   const allStores = Array.from(new Map(products.map((p) => [p.store?.id, p.store]).filter(([id]) => id)).values());
-  const mergedStores = [
-    ...allStores.map(s => ({ ...s, image: s.image || FEATURED_STORES.find(f => f.name === s.name)?.image })),
-    ...FEATURED_STORES.filter(f => !allStores.some(s => s.name === f.name)),
-  ];
   const contactOptions = ["WhatsApp","Phone","Instagram","Snapchat","Telegram","Email","X"];
   const getInitials = (name = "") => name.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
-  const storeImg = (store) => store?.image ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`) : null;
 
   return (
     <div>
@@ -114,8 +104,16 @@ export default function MarketHome() {
             <h2 className="marketHeroTitle">Welcome to Stuudo<br />Marketplace</h2>
             <p className="marketHeroSub">Buy, sell and discover goods and services from fellow students on campus. Fast, easy and trusted.</p>
             <div className="marketHeroActions">
-              <button className="marketHeroCta" type="button" onClick={() => document.querySelector(".marketControls")?.scrollIntoView({ behavior: "smooth" })}>Shop Now</button>
-              <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
+              <button className="marketHeroCta" type="button" onClick={() => {
+                if (searchRef.current) {
+                  const top = searchRef.current.getBoundingClientRect().top + window.scrollY;
+                  window.scrollTo({ top, behavior: "smooth" });
+                }
+              }}>Shop Now</button>
+              {isSeller
+                ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
+                : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
+              }
             </div>
           </div>
           <div className="marketHeroIllustration">
@@ -125,19 +123,18 @@ export default function MarketHome() {
 
       
         {/* Popular Stores Slider */}
+        {allStores.length > 0 && (
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
             <div>
               <h2>Popular Stores</h2>
-              <p>More trusted sellers you might like.</p>
-            </div>
-            <div className="sliderNavBtns">
+              <p>Trusted sellers on campus.</p>
               <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
-              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
             </div>
+            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
-            {mergedStores.map((store) => {
+            {allStores.map((store) => {
               const imgSrc = store.image
                 ? (store.image.startsWith("http") ? store.image : `${API_BASE}${store.image}`)
                 : null;
@@ -149,12 +146,13 @@ export default function MarketHome() {
                       : <span>{getInitials(store.name)}</span>}
                   </div>
                   <div className="popularSliderName">{store.name}</div>
-                  <div className="popularSliderCat">{store.type || store.category}</div>
+                  <div className="popularSliderCat">{["both", "goods", "services", "General"].includes(store.type) ? "General" : store.type || store.category || "General"}</div>
                 </Link>
               );
             })}
           </div>
         </div>
+        )}
 
         {/* Create Store Modal */}
         {showStoreForm && (
@@ -171,11 +169,12 @@ export default function MarketHome() {
                   <label>Store Description<textarea name="storeDesc" rows="3" value={storeForm.storeDesc} onChange={handleStoreChange} required /></label>
                   <label>Store Profile Photo (optional)<input name="storeImage" type="file" accept="image/*" onChange={handleStoreChange} /></label>
                   <label>
-                    Store Type
-                    <select name="storeType" value={storeForm.storeType} onChange={handleStoreChange}>
-                      <option value="goods">Goods</option>
-                      <option value="services">Services</option>
-                      <option value="both">Both</option>
+                    Store Category
+                    <select name="storeCategory" value={storeForm.storeCategory} onChange={handleStoreChange}>
+                      <option value="All Categories">All Categories</option>
+                      {allCategories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </label>
                   <label>
@@ -202,7 +201,7 @@ export default function MarketHome() {
                   </label>
                   <div className="storeModalActions">
                     <button className="submitButton" type="submit" disabled={storeLoading}>{storeLoading ? "Creating..." : "Create Store"}</button>
-                    <button className="btnOutline" type="button" onClick={() => setShowStoreForm(false)}>Cancel</button>
+                    <button className="btnOutline" type="button" onClick={() => setShowStoreForm(false)} disabled={storeLoading}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -212,6 +211,7 @@ export default function MarketHome() {
         <div className="marketSearch" style={{ margin: "16px 0 20px" }}>
           <div className="marketSearchWrapper">
             <input
+              ref={searchRef}
               type="text"
               placeholder="Search items, locations..."
               value={query}
@@ -237,22 +237,34 @@ export default function MarketHome() {
         {/* Filters */}
         <div className="marketControls">
           <div className="marketFilters">
-            <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
-              <option value="all">All Types</option>
-              <option value="goods">Goods</option>
-              <option value="services">Services</option>
-            </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-              <option value="all">All Categories</option>
-              {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-              {locations.map((loc) => (
-                <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
-              ))}
-            </select>
+            <label className="filterSelectWrap">
+              <span className="filterSelectText">{typeFilter === "all" ? "All Types" : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); }}>
+                <option value="all">All Types</option>
+                <option value="goods">Goods</option>
+                <option value="services">Services</option>
+              </select>
+            </label>
+            <label className="filterSelectWrap">
+              <span className="filterSelectText">{categoryFilter === "all" ? "All Categories" : categoryFilter}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option value="all">All Categories</option>
+                {(typeFilter === "all" ? allCategories : categoriesByType[typeFilter]).map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </label>
+            <label className="filterSelectWrap">
+              <span className="filterSelectText">{locationFilter === "all" ? "All Locations" : locationFilter}</span>
+              <svg className="filterArrowSvg" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+                {locations.map((loc) => (
+                  <option key={loc} value={loc === "All Locations" ? "all" : loc}>{loc}</option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
 
@@ -260,7 +272,11 @@ export default function MarketHome() {
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              {item.images?.[0] && <img src={typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]} alt={item.name} className="marketImage" />}
+              <img
+                src={item.images?.[0] ? (typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]) : DEFAULT_PRODUCT_IMG}
+                alt={item.name}
+                className="marketImage"
+              />
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>
@@ -268,8 +284,13 @@ export default function MarketHome() {
               <p className="cardTitle">
                 <Link to={`/marketplace/${item.id}`} className="productLink">{item.name}</Link>
               </p>
-              <p className="itemDesc">{item.description}</p>
               <p className="marketPrice">₦{item.price}</p>
+              {item.avgRating && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", margin: "4px 0" }}>
+                  <StarRatingDisplay value={Math.round(item.avgRating)} size="sm" />
+                  <span style={{ fontSize: "0.78rem", color: "var(--muted-foreground)" }}>{item.avgRating} ({item.reviewCount})</span>
+                </div>
+              )}
               <div className="locationChips">
                 {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}
               </div>

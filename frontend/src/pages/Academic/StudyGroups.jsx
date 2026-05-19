@@ -1,18 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Users, UserPlus, X, RefreshCw, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import "./StudyGroups.css";
 
 const API = import.meta.env.VITE_API_URL;
 
-// ── Reusable fetch helper ─────────────────────────────────────────
-// Handles JSON parsing, error checking and throws clean error messages
 const apiFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${API}${endpoint}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      // Send token on every request if it exists
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
   });
-  if (!res.ok) {
+
+  // Check content type FIRST — prevents the HTML parse error
+  const contentType = res.headers.get("content-type") || "";
+  if (!res.ok || !contentType.includes("application/json")) {
     const text = await res.text();
     let message;
     try {
@@ -23,6 +32,7 @@ const apiFetch = async (endpoint, options = {}) => {
     }
     throw new Error(message);
   }
+
   return res.json();
 };
 
@@ -49,7 +59,6 @@ const CreateGroupModal = ({
   };
 
   const handleSubmit = async () => {
-    // Validate required fields
     if (
       !form.name.trim() ||
       !form.course_code.trim() ||
@@ -78,7 +87,7 @@ const CreateGroupModal = ({
           description: form.description.trim(),
           max_members: maxMembers,
           year: Number(selectedYear),
-          department: selectedProgram, //change when auth is complete
+          department: selectedProgram,
         }),
       });
       onCreated(data);
@@ -105,8 +114,7 @@ const CreateGroupModal = ({
 
         {error && (
           <div className="modal-error">
-            <AlertCircle size={15} />
-            {error}
+            <AlertCircle size={15} /> {error}
           </div>
         )}
 
@@ -165,7 +173,6 @@ const CreateGroupModal = ({
             max={30}
           />
 
-          {/* Read only info so user can confirm context */}
           <div className="modal-context">
             <span>
               Department: <strong>{selectedProgram}</strong>
@@ -199,14 +206,15 @@ const CreateGroupModal = ({
   );
 };
 
-const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
+// ── Group Card ────────────────────────────────────────────────────
+const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId }) => {
   const navigate = useNavigate();
+  const isCreator = group.createdBy === currentUserId;
   const memberCount = isNaN(Number(group.member_count))
     ? 0
     : Number(group.member_count ?? 0);
   const isFull = memberCount >= group.max_members;
 
-  // Guard — if group.id is missing, button does nothing
   const handleViewDetails = () => {
     if (!group.id) return console.error("Group ID is missing:", group);
     navigate(`${group.id}`);
@@ -232,6 +240,12 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
         {group.description || "No description provided."}
       </p>
 
+      {group.creator && (
+        <p className="group-creator">
+          Created by {group.creator.f_name} {group.creator.l_name}
+        </p>
+      )}
+
       {isMember && <span className="member-badge">✓ You are a member</span>}
       {isFull && !isMember && <span className="full-badge">Group Full</span>}
 
@@ -252,6 +266,11 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
         <button className="btn-details" onClick={handleViewDetails}>
           View Details
         </button>
+        {isCreator && (
+          <button className="btn-delete" onClick={() => onDelete(group.id)}>
+            Delete Group
+          </button>
+        )}
       </div>
     </div>
   );
@@ -259,6 +278,7 @@ const GroupCard = ({ group, onJoin, isMember, isJoining }) => {
 
 // ── Main Component ────────────────────────────────────────────────
 const StudyGroups = () => {
+  const { user, loading: authLoading } = useAuth(); // ← also pull loading from auth
   const { selectedProgram, selectedYear } = useOutletContext();
 
   const [groups, setGroups] = useState([]);
@@ -267,26 +287,13 @@ const StudyGroups = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState("all");
-  const [joiningId, setJoiningId] = useState(null); // tracks which group is being joined
-  const [departmentId, setDepartmentId] = useState(null);
-
-  // ── Fetch department ID from program name ─────────────────────
-  // Needed so the POST body can send a valid department_id foreign key
-  const fetchDepartmentId = useCallback(async (program) => {
-    try {
-      const data = await apiFetch(
-        `/api/departments?name=${encodeURIComponent(program)}`,
-      );
-      // API returns array — take the first match
-      if (data.length > 0) setDepartmentId(data[0].id);
-    } catch (err) {
-      console.error("Could not fetch department ID:", err.message);
-    }
-  }, []);
+  const [joiningId, setJoiningId] = useState(null);
 
   // ── Fetch all groups + student's joined groups ────────────────
   const fetchGroups = useCallback(async () => {
-    if (!selectedProgram || !selectedYear) return;
+    // Guard — wait for all three values before fetching
+    if (!selectedProgram || !selectedYear || !user?.id) return;
+
     setLoading(true);
     setError(null);
 
@@ -295,45 +302,41 @@ const StudyGroups = () => {
         apiFetch(
           `/api/groups?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         ),
-        apiFetch(`/api/groups/my-groups?student_id=test-user-123`),
+        apiFetch(`/api/groups/my-groups`), 
       ]);
 
-      // ✅ Ensure arrays always
       const safeGroups = Array.isArray(allData) ? allData : [];
       const safeMyGroups = Array.isArray(myData) ? myData : [];
 
       setGroups(safeGroups);
       setMyGroupIds(new Set(safeMyGroups.map((g) => g.id)));
     } catch (err) {
-      // ✅ If backend says "not found", treat as empty instead
       if (err.message.toLowerCase().includes("not found")) {
         setGroups([]);
         setMyGroupIds(new Set());
-        setError(null); // prevent error UI
+        setError(null);
       } else {
         setError(err.message);
       }
     } finally {
       setLoading(false);
     }
-  }, [selectedProgram, selectedYear]);
+  }, [selectedProgram, selectedYear, user?.id]); // ← user?.id not user (avoids rerun on unrelated user changes)
 
-  // Re-fetch whenever program or year changes
   useEffect(() => {
     fetchGroups();
-    fetchDepartmentId(selectedProgram);
-  }, [fetchGroups, fetchDepartmentId, selectedProgram]);
+  }, [fetchGroups]);
 
   // ── Join a group ──────────────────────────────────────────────
   const handleJoin = async (groupId) => {
+    if (!user?.id) return; // guard
     setJoiningId(groupId);
     try {
       await apiFetch(`/api/groups/${groupId}/join`, {
         method: "POST",
-        body: JSON.stringify({ student_id: "test-user-123" }), // replace with real auth id
+        body: JSON.stringify({}),
       });
 
-      // Update locally without re-fetching entire list
       setGroups((prev) =>
         prev.map((g) =>
           g.id === groupId
@@ -349,16 +352,47 @@ const StudyGroups = () => {
     }
   };
 
-  // ── Add new group to top of list after creation ───────────────
+  const handleDelete = async (groupId) => {
+    if (!window.confirm("Delete this group?")) return;
+    try {
+      await apiFetch(`/api/groups/${groupId}`, { method: "DELETE" });
+      setGroups((prev) => prev.filter((g) => g.id !== groupId));
+      setMyGroupIds((prev) => {
+        const next = new Set(prev);
+        next.delete(groupId);
+        return next;
+      });
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleCreated = (newGroup) => {
     setGroups((prev) => [{ ...newGroup, member_count: 0 }, ...prev]);
   };
 
-  // ── Filter groups based on selected tab ──────────────────────
   const visibleGroups =
     filter === "mine" ? groups.filter((g) => myGroupIds.has(g.id)) : groups;
 
-  // ── Render ────────────────────────────────────────────────────
+  // ── Auth still loading — wait before rendering anything ───────
+  if (authLoading)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading user...</p>
+      </div>
+    );
+
+  // ── User failed to load (not logged in) ───────────────────────
+  if (!user)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>You must be logged in to view study groups.</p>
+      </div>
+    );
+
+  // ── Groups loading ────────────────────────────────────────────
   if (loading)
     return (
       <div className="groups-loading">
@@ -367,12 +401,12 @@ const StudyGroups = () => {
       </div>
     );
 
+  // ── Error ─────────────────────────────────────────────────────
   if (error)
     return (
       <div className="groups-error">
         <AlertCircle size={20} />
         <p>{error}</p>
-
         <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
           <button className="btn-retry" onClick={fetchGroups}>
             Retry
@@ -430,12 +464,14 @@ const StudyGroups = () => {
         <div className="groups-grid">
           {visibleGroups.map((group) => (
             <GroupCard
-              key={group.id}
-              group={group}
-              onJoin={handleJoin}
-              isMember={myGroupIds.has(group.id)}
-              isJoining={joiningId === group.id}
-            />
+            key={group.id}
+            group={group}
+            onJoin={handleJoin}
+            onDelete={handleDelete}
+            isMember={myGroupIds.has(group.id)}
+            isJoining={joiningId === group.id}
+            currentUserId={user.id}
+          />
           ))}
         </div>
       )}
@@ -447,7 +483,6 @@ const StudyGroups = () => {
           onCreated={handleCreated}
           selectedProgram={selectedProgram}
           selectedYear={selectedYear}
-          departmentId={departmentId}
         />
       )}
     </div>

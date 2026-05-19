@@ -1,14 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+
 
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const resourceRoutes = require('./modules/academic/routes/resources.routes');
 const userRoutes = require('./modules/users/routes');
 const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
+const postRoutes = require('./modules/social/post.routes');
+const friendRoutes = require('./modules/social/friend.routes');
 
-const path = require("path");
 
 const app = express();
 app.use(cors({
@@ -16,19 +18,24 @@ app.use(cors({
         "https://student-hub-henna-nu.vercel.app",
         "https://stuudo.onrender.com",
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:3000",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
-app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
+app.use(express.json());
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', require('./modules/auth/routes'));
 app.use("/api/timetables", timetableRoutes);
 app.use("/api/products", marketplaceRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/posts', require('./modules/social/comment.routes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

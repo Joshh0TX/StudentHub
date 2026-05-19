@@ -1,17 +1,18 @@
-import { dummyProducts } from "./marketplaceData";
 import API_BASE from "../../config";
 
 const BASE = `${API_BASE}/api/products`;
 
 export const fetchProducts = () =>
   fetch(BASE)
-    .then((r) => r.json())
-    .then((real) => {
-      const realIds = new Set((Array.isArray(real) ? real : []).map((p) => p.id));
-      const extras = dummyProducts.filter((d) => !realIds.has(d.id));
-      return [...(Array.isArray(real) ? real : []), ...extras];
+    .then(async (r) => {
+      const data = await r.json();
+      if (!r.ok) {
+        console.error("fetchProducts error:", data);
+        return [];
+      }
+      return Array.isArray(data) ? data : [];
     })
-    .catch(() => dummyProducts);
+    .catch(() => []);
 
 export const fetchProduct = (id) =>
   fetch(`${BASE}/${id}`).then((r) => r.json());
@@ -62,7 +63,16 @@ export const createStore = (data) => {
     else if (key === "contacts") form.append("contacts", JSON.stringify(val));
     else if (val !== undefined && val !== null) form.append(key, val);
   });
-  return fetch(`${BASE}/store`, { method: "POST", body: form }).then((r) => r.json());
+  return fetch(`${BASE}/store`, { method: "POST", body: form })
+    .then(async (r) => {
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error || `Server error: ${r.status}`);
+      return body;
+    })
+    .catch((err) => {
+      console.error("createStore error:", err);
+      throw err;
+    });
 };
 
 export const updateStore = (id, data) => {
@@ -85,6 +95,9 @@ export const placeOrder = (data) =>
 export const fetchStoreOrders = (storeId) =>
   fetch(`${BASE}/orders/store/${storeId}`).then((r) => r.json());
 
+export const fetchUserOrdersForProduct = (productId, userId) =>
+  fetch(`${BASE}/orders/buyer/${userId}/product/${productId}`).then((r) => r.json());
+
 export const updateOrderStatus = (id, status) =>
   fetch(`${BASE}/orders/${id}/status`, {
     method: "PUT",
@@ -100,7 +113,11 @@ export const postReview = (productId, data) =>
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.error || `Error: ${r.status}`);
+    return body;
+  });
 
 export const deleteReview = (reviewId) =>
   fetch(`${BASE}/reviews/${reviewId}`, { method: "DELETE" }).then((r) => r.json());

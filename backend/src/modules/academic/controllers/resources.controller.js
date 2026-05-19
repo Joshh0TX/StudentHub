@@ -1,19 +1,21 @@
 const { PrismaClient } = require("@prisma/client");
+const cloudinary = require("cloudinary").v2;
 const prisma = new PrismaClient();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 /**
  * GET /api/resources?department=CSC&year=300
- *
- * Returns a flat array of resources filtered by department and (optionally) year.
- * The frontend groups them by course_code itself, so we just return flat rows.
  */
 const getResources = async (req, res) => {
   const { department, year } = req.query;
 
   if (!department) {
-    return res
-      .status(400)
-      .json({ error: "department query param is required" });
+    return res.status(400).json({ error: "department query param is required" });
   }
 
   try {
@@ -25,22 +27,31 @@ const getResources = async (req, res) => {
       orderBy: [{ courseCode: "asc" }, { createdAt: "desc" }],
       include: {
         uploader: {
-          select: { id: true, name: true, profilePic: true },
+          select: {
+            id: true,
+            f_name: true,
+            l_name: true,
+            profileImage: true,
+            email: true,
+          },
         },
       },
     });
 
-    // Shape each row to match what Resources.jsx expects
     const shaped = resources.map((r) => ({
       id: r.id,
       course_code: r.courseCode,
-      course_title: r.courseTitle ?? r.courseCode, // fallback if title missing
+      course_title: r.courseTitle ?? r.courseCode,
       title: r.title,
-      type: r.type, // "pdf" | "link" | "video" | "notes"
+      type: r.type,
       url: r.url,
       description: r.description,
       department: r.department,
       year: r.year,
+      isFile: r.isFile,
+      fileName: r.fileName,
+      fileSize: r.fileSize,
+      mimeType: r.mimeType,
       uploadedBy: r.uploader,
       createdAt: r.createdAt,
     }));
@@ -54,25 +65,9 @@ const getResources = async (req, res) => {
 
 /**
  * POST /api/resources
- *
- * Body (JSON):
- * {
- *   title:       "Data Structures – Past Questions",
- *   type:        "pdf",           // pdf | link | video | notes
- *   url:         "https://...",
- *   description: "Very helpful for the exam",
- *   department:  "CSC",
- *   courseCode:  "CSC301",
- *   courseTitle: "Data Structures",
- *   year:        300,             // optional
- *   groupId:     "uuid"          // optional – ties resource to a study group
- * }
- *
- * Auth: expects req.user to be set by auth middleware.
- * During development without auth, falls back to a placeholder.
  */
 const createResource = async (req, res) => {
-  const uploadedBy = req.user?.id ?? "user-unique-id-002"; // swap when auth is live
+  const uploadedBy = req.user.id;
 
   const {
     title,
@@ -86,9 +81,14 @@ const createResource = async (req, res) => {
     groupId,
   } = req.body;
 
-  // Basic validation
-  const missing = ["title", "type", "url", "department", "courseCode"].filter(
-    (f) => !req.body[f],
+  if (!url && !req.file) {
+    return res
+      .status(400)
+      .json({ error: "Please provide either a link or upload a file" });
+  }
+
+  const missing = ["title", "type", "department", "courseCode"].filter(
+    (f) => !req.body[f]
   );
   if (missing.length) {
     return res
@@ -104,11 +104,14 @@ const createResource = async (req, res) => {
   }
 
   try {
+    // Cloudinary gives back req.file.path as the hosted URL
+    const fileUrl = req.file ? req.file.path : url;
+
     const resource = await prisma.resource.create({
       data: {
         title,
         type,
-        url,
+        url: fileUrl,
         description: description ?? null,
         department,
         courseCode,
@@ -116,9 +119,21 @@ const createResource = async (req, res) => {
         year: year ? parseInt(year, 10) : null,
         groupId: groupId ?? null,
         uploadedBy,
+        isFile: !!req.file,
+        fileName: req.file?.originalname ?? null,
+        fileSize: req.file?.size ?? null,
+        mimeType: req.file?.mimetype ?? null,
       },
       include: {
-        uploader: { select: { id: true, name: true } },
+        uploader: {
+          select: {
+            id: true,
+            f_name: true,
+            l_name: true,
+            profileImage: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -132,6 +147,10 @@ const createResource = async (req, res) => {
       description: resource.description,
       department: resource.department,
       year: resource.year,
+      isFile: resource.isFile,
+      fileName: resource.fileName,
+      fileSize: resource.fileSize,
+      mimeType: resource.mimeType,
       uploadedBy: resource.uploader,
       createdAt: resource.createdAt,
     });
@@ -143,12 +162,10 @@ const createResource = async (req, res) => {
 
 /**
  * DELETE /api/resources/:id
- *
- * Only the uploader can delete their own resource.
  */
 const deleteResource = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user?.id ?? "test-user-123";
+  const requesterId = req.user.id;
 
   try {
     const resource = await prisma.resource.findUnique({ where: { id } });
@@ -158,6 +175,16 @@ const deleteResource = async (req, res) => {
       return res
         .status(403)
         .json({ error: "Not authorised to delete this resource" });
+    }
+
+    // Delete from Cloudinary if it was a file upload
+    if (resource.isFile && resource.url) {
+      const publicId = resource.url
+        .split("/")
+        .slice(-2)
+        .join("/")
+        .split(".")[0];
+      await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
     }
 
     await prisma.resource.delete({ where: { id } });

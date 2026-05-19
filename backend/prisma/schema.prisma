@@ -27,6 +27,8 @@ model User {
   projects    Json?
   socials    Json?
   createdAt  DateTime @default(now())
+  requestsSent     FriendRequest[] @relation("RequestsSent")
+  requestsReceived FriendRequest[] @relation("RequestsReceived")
 
   // Academic
   courseMemberships CourseMember[]
@@ -34,6 +36,8 @@ model User {
 
   // Social
   posts     Post[]
+  comments  Comment[]
+  likes     Like[]
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
 
@@ -42,6 +46,11 @@ model User {
   pastQuestions PastQuestion[]
   studyGroups   StudyGroup[]
   GroupMember   StudyGroupMember[]
+  assignments Assignment[]
+  timetables Timetable[]
+
+  // Study group schedules created by this user
+  studyGroupSchedules StudyGroupSchedule[]
 
   // Marketplace
   store      Store?
@@ -61,7 +70,6 @@ model Course {
   creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
-  timetableClasses TimetableClass[]
 }
 
 model CourseMember {
@@ -85,38 +93,88 @@ model Assignment {
   createdBy   String
   createdAt   DateTime @default(now())
 
+  creator User @relation(fields: [createdBy], references: [id])
   course Course @relation(fields: [courseId], references: [id])
 }
 
 model Timetable {
-  id        Int              @id @default(autoincrement())
-  name      String           @db.VarChar(100)
-  studentId Int?
-  createdAt DateTime         @default(now())
-  classes   TimetableClass[]
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  department String?
+  year       Int?
+  createdBy  String?
+  createdAt  DateTime @default(now())
+
+  creator User?            @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  classes TimetableClass[]
 }
 
 model TimetableClass {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(cuid())
   timetableId Int
-  courseId    String?
-  subject     String    @db.VarChar(60)
-  location    String?   @db.VarChar(60)
-  day         String    @db.VarChar(10)
-  startTime   String    @db.VarChar(5)
-  endTime     String    @db.VarChar(5)
+  subject     String
+  location    String?
+  day         String
+  startTime   String
+  endTime     String
   colorIdx    Int       @default(0)
   timetable   Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
-  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
 }
 
 model Post {
   id        String   @id @default(uuid())
-  content   String
+  content   String?
   image     String?
+  video     String?
   userId    String
   createdAt DateTime @default(now())
 
+  user     User      @relation(fields: [userId], references: [id])
+  comments Comment[]
+  likes     Like[]
+  hashtags  PostHashtag[]
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+}
+
+model Hashtag {
+  id        String   @id @default(uuid())
+  tag       String   @unique
+  createdAt DateTime @default(now())
+
+  posts PostHashtag[]
+}
+
+model PostHashtag {
+  id        String   @id @default(uuid())
+  postId    String
+  hashtagId String
+  createdAt DateTime @default(now())
+
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  hashtag Hashtag @relation(fields: [hashtagId], references: [id])
+
+  @@unique([postId, hashtagId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 }
 
@@ -146,6 +204,7 @@ model StudyGroup {
   creator   User               @relation(fields: [createdBy], references: [id])
   resources Resource[]
   members   StudyGroupMember[]
+  schedules StudyGroupSchedule[]
 }
 
 model StudyGroupMember {
@@ -158,6 +217,25 @@ model StudyGroupMember {
   user  User       @relation(fields: [userId], references: [id])
 
   @@unique([groupId, userId])
+}
+
+model StudyGroupSchedule {
+  id          String   @id @default(cuid())
+  groupId     String
+  createdBy   String
+  title       String
+  date_time   DateTime
+  location    String?
+
+  is_online   Boolean  @default(false)
+  meeting_url String?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  group   StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator User       @relation(fields: [createdBy], references: [id])
 }
 
 model Resource {
@@ -173,6 +251,12 @@ model Resource {
   groupId     String?
   uploadedBy  String
   createdAt   DateTime @default(now())
+
+  //for file uploads
+  isFile      Boolean  @default(false)
+  fileName    String?
+  fileSize    Int?
+  mimeType    String?
 
   group    StudyGroup? @relation(fields: [groupId], references: [id])
   uploader User        @relation(fields: [uploadedBy], references: [id])
@@ -252,7 +336,8 @@ model Review {
   id        String   @id @default(uuid())
   productId String
   userId    String
-  text      String
+  rating    Int      @default(5)
+  text      String?
   createdAt DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id])
@@ -271,4 +356,17 @@ model StoreFavourite {
   user  User  @relation(fields: [userId], references: [id])
 
   @@unique([storeId, userId])
+}
+
+model FriendRequest {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("RequestsSent", fields: [senderId], references: [id])
+  receiver User @relation("RequestsReceived", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
 }

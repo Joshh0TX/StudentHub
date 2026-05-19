@@ -2,7 +2,7 @@ import "./Storefront.css";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  fetchStore, fetchProducts, createProduct, updateProduct,
+  fetchStore, createProduct, updateProduct,
   deleteProduct, fetchStoreOrders, updateOrderStatus, updateStore,
 } from "./marketplaceApi";
 import { categoriesByType } from "./marketplaceData";
@@ -17,10 +17,12 @@ export default function Storefront() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [orderTab, setOrderTab] = useState("Pending");
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formError, setFormError] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
   const [product, setProduct] = useState({
     name: "", desc: "", price: "", type: "goods", category: "Food", locations: "", images: [],
   });
@@ -31,21 +33,25 @@ export default function Storefront() {
       .then((storeData) => {
         if (!storeData || storeData.error) return;
         setStore(storeData);
-        return Promise.all([
-          fetchProducts().then((all) =>
-            setProducts(all.filter((p) => p.storeId === storeData.id || p.store?.id === storeData.id))
-          ),
-          fetchStoreOrders(storeData.id).then((o) => setOrders(Array.isArray(o) ? o : [])),
-        ]);
+        // use products directly from store fetch (includes _count.orders)
+        setProducts(storeData.products || []);
+        return fetchStoreOrders(storeData.id).then((o) => setOrders(Array.isArray(o) ? o : []));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
+  const refreshOrders = () => {
+    if (!store) return;
+    fetchStoreOrders(store.id)
+      .then((o) => setOrders(Array.isArray(o) ? o : []))
+      .catch(console.error);
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "images") {
-      setProduct((prev) => ({ ...prev, images: Array.from(files).slice(0, 3) }));
+      setProduct((prev) => ({ ...prev, images: Array.from(files).slice(0, 4) }));
     } else {
       setProduct((prev) => ({ ...prev, [name]: value }));
     }
@@ -54,6 +60,7 @@ export default function Storefront() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
+    setFormLoading(true);
     const payload = {
       name: product.name,
       description: product.desc,
@@ -78,6 +85,8 @@ export default function Storefront() {
       setShowProductForm(false);
     } catch (err) {
       setFormError(err.message || "Something went wrong");
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -102,6 +111,7 @@ export default function Storefront() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product? This can't be undone.")) return;
     try {
       await deleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
@@ -127,6 +137,62 @@ export default function Storefront() {
       setStore((prev) => ({ ...prev, image: updated.image }));
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const [showEditStore, setShowEditStore] = useState(false);
+  const [storeForm, setStoreForm] = useState({ name: "", description: "", type: "goods", image: null, contacts: [] });
+  const [storeFormError, setStoreFormError] = useState("");
+  const [storeFormLoading, setStoreFormLoading] = useState(false);
+
+  const openEditStore = () => {
+    setStoreForm({
+      name: store?.name || "",
+      description: store?.description || "",
+      type: store?.type || "Food",
+      image: null,
+      contacts: store?.contacts ? store.contacts.map((c) => ({ type: c.type, value: c.value })) : [],
+    });
+    setStoreFormError("");
+    setShowEditStore(true);
+  };
+
+  const handleStoreFormChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "image") setStoreForm((p) => ({ ...p, image: files[0] || null }));
+    else setStoreForm((p) => ({ ...p, [name]: value }));
+  };
+
+  const handleContactChange = (i, field, value) => {
+    setStoreForm((p) => {
+      const contacts = [...p.contacts];
+      contacts[i] = { ...contacts[i], [field]: value };
+      return { ...p, contacts };
+    });
+  };
+
+  const addContact = () => setStoreForm((p) => ({ ...p, contacts: [...p.contacts, { type: "whatsapp", value: "" }] }));
+  const removeContact = (i) => setStoreForm((p) => ({ ...p, contacts: p.contacts.filter((_, idx) => idx !== i) }));
+
+  const handleEditStoreSubmit = async (e) => {
+    e.preventDefault();
+    setStoreFormError("");
+    setStoreFormLoading(true);
+    try {
+      const updated = await updateStore(store.id, {
+        name: storeForm.name,
+        description: storeForm.description,
+        type: storeForm.type,
+        ...(storeForm.image && { image: storeForm.image }),
+        contacts: storeForm.contacts.filter((c) => c.value.trim()),
+      });
+      if (updated.error) throw new Error(updated.error);
+      setStore((prev) => ({ ...prev, ...updated }));
+      setShowEditStore(false);
+    } catch (err) {
+      setStoreFormError(err.message || "Failed to update store");
+    } finally {
+      setStoreFormLoading(false);
     }
   };
 
@@ -162,28 +228,22 @@ export default function Storefront() {
           <div>
             <h1 style={{ margin: 0 }}>{store?.name || "Storefront"}</h1>
             <p style={{ margin: "0.2rem 0 0", color: "#888", fontSize: "0.9rem" }}>{store?.description || "Post products and manage your listings."}</p>
+            <p className="storefrontStatLine">
+              <strong>{products.length}</strong> products
+              <span className="statDot"> · </span>
+              <strong>{orders.length}</strong> orders
+              <span className="statDot"> · </span>
+              <strong>{orders.filter((o) => o.status === "Pending").length}</strong> pending
+              <span className="statDot"> · </span>
+              <strong>{store?.visits ?? 0}</strong> visits
+            </p>
+            {store && (              <button type="button" className="btnOutline" style={{ marginTop: "8px", marginBottom: "12px", fontSize: "0.8rem", padding: "5px 14px" }} onClick={openEditStore}>
+                Edit Store Profile
+              </button>
+            )}
           </div>
         </div>
       </header>
-
-      <section className="storefrontStats">
-        <div className="statCard">
-          <div className="statValue">{products.length}</div>
-          <div className="statLabel">Products</div>
-        </div>
-        <div className="statCard">
-          <div className="statValue">{orders.length}</div>
-          <div className="statLabel">Orders</div>
-        </div>
-        <div className="statCard">
-          <div className="statValue">{orders.filter((o) => o.status === "Pending").length}</div>
-          <div className="statLabel">Pending</div>
-        </div>
-        <div className="statCard">
-          <div className="statValue">{store?.visits ?? 0}</div>
-          <div className="statLabel">Store Visits</div>
-        </div>
-      </section>
 
       <section className="storefrontGrid">
         {/* ── Products ── */}
@@ -209,25 +269,29 @@ export default function Storefront() {
               {showProductForm ? "Close" : "+ Add Product"}
             </button>
           </div>
-          <div className="productList">
+          <div className="productGrid">
             {filteredProducts.map((item) => {
               const thumb = item.images?.[0]
                 ? (item.images[0].startsWith("http") ? item.images[0] : `${API_BASE}${item.images[0]}`)
                 : null;
               return (
-                <div className="productRow" key={item.id}>
-                  {thumb && <img src={thumb} alt={item.name} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "6px", flexShrink: 0 }} />}
-                  <div style={{ flex: 1 }}>
+                <div className="productCard" key={item.id}>
+                  <Link to={`/marketplace/${item.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <div className="productCardImg">
+                    {thumb
+                      ? <img src={thumb} alt={item.name} />
+                      : <div className="productCardImgPlaceholder" />}
+                  </div>
+                  <div className="productCardBody">
                     <div className="productName">{item.name}</div>
                     <div className="productMeta">{item.category} · ₦{item.price}</div>
                     {item.locations?.length > 0 && (
-                      <div style={{ fontSize: "0.75rem", color: "#999", marginTop: "2px" }}>{item.locations.join(", ")}</div>
+                      <div style={{ fontSize: "0.72rem", color: "#999", marginTop: "2px" }}>{item.locations.join(", ")}</div>
                     )}
-                    <div style={{ fontSize: "0.75rem", color: "#aaa", marginTop: "2px" }}>
-                      {item.visits ?? 0} views
-                    </div>
+                    <div style={{ fontSize: "0.72rem", color: "#aaa", marginTop: "2px" }}>{item.visits ?? 0} views · {item._count?.orders ?? 0} orders</div>
                   </div>
-                  <div className="productActions">
+                  </Link>
+                  <div className="productCardActions">
                     <button type="button" className="btnOutline" onClick={() => handleEdit(item)}>Edit</button>
                     <button type="button" className="btnDanger" onClick={() => handleDelete(item.id)}>Delete</button>
                   </div>
@@ -235,7 +299,7 @@ export default function Storefront() {
               );
             })}
             {filteredProducts.length === 0 && (
-              <p style={{ padding: "1rem", color: "#888" }}>
+              <p style={{ padding: "1rem", color: "#888", gridColumn: "1/-1" }}>
                 {products.length === 0 ? "No products yet. Add your first one!" : "No products in this category."}
               </p>
             )}
@@ -270,7 +334,7 @@ export default function Storefront() {
                   </label>
                   <label>Locations (comma separated)<input name="locations" type="text" value={product.locations} onChange={handleChange} required /></label>
                   <label>
-                    Product Images (up to 3)
+                    Product Images (up to 4)
                     <input name="images" type="file" accept="image/*" multiple onChange={handleChange} />
                     {product.images.length > 0 && (
                       <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "4px" }}>
@@ -279,8 +343,10 @@ export default function Storefront() {
                     )}
                   </label>
                   <div className="storefrontModalActions">
-                    <button type="submit" className="submitButton">{editingId ? "Save Changes" : "Post Product"}</button>
-                    <button type="button" className="btnOutline" onClick={closeProductForm}>Cancel</button>
+                    <button type="submit" className="submitButton" disabled={formLoading}>
+                      {formLoading ? "Saving..." : (editingId ? "Save Changes" : "Post Product")}
+                    </button>
+                    <button type="button" className="btnOutline" onClick={closeProductForm} disabled={formLoading}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -290,14 +356,38 @@ export default function Storefront() {
 
         {/* ── Orders ── */}
         <section className="storefrontCard">
-          <h2>Orders</h2>
+          <div className="storefrontCardHeader">
+            <h2 style={{ margin: 0 }}>Orders</h2>
+            <button type="button" className="btnOutline" style={{ fontSize: "0.8rem", padding: "5px 12px" }} onClick={refreshOrders}>↻ Refresh</button>
+          </div>
+          {/* Status tabs */}
+          <div className="orderTabs">
+            {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((tab) => {
+              const count = orders.filter((o) => o.status === tab).length;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`orderTab${orderTab === tab ? " orderTabActive" : ""}`}
+                  onClick={() => setOrderTab(tab)}
+                >
+                  {tab}
+                  {count > 0 && (
+                    <span className={`orderTabBadge${tab === "Completed" ? " orderTabBadgeDone" : ""}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
           <div className="orderList">
-            {orders.map((order) => (
+            {orders.filter((o) => o.status === orderTab).map((order) => (
               <div className="orderRow" key={order.id}>
                 <div style={{ flex: 1 }}>
                   <div className="orderTitle">{order.product?.name || "Product"}</div>
                   <div className="orderMeta">
-                    {order.buyer?.name || "Buyer"} · {order.location || "No location"} · Qty: {order.quantity}
+                    {order.buyer ? `${order.buyer.f_name} ${order.buyer.l_name}` : "Buyer"} · {order.location || "No location"} · Qty: {order.quantity}
                   </div>
                   {order.note && <div className="noteMeta" style={{ fontStyle: "italic", color: "#888", fontSize: "0.8rem" }}>"{order.note}"</div>}
                   {order.deliveryTime && <div style={{ fontSize: "0.78rem", color: "#aaa" }}>Delivery: {order.deliveryTime}</div>}
@@ -306,17 +396,81 @@ export default function Storefront() {
                   className="orderStatus"
                   value={order.status}
                   onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                  style={order.status === "Completed" ? { background: "#dcfce7", color: "#166534", borderColor: "#86efac" } : {}}
                 >
-                  {["Pending", "Preparing", "Ready", "Shipped"].map((s) => (
+                  {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </div>
             ))}
-            {orders.length === 0 && <p style={{ padding: "1rem", color: "#888" }}>No orders yet.</p>}
+            {orders.filter((o) => o.status === orderTab).length === 0 && (
+              <p style={{ padding: "1rem", color: "#888" }}>No {orderTab.toLowerCase()} orders.</p>
+            )}
           </div>
         </section>
       </section>
+      {/* ── Edit Store Modal ── */}
+      {showEditStore && (
+        <div className="storefrontModal" role="dialog" aria-modal="true" aria-label="Edit store profile">
+          <button className="storefrontModalBackdrop" type="button" aria-label="Close" onClick={() => setShowEditStore(false)} />
+          <div className="storefrontModalCard" role="document">
+            <button className="storefrontModalClose" type="button" aria-label="Close" onClick={() => setShowEditStore(false)}>×</button>
+            <h2>Edit Store Profile</h2>
+            {storeFormError && <p style={{ color: "red", fontSize: "0.85rem", padding: "0 1rem" }}>{storeFormError}</p>}
+            <div className="storefrontModalBody">
+              <form className="storefrontForm" onSubmit={handleEditStoreSubmit}>
+                <label>Store Name
+                  <input name="name" type="text" value={storeForm.name} onChange={handleStoreFormChange} required />
+                </label>
+                <label>Description
+                  <textarea name="description" rows="3" value={storeForm.description} onChange={handleStoreFormChange} />
+                </label>
+                <label>Category
+                  <select name="type" value={storeForm.type} onChange={handleStoreFormChange}>
+                    {[...new Set([...categoriesByType.goods, ...categoriesByType.services])].map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>Store Image
+                  <input name="image" type="file" accept="image/*" onChange={handleStoreFormChange} />
+                  {storeForm.image && <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "4px" }}>{storeForm.image.name}</p>}
+                </label>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>Contact Links</span>
+                    <button type="button" className="btnOutline" style={{ fontSize: "0.78rem", padding: "4px 10px" }} onClick={addContact}>+ Add</button>
+                  </div>
+                  {storeForm.contacts.map((c, i) => (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "120px 1fr auto", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                      <select value={c.type} onChange={(e) => handleContactChange(i, "type", e.target.value)}
+                        style={{ padding: "8px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)" }}>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="snapchat">Snapchat</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="twitter">X (Twitter)</option>
+                        <option value="phone">Phone</option>
+                        <option value="email">Email</option>
+                      </select>
+                      <input type="text" placeholder="e.g. +234..." value={c.value} onChange={(e) => handleContactChange(i, "value", e.target.value)}
+                        style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--input-background)", color: "var(--foreground)" }} />
+                      <button type="button" className="btnDanger" style={{ padding: "6px 10px", fontSize: "0.8rem" }} onClick={() => removeContact(i)}>✕</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="storefrontModalActions">
+                  <button type="submit" className="submitButton" disabled={storeFormLoading}>
+                    {storeFormLoading ? "Saving..." : "Save Changes"}
+                  </button>
+                  <button type="button" className="btnOutline" onClick={() => setShowEditStore(false)}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

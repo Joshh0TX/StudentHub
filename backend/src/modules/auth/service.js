@@ -91,6 +91,25 @@ exports.login = async ({ email, password }) => {
             email: user.email,
             f_name: user.f_name,
             l_name: user.l_name,
+            profile_pic: user.profileImage
         },
     };
+};
+
+// GET ME
+exports.getMe = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      f_name: true,
+      l_name: true,
+      department: true,
+      level: true,
+    },
+  });
+
+  if (!user) throw new Error("User not found");
+  return user;
 };

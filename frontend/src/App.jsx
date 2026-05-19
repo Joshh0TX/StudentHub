@@ -11,11 +11,13 @@ import Onboard from "./pages/Onboarding/Onboard.jsx";
 import MarketHome from "./pages/Marketplace/MarketHome.jsx";
 import Storefront from "./pages/Marketplace/Storefront.jsx";
 import ProductDetail from "./pages/Marketplace/ProductDetail.jsx";
+import ProductReviews from "./pages/Marketplace/ProductReviews.jsx";
 import StoreView from "./pages/Marketplace/StoreView.jsx";
 import SearchPage from "./pages/Marketplace/SearchPage.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
+import UserProfile from "./pages/Profile/UserProfile.jsx";
 
 function App() {
   return (
@@ -26,9 +28,11 @@ function App() {
 
       {/* Everything inside Layout gets the bottom nav */}
       <Route element={<Layout />}>
+        <Route path="/profile/:userId" element={<UserProfile />} />
         <Route path="/marketplace" element={<MarketHome />} />
         <Route path="/marketplace/search" element={<SearchPage />} />
         <Route path="/marketplace/:productId" element={<ProductDetail />} />
+        <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
         <Route path="/store/:storeId" element={<StoreView />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>
