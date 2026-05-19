@@ -51,7 +51,7 @@ const Login = () => {
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
-    window.location.href = "/profile";
+    navigate("/onboarding");
   };
 
 
@@ -75,7 +75,7 @@ const Login = () => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    window.location.href = "/profile";
+    navigate("/profile");
   };
 
   return (

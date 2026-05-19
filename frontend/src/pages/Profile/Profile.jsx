@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './profile.css';
 import * as Icons from 'lucide-react';
 import BadgeManager from './profileSubsection/BadgeManager';
@@ -501,7 +502,7 @@ function AboutSection({ user, setUser, isEditingAbout, setIsEditingAbout }) {
           className="edit-rect-btn"
           onClick={() => setIsEditingAbout(true)}
         >
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <p className="about-text">
@@ -543,7 +544,7 @@ function BadgesSection({ user, onEdit }) {
           aria-label="Edit badges"
           title="Edit badges"
         >
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <div className="badges-grid">
@@ -577,7 +578,7 @@ function SkillsSection({ skills, onEdit }) {
       <div className="box-header">
         <h2>Skills</h2>
         <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <div className="skills-list">
@@ -610,7 +611,7 @@ function InterestsSection({ interests = [], onEdit }) {
       <div className="box-header">
         <h2>Interests</h2>
         <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <div className="interests-list">
@@ -624,6 +625,69 @@ function InterestsSection({ interests = [], onEdit }) {
   );
 }
 
+/**
+ * COMPONENT: MyStoreSection
+ * Responsibility: Displays a preview of the user's store if it exists
+ */
+function MyStoreSection({ storeData, isOwner }) {
+  // If the user hasn't created a store, render nothing at all
+  if (!storeData || !storeData.hasStore) return null;
+
+  // Static dummy product array matching what your backend will send later
+  const dummyProducts = [
+    { id: 1, name: "Premium UI Kit", price: "₦15,000", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&h=150&fit=crop" },
+    { id: 2, name: "React Starter Template", price: "₦25,000", image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=150&h=150&fit=crop" },
+    { id: 3, name: "Developer Sticker Pack", price: "₦3,500", image: "https://images.unsplash.com/photo-1572945281861-68b122e3e116?w=150&h=150&fit=crop" }
+  ];
+
+  return (
+    <div className="info-box store-box">
+      <div className="box-header">
+        <div className="store-title-area">
+          <Icons.ShoppingBag size={22} className="store-icon-header" />
+          <div>
+            <h2>{storeData.name || "My Digital Store"}</h2>
+            <p className="store-tagline">Explore premium products curated by this developer</p>
+          </div>
+        </div>
+        
+        {/* Dynamic Button Target based on Viewer Ownership */}
+        {isOwner ? (
+          <button 
+            onClick={() => navigate("/storefront")} 
+            className="store-action-btn owner-btn"
+            style={{ cursor: 'pointer' }}
+          >
+            <Icons.Settings size={16} /> Manage Store
+          </button>
+        ) : (
+          <button 
+            onClick={() => navigate(`/store/${storeData.slug}`)} 
+            className="store-action-btn visitor-btn"
+            style={{ cursor: 'pointer' }}
+          >
+            Visit Store <Icons.ArrowRight size={16} />
+          </button>
+        )}
+      </div>
+
+      {/* Product Row Grid */}
+      <div className="store-products-preview">
+        {dummyProducts.map((product) => (
+          <div key={product.id} className="store-mini-card">
+            <div className="store-img-wrapper">
+              <img src={product.image} alt={product.name} />
+            </div>
+            <div className="store-mini-details">
+              <h4>{product.name}</h4>
+              <span className="store-price">{product.price}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /**
  * COMPONENT: ProjectsSection
@@ -635,7 +699,7 @@ function ProjectsSection({ projects, onEdit }) {
       <div className="box-header">
         <h2>Projects &amp; Portfolios</h2>
         <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <div className="projects-grid">
@@ -672,7 +736,7 @@ function AchievementsSection({ achievements = [], onEdit }) {
       <div className="box-header">
         <h2>Notable Achievements</h2>
         <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> Edit
+          <Edit size={18} /> 
         </button>
       </div>
       <div className="achievements-list">
@@ -728,6 +792,7 @@ function ActivitiesSection({ activities }) {
  */
 function ProfilePage() {
   // State Management
+  const navigate = useNavigate();
   const modals = useModalManager();
   const { user, setUser } = useProfileData();
   const imageUpload = useImageUpload();
@@ -786,6 +851,13 @@ const handleSaveSkills = async (updatedSkills) => {
   setUser((prev) => ({ ...prev, skills: updatedSkills }));
   modals.setIsSkillManagerOpen(false);
 };
+
+const isOwner = true; 
+  const mockStoreData = {
+    hasStore: true, 
+    name: "Henry's Dev Hub",
+    slug: "henry-dev-hub"
+  };
   // ========================================================================
   // RENDER - Organized by sections
   // ========================================================================
@@ -847,6 +919,7 @@ const handleSaveSkills = async (updatedSkills) => {
 
           {/* ===== RIGHT COLUMN ===== */}
           <div className="right-column">
+            <MyStoreSection storeData={mockStoreData} isOwner={isOwner} navigate={navigate} />
             <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} />
 
             <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} />
