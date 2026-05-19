@@ -449,9 +449,9 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
               {item.fileSize ? ` · ${formatBytes(item.fileSize)}` : ""}
             </span>
           )}
-          {item.creator?.name && (
+          {/* {item.creator?.name && (
             <span className="resource-creator">by {item.creator.name}</span>
-          )}
+          )} */}
         </div>
       </div>
 
