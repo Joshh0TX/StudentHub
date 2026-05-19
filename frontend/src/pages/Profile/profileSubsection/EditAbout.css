@@ -50,6 +50,37 @@
   resize: vertical;
   min-height: 100px;
 }
+
+/* --- Socials Section Layout --- */
+.socials-edit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Spacing between social inputs */
+}
+
+.socials-edit-section h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569; /* Slate-600 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 4px 0;
+}
+
+.form-divider {
+  border: 0;
+  height: 1px;
+  background: #f1f5f9; /* Matches action bar divider */
+  margin: 16px 0 8px 0;
+}
+
+/* Optional styling for URL placeholders */
+.socials-edit-section input::placeholder {
+  color: #cbd5e1; /* Slate-300 */
+  font-size: 0.9rem;
+}
+
+/* --- Form Actions --- */
 .edit-about-actions {
   display: flex;
   justify-content: flex-end;
