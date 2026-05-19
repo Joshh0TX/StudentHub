@@ -22,7 +22,7 @@ import "./Resources.css";
 
 const API = import.meta.env.VITE_API_URL;
 
-// ── Tag config ────────────────────────────────────────────────────
+// ── Tag config (visual category — stored as `category`, never sent as `type`) ─
 const TAGS = [
   { label: "Tutorial", color: "#6d28d9", bg: "#ede9fe", Icon: BookOpen },
   { label: "Article", color: "#1d4ed8", bg: "#dbeafe", Icon: FileText },
@@ -35,7 +35,18 @@ const TAGS = [
 
 const tagMap = Object.fromEntries(TAGS.map((t) => [t.label, t]));
 
-// ── Helpers ───────────────────────────────────────────────────────
+// Derives the backend enum value from the upload mode and file extension.
+// Backend accepts: "pdf" | "link" | "video" | "notes"
+const deriveBackendType = (mode, file) => {
+  if (mode === "link") return "link";
+  if (!file) return "notes";
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (ext === "pdf") return "pdf";
+  if (["mp4", "mov", "avi", "webm"].includes(ext)) return "video";
+  return "notes";
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
 const formatBytes = (bytes) => {
   if (!bytes) return "";
   if (bytes < 1024) return `${bytes} B`;
@@ -65,23 +76,18 @@ const apiFetch = async (endpoint, options = {}, token) => {
   return res.json();
 };
 
-// ── Upload Resource Modal ─────────────────────────────────────────
+// ── Upload Resource Modal ──────────────────────────────────────────────────────
 const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
   const { getToken } = useAuth();
   const fileRef = useRef(null);
 
-  // FIX 1: Renamed `type` → `mode` for the link/file toggle to avoid
-  //         collision with the backend's `type` field (resource category).
-  //         `type` now exclusively holds the resource category (Tutorial etc.)
-  //         which is what the backend's "Missing required fields: type" error
-  //         was complaining about.
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "Tutorial", // resource category — sent to backend as "type"
+    category: "Tutorial", // visual label — stored as `category` in DB
     courseCode: "",
     courseTitle: "",
-    mode: "link", // UI toggle: "link" | "file" (not sent to backend)
+    mode: "link", // UI toggle only: "link" | "file"
     url: "",
   });
 
@@ -114,9 +120,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
   const handleSubmit = async () => {
     if (!form.title.trim()) return setError("Title is required.");
     if (!form.courseCode.trim()) return setError("Course code is required.");
-
-    // FIX 2: Validation now uses `form.mode` (link/file toggle) instead of
-    //         the old `form.type` which now holds the resource category.
     if (form.mode === "link" && !form.url.trim())
       return setError("Please enter a URL.");
     if (form.mode === "file" && !file) return setError("Please select a file.");
@@ -126,34 +129,26 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
     try {
       const token = getToken?.();
+      const backendType = deriveBackendType(form.mode, file);
       let data;
 
-      // FIX 3: Both submission paths now send `type: form.type` (the resource
-      //         category) instead of the old `tag: form.tag`, which the backend
-      //         never recognised.
       if (form.mode === "file") {
-        // Multipart form for file upload
         const fd = new FormData();
         fd.append("file", file);
         fd.append("title", form.title.trim());
         fd.append("description", form.description.trim());
-        fd.append("type", form.type); // FIX 3a
+        fd.append("type", backendType);
+        fd.append("category", form.category);
         fd.append("courseCode", form.courseCode.trim().toUpperCase());
         fd.append("courseTitle", form.courseTitle.trim());
         fd.append("department", selectedProgram);
         fd.append("year", String(selectedYear));
-
         data = await apiFetch(
           "/api/resources",
-          {
-            method: "POST",
-            body: fd,
-            // Do NOT set Content-Type — browser sets it with boundary for FormData
-          },
+          { method: "POST", body: fd },
           token,
         );
       } else {
-        // JSON for link
         data = await apiFetch(
           "/api/resources",
           {
@@ -162,7 +157,8 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             body: JSON.stringify({
               title: form.title.trim(),
               description: form.description.trim(),
-              type: form.type, // FIX 3b
+              type: backendType,
+              category: form.category,
               courseCode: form.courseCode.trim().toUpperCase(),
               courseTitle: form.courseTitle.trim(),
               department: selectedProgram,
@@ -182,9 +178,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
       setLoading(false);
     }
   };
-
-  // Derive the currently selected tag config for styling
-  const selectedTag = tagMap[form.type] || TAGS[0];
 
   return (
     <div
@@ -206,10 +199,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
         )}
 
         <div className="modal-Rbody modal-Rbody--scroll">
-          {/* ── Resource mode toggle (link vs file) ── */}
-          {/* FIX 4: Toggle buttons now read/write `form.mode` instead of
-                     the old `form.type`, which is now reserved for the
-                     resource category sent to the backend.               */}
           <div className="resource-type-toggle">
             <button
               className={`type-btn ${form.mode === "link" ? "type-btn--active" : ""}`}
@@ -225,7 +214,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </button>
           </div>
 
-          {/* ── Title ── */}
           <div className="modal-field">
             <label>
               Resource Name <span>*</span>
@@ -239,7 +227,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             />
           </div>
 
-          {/* ── Description ── */}
           <div className="modal-field">
             <label>Description</label>
             <textarea
@@ -252,7 +239,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             />
           </div>
 
-          {/* ── Course Code + Title ── */}
           <div className="modal-two-col">
             <div className="modal-field">
               <label>
@@ -268,9 +254,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
             <div className="modal-field">
               <label>Course Title</label>
-              {/* FIX 5: Removed the accidental line-break inside the name
-                         attribute that was silently preventing courseTitle
-                         from ever being updated in state.                 */}
               <input
                 name="courseTitle"
                 value={form.courseTitle}
@@ -281,18 +264,15 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           </div>
 
-          {/* ── Tag / resource-category selector ── */}
-          {/* FIX 6: Selector now reads/writes `form.type` (the backend field)
-                     instead of the old `form.tag` which was never sent.   */}
           <div className="modal-field">
-            <label>Resource Type</label>
+            <label>Resource Category</label>
             <div className="tag-selector">
               {TAGS.map((t) => (
                 <button
                   key={t.label}
-                  className={`tag-option ${form.type === t.label ? "tag-option--active" : ""}`}
+                  className={`tag-option ${form.category === t.label ? "tag-option--active" : ""}`}
                   style={
-                    form.type === t.label
+                    form.category === t.label
                       ? {
                           backgroundColor: t.bg,
                           color: t.color,
@@ -300,7 +280,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
                         }
                       : {}
                   }
-                  onClick={() => setForm((p) => ({ ...p, type: t.label }))}
+                  onClick={() => setForm((p) => ({ ...p, category: t.label }))}
                 >
                   <t.Icon size={13} /> {t.label}
                 </button>
@@ -308,8 +288,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           </div>
 
-          {/* ── Link input ── */}
-          {/* FIX 7: Conditional now uses `form.mode` */}
           {form.mode === "link" && (
             <div className="modal-field">
               <label>
@@ -325,8 +303,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           )}
 
-          {/* ── File upload ── */}
-          {/* FIX 8: Conditional now uses `form.mode` */}
           {form.mode === "file" && (
             <div className="modal-field">
               <label>
@@ -381,7 +357,6 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
             </div>
           )}
 
-          {/* ── Context info ── */}
           <div className="modal-context">
             <span>
               Department: <strong>{selectedProgram}</strong>
@@ -417,11 +392,21 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
   );
 };
 
-// ── Resource Item ─────────────────────────────────────────────────
+// ── Resource Item ──────────────────────────────────────────────────────────────
 const ResourceItem = ({ item, currentUserId, onDelete }) => {
-  // FIX 9: Tag lookup now checks both `item.type` (new) and `item.tag` (legacy)
-  //         so items already in the database still render correctly.
-  const tag = tagMap[item.type] || tagMap[item.tag] || tagMap["Other"];
+  // TEMP DEBUG — remove after fixing
+  console.log("Resource item raw data:", {
+    id: item.id,
+    title: item.title,
+    category: item.category,
+    tag: item.tag,
+    createdBy: item.createdBy,
+    uploadedBy: item.uploadedBy,
+    created_by: item.created_by,
+  });
+  console.log("currentUserId:", currentUserId);
+  console.log("tagMap lookup result:", tagMap[item.category], tagMap[item.tag]);
+  const tag = tagMap[item.category] || tagMap[item.tag] || tagMap["Other"];
   const isOwner =
     String(item.createdBy || item.created_by) === String(currentUserId);
   const isFile = item.isFile || item.is_file;
@@ -440,7 +425,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 
   return (
     <div className="resource-item">
-      {/* Tag icon bubble */}
       <div
         className="resource-icon-bubble"
         style={{ backgroundColor: tag.bg, color: tag.color }}
@@ -448,7 +432,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
         <tag.Icon size={18} />
       </div>
 
-      {/* Info */}
       <div className="resource-info">
         <span className="resource-name">{item.title}</span>
         {item.description && (
@@ -459,8 +442,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
             className="resource-tag"
             style={{ color: tag.color, backgroundColor: tag.bg }}
           >
-            {/* FIX 10: Display whichever field exists — type (new) or tag (legacy) */}
-            {item.type || item.tag}
+            {item.category || item.tag}
           </span>
           {isFile && item.fileName && (
             <span className="resource-filename">
@@ -474,7 +456,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="resource-actions">
         {isFile ? (
           <a
@@ -512,7 +493,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
   );
 };
 
-// ── Main Component ────────────────────────────────────────────────
+// ── Main Component ─────────────────────────────────────────────────────────────
 const Resources = () => {
   const { selectedProgram, selectedYear } = useOutletContext();
   const { user, getToken } = useAuth();
@@ -522,10 +503,6 @@ const Resources = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // ── Fetch ─────────────────────────────────────────────────────
-  // FIX 11: Wrapped in useCallback so it can be called from the Retry
-  //         button without causing stale-closure warnings, matching the
-  //         pattern used in the rest of the codebase.
   const fetchResources = useCallback(async () => {
     if (!selectedProgram || !selectedYear) return;
     setLoading(true);
@@ -538,11 +515,7 @@ const Resources = () => {
         token,
       );
 
-      // Group by courseCode
       const grouped = data.reduce((acc, item) => {
-        // FIX 12: The original code had `item.courseCode || item.courseCode`
-        //         (duplicate). Now falls back to course_code for snake_case
-        //         responses from raw SQL.
         const key = item.courseCode || item.course_code || "Unknown";
         if (!acc[key]) {
           acc[key] = {
@@ -567,9 +540,7 @@ const Resources = () => {
     fetchResources();
   }, [fetchResources]);
 
-  // ── Add new resource to correct section locally ───────────────
   const handleCreated = (newResource) => {
-    // FIX 13: Same duplicate key fix as in fetchResources above.
     const key = newResource.courseCode || newResource.course_code || "Unknown";
     setSections((prev) => {
       const existing = prev.find((s) => s.course === key);
@@ -589,7 +560,6 @@ const Resources = () => {
     });
   };
 
-  // ── Delete resource ───────────────────────────────────────────
   const handleDelete = async (id) => {
     try {
       const token = getToken?.();
@@ -604,7 +574,6 @@ const Resources = () => {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────
   if (loading)
     return (
       <div className="groups-loading">
@@ -626,7 +595,6 @@ const Resources = () => {
 
   return (
     <div className="resources-page">
-      {/* ── Page Header ── */}
       <div className="resources-header">
         <div>
           <h1>Educational Resources</h1>
@@ -651,7 +619,6 @@ const Resources = () => {
         </div>
       </div>
 
-      {/* ── Resource Sections ── */}
       {sections.length === 0 ? (
         <div className="resources-empty-state">
           <BookOpen size={36} color="#d1d5db" />
@@ -686,7 +653,6 @@ const Resources = () => {
         </div>
       )}
 
-      {/* ── Modal ── */}
       {showModal && (
         <UploadModal
           onClose={() => setShowModal(false)}
