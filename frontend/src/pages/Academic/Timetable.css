@@ -207,6 +207,28 @@
   flex-shrink: 0;
 }
 
+/* ── Edit button ── */
+.btn-edit {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a3a6b;
+  background: #fff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-edit:hover {
+  background: #eff6ff;
+  border-color: #1a3a6b;
+}
+
 /* ── Delete button — only rendered for owners, styled more prominently ── */
 .btn-delete {
   display: flex;
@@ -866,6 +888,13 @@
     display: none;
   }
   .btn-delete {
+    padding: 6px 8px;
+  }
+  /* Edit button — icon only on mobile, matching delete button behaviour */
+  .btn-edit span {
+    display: none;
+  }
+  .btn-edit {
     padding: 6px 8px;
   }
 }

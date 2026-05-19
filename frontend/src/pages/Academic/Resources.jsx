@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useOutletContext } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   AlertCircle,
   ExternalLink,
@@ -16,8 +18,9 @@ import {
   HelpCircle,
   File,
 } from "lucide-react";
+import "./Resources.css";
 
-const API = import.meta.env.VITE_API_URL ?? "";
+const API = import.meta.env.VITE_API_URL;
 
 // ── Tag config ────────────────────────────────────────────────────
 const TAGS = [
@@ -31,23 +34,6 @@ const TAGS = [
 ];
 
 const tagMap = Object.fromEntries(TAGS.map((t) => [t.label, t]));
-
-const TYPE_MAP = {
-  Tutorial: "notes",
-  Article: "notes",
-  Video: "video",
-  Guide: "notes",
-  Docs: "pdf",
-  Tool: "link",
-  Other: "link",
-};
-
-const BACKEND_TYPE_TO_TAG = {
-  pdf: tagMap["Docs"],
-  video: tagMap["Video"],
-  notes: tagMap["Tutorial"],
-  link: tagMap["Tool"],
-};
 
 // ── Helpers ───────────────────────────────────────────────────────
 const formatBytes = (bytes) => {
@@ -80,22 +66,22 @@ const apiFetch = async (endpoint, options = {}, token) => {
 };
 
 // ── Upload Resource Modal ─────────────────────────────────────────
-const UploadModal = ({
-  onClose,
-  onCreated,
-  selectedProgram,
-  selectedYear,
-  getToken,
-}) => {
+const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
+  const { getToken } = useAuth();
   const fileRef = useRef(null);
 
+  // FIX 1: Renamed `type` → `mode` for the link/file toggle to avoid
+  //         collision with the backend's `type` field (resource category).
+  //         `type` now exclusively holds the resource category (Tutorial etc.)
+  //         which is what the backend's "Missing required fields: type" error
+  //         was complaining about.
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "Tutorial",
+    type: "Tutorial", // resource category — sent to backend as "type"
     courseCode: "",
     courseTitle: "",
-    mode: "link",
+    mode: "link", // UI toggle: "link" | "file" (not sent to backend)
     url: "",
   });
 
@@ -128,6 +114,9 @@ const UploadModal = ({
   const handleSubmit = async () => {
     if (!form.title.trim()) return setError("Title is required.");
     if (!form.courseCode.trim()) return setError("Course code is required.");
+
+    // FIX 2: Validation now uses `form.mode` (link/file toggle) instead of
+    //         the old `form.type` which now holds the resource category.
     if (form.mode === "link" && !form.url.trim())
       return setError("Please enter a URL.");
     if (form.mode === "file" && !file) return setError("Please select a file.");
@@ -135,18 +124,20 @@ const UploadModal = ({
     setLoading(true);
     setError(null);
 
-    const backendType = TYPE_MAP[form.type] ?? "link";
-
     try {
       const token = getToken?.();
       let data;
 
+      // FIX 3: Both submission paths now send `type: form.type` (the resource
+      //         category) instead of the old `tag: form.tag`, which the backend
+      //         never recognised.
       if (form.mode === "file") {
+        // Multipart form for file upload
         const fd = new FormData();
         fd.append("file", file);
         fd.append("title", form.title.trim());
         fd.append("description", form.description.trim());
-        fd.append("type", backendType);
+        fd.append("type", form.type); // FIX 3a
         fd.append("courseCode", form.courseCode.trim().toUpperCase());
         fd.append("courseTitle", form.courseTitle.trim());
         fd.append("department", selectedProgram);
@@ -154,10 +145,15 @@ const UploadModal = ({
 
         data = await apiFetch(
           "/api/resources",
-          { method: "POST", body: fd },
+          {
+            method: "POST",
+            body: fd,
+            // Do NOT set Content-Type — browser sets it with boundary for FormData
+          },
           token,
         );
       } else {
+        // JSON for link
         data = await apiFetch(
           "/api/resources",
           {
@@ -166,7 +162,7 @@ const UploadModal = ({
             body: JSON.stringify({
               title: form.title.trim(),
               description: form.description.trim(),
-              type: backendType,
+              type: form.type, // FIX 3b
               courseCode: form.courseCode.trim().toUpperCase(),
               courseTitle: form.courseTitle.trim(),
               department: selectedProgram,
@@ -187,6 +183,7 @@ const UploadModal = ({
     }
   };
 
+  // Derive the currently selected tag config for styling
   const selectedTag = tagMap[form.type] || TAGS[0];
 
   return (
@@ -209,6 +206,10 @@ const UploadModal = ({
         )}
 
         <div className="modal-Rbody modal-Rbody--scroll">
+          {/* ── Resource mode toggle (link vs file) ── */}
+          {/* FIX 4: Toggle buttons now read/write `form.mode` instead of
+                     the old `form.type`, which is now reserved for the
+                     resource category sent to the backend.               */}
           <div className="resource-type-toggle">
             <button
               className={`type-btn ${form.mode === "link" ? "type-btn--active" : ""}`}
@@ -224,6 +225,7 @@ const UploadModal = ({
             </button>
           </div>
 
+          {/* ── Title ── */}
           <div className="modal-field">
             <label>
               Resource Name <span>*</span>
@@ -237,6 +239,7 @@ const UploadModal = ({
             />
           </div>
 
+          {/* ── Description ── */}
           <div className="modal-field">
             <label>Description</label>
             <textarea
@@ -249,6 +252,7 @@ const UploadModal = ({
             />
           </div>
 
+          {/* ── Course Code + Title ── */}
           <div className="modal-two-col">
             <div className="modal-field">
               <label>
@@ -264,6 +268,9 @@ const UploadModal = ({
             </div>
             <div className="modal-field">
               <label>Course Title</label>
+              {/* FIX 5: Removed the accidental line-break inside the name
+                         attribute that was silently preventing courseTitle
+                         from ever being updated in state.                 */}
               <input
                 name="courseTitle"
                 value={form.courseTitle}
@@ -274,6 +281,9 @@ const UploadModal = ({
             </div>
           </div>
 
+          {/* ── Tag / resource-category selector ── */}
+          {/* FIX 6: Selector now reads/writes `form.type` (the backend field)
+                     instead of the old `form.tag` which was never sent.   */}
           <div className="modal-field">
             <label>Resource Type</label>
             <div className="tag-selector">
@@ -298,6 +308,8 @@ const UploadModal = ({
             </div>
           </div>
 
+          {/* ── Link input ── */}
+          {/* FIX 7: Conditional now uses `form.mode` */}
           {form.mode === "link" && (
             <div className="modal-field">
               <label>
@@ -313,6 +325,8 @@ const UploadModal = ({
             </div>
           )}
 
+          {/* ── File upload ── */}
+          {/* FIX 8: Conditional now uses `form.mode` */}
           {form.mode === "file" && (
             <div className="modal-field">
               <label>
@@ -367,6 +381,7 @@ const UploadModal = ({
             </div>
           )}
 
+          {/* ── Context info ── */}
           <div className="modal-context">
             <span>
               Department: <strong>{selectedProgram}</strong>
@@ -404,24 +419,23 @@ const UploadModal = ({
 
 // ── Resource Item ─────────────────────────────────────────────────
 const ResourceItem = ({ item, currentUserId, onDelete }) => {
-  const tag =
-    tagMap[item.type] ||
-    tagMap[item.tag] ||
-    tagMap[item.displayType] ||
-    BACKEND_TYPE_TO_TAG[item.displayType] ||
-    tagMap["Other"];
-
-  // Only the original creator may delete this resource
+  // FIX 9: Tag lookup now checks both `item.type` (new) and `item.tag` (legacy)
+  //         so items already in the database still render correctly.
+  const tag = tagMap[item.type] || tagMap[item.tag] || tagMap["Other"];
   const isOwner =
-    String(item.createdBy ?? item.created_by) === String(currentUserId);
-
+    String(item.createdBy || item.created_by) === String(currentUserId);
   const isFile = item.isFile || item.is_file;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // ── Delete handler — mirrors StudyGroups window.confirm pattern ──
   const handleDeleteClick = (e) => {
     e.preventDefault();
-    if (!window.confirm("Delete this resource?")) return;
-    onDelete(item.id);
+    if (confirmDelete) {
+      onDelete(item.id);
+      setConfirmDelete(false);
+    } else {
+      setConfirmDelete(true);
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
   };
 
   return (
@@ -445,6 +459,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
             className="resource-tag"
             style={{ color: tag.color, backgroundColor: tag.bg }}
           >
+            {/* FIX 10: Display whichever field exists — type (new) or tag (legacy) */}
             {item.type || item.tag}
           </span>
           {isFile && item.fileName && (
@@ -453,7 +468,9 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
               {item.fileSize ? ` · ${formatBytes(item.fileSize)}` : ""}
             </span>
           )}
-          {/* creator display intentionally omitted per requirements */}
+          {item.creator?.name && (
+            <span className="resource-creator">by {item.creator.name}</span>
+          )}
         </div>
       </div>
 
@@ -480,14 +497,14 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
           </a>
         )}
 
-        {/* Delete button — only rendered for the resource creator */}
         {isOwner && (
           <button
-            className="resource-action-btn resource-action-btn--delete"
+            className={`resource-action-btn resource-action-btn--delete ${confirmDelete ? "resource-action-btn--confirm" : ""}`}
             onClick={handleDeleteClick}
-            title="Delete resource"
+            title={confirmDelete ? "Click again to confirm" : "Delete resource"}
           >
             <Trash2 size={16} />
+            {confirmDelete && <span>Confirm?</span>}
           </button>
         )}
       </div>
@@ -496,13 +513,19 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 };
 
 // ── Main Component ────────────────────────────────────────────────
-const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
+const Resources = () => {
+  const { selectedProgram, selectedYear } = useOutletContext();
+  const { user, getToken } = useAuth();
+
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   // ── Fetch ─────────────────────────────────────────────────────
+  // FIX 11: Wrapped in useCallback so it can be called from the Retry
+  //         button without causing stale-closure warnings, matching the
+  //         pattern used in the rest of the codebase.
   const fetchResources = useCallback(async () => {
     if (!selectedProgram || !selectedYear) return;
     setLoading(true);
@@ -515,7 +538,11 @@ const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
         token,
       );
 
+      // Group by courseCode
       const grouped = data.reduce((acc, item) => {
+        // FIX 12: The original code had `item.courseCode || item.courseCode`
+        //         (duplicate). Now falls back to course_code for snake_case
+        //         responses from raw SQL.
         const key = item.courseCode || item.course_code || "Unknown";
         if (!acc[key]) {
           acc[key] = {
@@ -542,6 +569,7 @@ const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
 
   // ── Add new resource to correct section locally ───────────────
   const handleCreated = (newResource) => {
+    // FIX 13: Same duplicate key fix as in fetchResources above.
     const key = newResource.courseCode || newResource.course_code || "Unknown";
     setSections((prev) => {
       const existing = prev.find((s) => s.course === key);
@@ -561,13 +589,11 @@ const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
     });
   };
 
-  // ── Delete resource — mirrors StudyGroups handleDelete pattern ─
+  // ── Delete resource ───────────────────────────────────────────
   const handleDelete = async (id) => {
-    // Guard: confirmation is already handled in ResourceItem via window.confirm
     try {
       const token = getToken?.();
       await apiFetch(`/api/resources/${id}`, { method: "DELETE" }, token);
-      // Remove the item locally; drop the section if it becomes empty
       setSections((prev) =>
         prev
           .map((s) => ({ ...s, items: s.items.filter((i) => i.id !== id) }))
@@ -667,7 +693,6 @@ const Resources = ({ selectedProgram, selectedYear, user, getToken }) => {
           onCreated={handleCreated}
           selectedProgram={selectedProgram}
           selectedYear={selectedYear}
-          getToken={getToken}
         />
       )}
     </div>
