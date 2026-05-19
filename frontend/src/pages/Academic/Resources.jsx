@@ -394,19 +394,18 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 
 // ── Resource Item ──────────────────────────────────────────────────────────────
 const ResourceItem = ({ item, currentUserId, onDelete }) => {
-  // TEMP DEBUG — remove after fixing
-  console.log("Resource item raw data:", {
-    id: item.id,
-    title: item.title,
-    category: item.category,
-    tag: item.tag,
-    createdBy: item.createdBy,
-    uploadedBy: item.uploadedBy,
-    created_by: item.created_by,
-  });
-  console.log("currentUserId:", currentUserId);
-  console.log("tagMap lookup result:", tagMap[item.category], tagMap[item.tag]);
-  const tag = tagMap[item.category] || tagMap[item.tag] || tagMap["Other"];
+  const typeToCategory = {
+    link: "Other",
+    pdf: "Docs",
+    video: "Video",
+    notes: "Tutorial",
+  };
+
+  const categoryKey =
+    item.category || // new rows: use category
+    typeToCategory[item.type] || // old rows: derive from type enum
+    "Other"; // absolute fallback
+  const tag = tagMap[categoryKey] || tagMap["Other"];
   const isOwner =
     String(item.createdBy || item.created_by) === String(currentUserId);
   const isFile = item.isFile || item.is_file;
