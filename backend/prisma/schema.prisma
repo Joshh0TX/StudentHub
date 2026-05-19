@@ -242,6 +242,7 @@ model Resource {
   id          String   @id @default(uuid())
   title       String
   type        String
+  category    String?
   url         String
   description String?
   department  String

@@ -72,6 +72,54 @@ const createTimetable = async (req, res) => {
   }
 };
 
+const updateTimetable = async (req, res) => {
+  const { id } = req.params;
+  const { name, classes } = req.body;
+  const requesterId = req.user.id;
+
+  try {
+    const timetable = await prisma.timetable.findUnique({
+      where: { id: parseInt(id) },
+    });
+    if (!timetable)
+      return res.status(404).json({ error: "Timetable not found" });
+    if (String(timetable.createdBy) !== String(requesterId))
+      return res.status(403).json({ error: "You can only edit your own timetables" });
+
+    // Delete existing classes and recreate with updated ones
+    await prisma.timetableClass.deleteMany({
+      where: { timetableId: parseInt(id) },
+    });
+
+    const updated = await prisma.timetable.update({
+      where: { id: parseInt(id) },
+      data: {
+        name,
+        classes: {
+          create: classes.map((cls) => ({
+            subject: cls.subject,
+            location: cls.location ?? null,
+            day: cls.day,
+            startTime: cls.startTime,
+            endTime: cls.endTime,
+            colorIdx: cls.colorIdx ?? 0,
+          })),
+        },
+      },
+      include: {
+        classes: true,
+        creator: {
+          select: { f_name: true, l_name: true },
+        },
+      },
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 // DELETE /api/timetables/:id
 const deleteTimetable = async (req, res) => {
   const { id } = req.params;
@@ -93,4 +141,4 @@ const deleteTimetable = async (req, res) => {
   }
 };
 
-module.exports = { getTimetables, createTimetable, deleteTimetable };
+module.exports = { getTimetables, createTimetable, updateTimetable, deleteTimetable };

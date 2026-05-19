@@ -8,6 +8,7 @@ import {
   ChevronUp,
   RefreshCw,
   AlertCircle,
+  Pencil,
 } from "lucide-react";
 import "./Timetable.css";
 import { useAuth } from "../../context/AuthContext";
@@ -65,20 +66,14 @@ const formatTime = (time) => {
 
 const normaliseTime = (val) => {
   if (!val) return "09:00";
-  // Already "HH:MM" — return as-is
   if (/^\d{2}:\d{2}$/.test(val)) return val;
-  // ISO string like "1970-01-01T09:00:00.000Z"
   const date = new Date(val);
   if (!isNaN(date.getTime())) {
-    return date.toISOString().slice(11, 16); // "09:00"
+    return date.toISOString().slice(11, 16);
   }
   return "09:00";
 };
 
-/**
- * Returns a human-readable duration string, e.g. "1 hr", "1 hr 30 min", "45 min".
- * Works purely from "HH:MM" strings — no Date objects needed.
- */
 const formatDuration = (startTime, endTime) => {
   const [sh, sm] = startTime.split(":").map(Number);
   const [eh, em] = endTime.split(":").map(Number);
@@ -91,7 +86,6 @@ const formatDuration = (startTime, endTime) => {
   return `${hrs} hr ${mins} min`;
 };
 
-/** Returns the first letter(s) of a name for the avatar */
 const initials = (name = "") =>
   name
     .split(" ")
@@ -205,12 +199,18 @@ const ClassRow = ({ cls, onChange, onRemove, index }) => (
   </div>
 );
 
-// ── Create Timetable Modal ────────────────────────────────────────
-const CreateTimetableModal = ({ onClose, onCreated }) => {
-  const [name, setName] = useState("");
-  const [classes, setClasses] = useState([emptyClass()]);
+// ── Create / Edit Timetable Modal ─────────────────────────────────
+const CreateTimetableModal = ({ onClose, onCreated, initialData }) => {
+  // Seed state from initialData if provided (edit mode), else blank (create mode)
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [classes, setClasses] = useState(
+    initialData?.classes?.length
+      ? initialData.classes.map((c) => ({ ...c, id: c.id ?? generateId() }))
+      : [emptyClass()],
+  );
   const [error, setError] = useState(null);
-  const [step, setStep] = useState(1);
+  // Start on step 2 directly if editing (name already known)
+  const [step, setStep] = useState(initialData ? 2 : 1);
 
   const handleClassChange = (id, field, value) =>
     setClasses((prev) =>
@@ -219,7 +219,6 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
 
         const updated = { ...c, [field]: value };
 
-        // If start time changed, reset end time to first valid slot after it
         if (field === "startTime") {
           const firstValidEnd = TIME_SLOTS.find((t) => t > value);
           updated.endTime = firstValidEnd ?? value;
@@ -272,13 +271,16 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
     }
     setError(null);
     onCreated({
-      id: generateId(),
+      id: initialData?.id ?? generateId(), // preserve ID in edit mode
       name: name.trim(),
       classes: validClasses,
-      createdAt: new Date().toISOString(),
+      createdAt: initialData?.createdAt ?? new Date().toISOString(),
+      isEdit: !!initialData, // flag so the parent knows to PATCH not POST
     });
     onClose();
   };
+
+  const isEditMode = !!initialData;
 
   return (
     <div
@@ -288,22 +290,29 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
       <div className="modal modal--large">
         <div className="modal-header">
           <h2>
-            {step === 1 ? "Name Your Timetable" : `Add Classes — ${name}`}
+            {isEditMode
+              ? `Edit Timetable — ${name}`
+              : step === 1
+                ? "Name Your Timetable"
+                : `Add Classes — ${name}`}
           </h2>
           <button className="modal-close" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        <div className="step-indicator">
-          <div className={`step ${step >= 1 ? "step--active" : ""}`}>
-            <span>1</span> Name
+        {/* Step indicator — only shown in create mode */}
+        {!isEditMode && (
+          <div className="step-indicator">
+            <div className={`step ${step >= 1 ? "step--active" : ""}`}>
+              <span>1</span> Name
+            </div>
+            <div className="step-line" />
+            <div className={`step ${step >= 2 ? "step--active" : ""}`}>
+              <span>2</span> Classes
+            </div>
           </div>
-          <div className="step-line" />
-          <div className={`step ${step >= 2 ? "step--active" : ""}`}>
-            <span>2</span> Classes
-          </div>
-        </div>
+        )}
 
         {error && (
           <div className="modal-error">
@@ -311,7 +320,7 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
           </div>
         )}
 
-        {step === 1 && (
+        {step === 1 && !isEditMode && (
           <div className="modal-body">
             <label>
               Timetable Name <span>*</span>
@@ -330,25 +339,50 @@ const CreateTimetableModal = ({ onClose, onCreated }) => {
           </div>
         )}
 
-        {step === 2 && (
-          <div className="modal-body modal-body--scroll">
-            {classes.map((cls, i) => (
-              <ClassRow
-                key={cls.id}
-                cls={cls}
-                index={i}
-                onChange={handleClassChange}
-                onRemove={handleRemoveClass}
-              />
-            ))}
-            <button className="btn-add-class" onClick={handleAddClass}>
-              <Plus size={16} /> Add Another Class
-            </button>
-          </div>
+        {(step === 2 || isEditMode) && (
+          <>
+            {/* Name field shown inline at top when editing */}
+            {isEditMode && (
+              <div className="modal-body" style={{ paddingBottom: 0, gap: 6 }}>
+                <label>
+                  Timetable Name <span>*</span>
+                </label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Semester 2 Schedule"
+                  maxLength={80}
+                />
+              </div>
+            )}
+            <div className="modal-body modal-body--scroll">
+              {classes.map((cls, i) => (
+                <ClassRow
+                  key={cls.id}
+                  cls={cls}
+                  index={i}
+                  onChange={handleClassChange}
+                  onRemove={handleRemoveClass}
+                />
+              ))}
+              <button className="btn-add-class" onClick={handleAddClass}>
+                <Plus size={16} /> Add Another Class
+              </button>
+            </div>
+          </>
         )}
 
         <div className="modal-footer">
-          {step === 1 ? (
+          {isEditMode ? (
+            <>
+              <button className="btn-cancel" onClick={onClose}>
+                Cancel
+              </button>
+              <button className="btn-submit" onClick={handleSubmit}>
+                Save Changes
+              </button>
+            </>
+          ) : step === 1 ? (
             <>
               <button className="btn-cancel" onClick={onClose}>
                 Cancel
@@ -391,16 +425,11 @@ const CreatorBadge = ({ name, isOwner }) => {
 };
 
 // ── Timetable Grid View ───────────────────────────────────────────
-const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
-  /**
-   * `currentUserId` is the database-issued ID that came from the server
-   * via AuthContext → /api/auth/me. It is never read from localStorage.
-   * We compare it against `timetable.created_by` (also DB-issued) to
-   * decide ownership.
-   */
+const TimetableGrid = ({ timetable, onDelete, onEdit, currentUserId }) => {
   const isOwner = String(timetable.createdBy) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const activeDays = DAYS.filter((d) =>
     timetable.classes.some((c) => c.day === d),
@@ -452,7 +481,6 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
               {timetable.classes.length !== 1 ? "es" : ""}
             </span>
 
-            {/* Creator badge — always visible */}
             <CreatorBadge
               name={
                 timetable.creator
@@ -467,27 +495,40 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
         {/* ── Actions ── */}
         <div className="timetable-card-actions">
           {isOwner && (
-            <button
-              className="btn-delete"
-              onClick={handleDeleteClick}
-              title={
-                confirmDelete
-                  ? "Click again to confirm deletion"
-                  : "Delete timetable"
-              }
-              style={
-                confirmDelete
-                  ? {
-                      background: "#fee2e2",
-                      borderColor: "#dc2626",
-                      color: "#dc2626",
-                    }
-                  : {}
-              }
-            >
-              <Trash2 size={14} />
-              <span>{confirmDelete ? "Confirm delete?" : "Delete"}</span>
-            </button>
+            <>
+              {/* Edit button */}
+              <button
+                className="btn-edit"
+                onClick={() => setShowEditModal(true)}
+                title="Edit timetable"
+              >
+                <Pencil size={14} />
+                <span>Edit</span>
+              </button>
+
+              {/* Delete button */}
+              <button
+                className="btn-delete"
+                onClick={handleDeleteClick}
+                title={
+                  confirmDelete
+                    ? "Click again to confirm deletion"
+                    : "Delete timetable"
+                }
+                style={
+                  confirmDelete
+                    ? {
+                        background: "#fee2e2",
+                        borderColor: "#dc2626",
+                        color: "#dc2626",
+                      }
+                    : {}
+                }
+              >
+                <Trash2 size={14} />
+                <span>{confirmDelete ? "Confirm delete?" : "Delete"}</span>
+              </button>
+            </>
           )}
 
           <button
@@ -617,6 +658,18 @@ const TimetableGrid = ({ timetable, onDelete, currentUserId }) => {
           </div>
         </div>
       )}
+
+      {/* Edit modal — only mounts when open */}
+      {showEditModal && (
+        <CreateTimetableModal
+          initialData={timetable}
+          onClose={() => setShowEditModal(false)}
+          onCreated={(updated) => {
+            onEdit(updated);
+            setShowEditModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -628,12 +681,6 @@ const Timetable = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /**
-   * `user`      – object whose `.id` is the database-issued user ID,
-   *               populated from /api/auth/me. Never sourced from localStorage.
-   * `getToken`  – returns the in-memory JWT; components never call
-   *               localStorage.getItem("token") directly.
-   */
   const { user, loading: authLoading, getToken } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
 
@@ -646,7 +693,6 @@ const Timetable = () => {
       const res = await fetch(
         `${API}/api/timetables?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         {
-          // Token comes from memory via getToken(), not from localStorage
           headers: { Authorization: `Bearer ${getToken()}` },
         },
       );
@@ -686,19 +732,12 @@ const Timetable = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Token comes from memory via getToken(), not from localStorage
           Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           name: newTimetable.name,
           department: selectedProgram,
           year: selectedYear,
-          /**
-           * `user.id` is the database-issued ID returned by /api/auth/me
-           * (or /api/auth/login). It was never stored in localStorage and
-           * is never read from there — the server is the single source of
-           * truth for the user's identity.
-           */
           createdBy: user.id,
           classes: newTimetable.classes,
         }),
@@ -723,6 +762,48 @@ const Timetable = () => {
     }
   };
 
+  // ── Edit timetable ────────────────────────────────────────────
+  const handleEdit = async (updatedTimetable) => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`${API}/api/timetables/${updatedTimetable.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          name: updatedTimetable.name,
+          department: selectedProgram,
+          year: selectedYear,
+          createdBy: user.id,
+          classes: updatedTimetable.classes,
+        }),
+      });
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok || !contentType.includes("application/json"))
+        throw new Error("Failed to update timetable");
+      const saved = await res.json();
+      // Replace old timetable in state with updated version
+      setTimetables((prev) =>
+        prev.map((t) =>
+          t.id === saved.id
+            ? {
+                ...saved,
+                classes: (saved.classes || []).map((c) => ({
+                  ...c,
+                  startTime: normaliseTime(c.startTime ?? c.start_time),
+                  endTime: normaliseTime(c.endTime ?? c.end_time),
+                })),
+              }
+            : t,
+        ),
+      );
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   // ── Delete timetable ──────────────────────────────────────────
   const handleDelete = async (id) => {
     try {
@@ -730,13 +811,8 @@ const Timetable = () => {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          // Token comes from memory via getToken(), not from localStorage
           Authorization: `Bearer ${getToken()}`,
         },
-        /**
-         * `student_id` is user.id — the database-issued ID from the server,
-         * not anything retrieved from localStorage.
-         */
         body: JSON.stringify({ student_id: user.id }),
       });
       if (!res.ok) {
@@ -822,11 +898,7 @@ const Timetable = () => {
               key={tt.id}
               timetable={tt}
               onDelete={handleDelete}
-              /**
-               * Pass the DB-issued user ID down to the grid so it can
-               * determine ownership by comparing against timetable.created_by.
-               * This value never touches localStorage.
-               */
+              onEdit={handleEdit}
               currentUserId={user.id}
             />
           ))}
