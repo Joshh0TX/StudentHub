@@ -8,5 +8,6 @@ router.get('/', authMiddleware, postController.getPosts);
 router.delete('/:postId', authMiddleware, postController.deletePost);
 router.get('/trending', postController.getTrending);     
 router.get('/hashtag/:tag', postController.getPostsByHashtag);
+router.post('/:postId/like', authMiddleware, postController.toggleLike);
 
 module.exports = router;

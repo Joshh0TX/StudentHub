@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import './amebofeed.css';
 import PostItem from './postItem';
@@ -16,10 +16,7 @@ const PostBox = ({ user }) => {
   const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef(null);
 
-
-  
-
-    const handleImageSelect = (e) => {
+  const handleImageSelect = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   setImage(file);
@@ -185,6 +182,7 @@ return (
 // --- MAIN FEED ---
 export default function AmeboFeed({ user }) {
   const [posts, setPosts] = React.useState([]);
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   React.useEffect(() => {
     const fetchPosts = async () => {
@@ -212,7 +210,8 @@ export default function AmeboFeed({ user }) {
           content: p.content,
           postImage: p.image,
           postVideo: p.video,
-          likes: 0,
+          likes: p._count.likes || 0,
+          isLiked: p.likes.some((l) => l.userId === storedUser?.id) || false,
           comments: 0,
         }} currentUser={user} />
       ))}
@@ -221,3 +220,4 @@ export default function AmeboFeed({ user }) {
     </div>
   );
 }
+

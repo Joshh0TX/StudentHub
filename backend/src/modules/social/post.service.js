@@ -38,16 +38,18 @@ exports.createPost = async (userId, { content, image, video }) => {
   return post;
 };
 
-exports.getPosts = async () => {
+exports.getPosts = async (userId) => {
   return prisma.post.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
       user: {
         select: { id: true, f_name: true, l_name: true, profileImage: true }
       },
-      hashtags: {
-        include: { hashtag: true }
-      }
+      hashtags: { include: { hashtag: true } },
+      likes: {
+        select: { userId: true } // ← fix this
+      },
+      _count: { select: { likes: true } }
     }
   });
 };

@@ -1,3 +1,6 @@
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 const postService = require('./post.service');
 
 exports.createPost = async (req, res) => {
@@ -14,7 +17,7 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    const posts = await postService.getPosts();
+    const posts = await postService.getPosts(req.user.id);
     res.json(posts);
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -54,5 +57,26 @@ exports.getPostsByHashtag = async (req, res) => {
   } catch (error) {
     console.error('Error fetching posts by hashtag:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.toggleLike = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    const existing = await prisma.like.findUnique({
+      where: { postId_userId: { postId, userId } }
+    });
+
+    if (existing) {
+      await prisma.like.delete({ where: { postId_userId: { postId, userId } } });
+      res.json({ liked: false });
+    } else {
+      await prisma.like.create({ data: { postId, userId } });
+      res.json({ liked: true });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

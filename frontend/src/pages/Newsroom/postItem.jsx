@@ -26,7 +26,7 @@ const PostItem = ({ post, currentUser }) => {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(Number(post.likes) || 0);
   const navigate = useNavigate();
 
@@ -44,11 +44,19 @@ const PostItem = ({ post, currentUser }) => {
     fetchComments();
   }, [showComments, post.id]);
 
-  const handleLike = (e) => {
-    e.preventDefault();
-    setLikeCount((prev) => isLiked ? prev - 1 : prev + 1);
-    setIsLiked(!isLiked);
-  };
+  const handleLike = async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/${post.id}/like`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (res.ok) {
+    const data = await res.json();
+    setIsLiked(data.liked);
+    setLikeCount((prev) => data.liked ? prev + 1 : prev - 1);
+  }
+};
 
   const handleDeletePost = async () => {
   if (!window.confirm('Delete this post?')) return;

@@ -37,6 +37,7 @@ model User {
   // Social
   posts     Post[]
   comments  Comment[]
+  likes     Like[]
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
 
@@ -130,7 +131,20 @@ model Post {
 
   user     User      @relation(fields: [userId], references: [id])
   comments Comment[]
+  likes     Like[]
   hashtags  PostHashtag[]
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
 }
 
 model Hashtag {
