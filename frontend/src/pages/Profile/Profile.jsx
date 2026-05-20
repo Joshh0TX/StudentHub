@@ -23,6 +23,8 @@ import {
   FaReact,
   FaShieldHalved,
 } from 'react-icons/fa6';
+import API_BASE from '../../config';
+import { fetchStore } from '../Marketplace/marketplaceApi';
 
 // ============================================================================
 // SECTION 1: CUSTOM HOOKS - Modal and State Management
@@ -666,16 +668,15 @@ function InterestsSection({ interests = [], onEdit, isOwner }) {
  * COMPONENT: MyStoreSection
  * Responsibility: Displays a preview of the user's store if it exists
  */
-function MyStoreSection({ storeData, isOwner }) {
+function MyStoreSection({ storeData, isOwner, navigate }) {
   // If the user hasn't created a store, render nothing at all
   if (!storeData || !storeData.hasStore) return null;
-
-  // Static dummy product array matching what your backend will send later
-  const dummyProducts = [
-    { id: 1, name: "Premium UI Kit", price: "₦15,000", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&h=150&fit=crop" },
-    { id: 2, name: "React Starter Template", price: "₦25,000", image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=150&h=150&fit=crop" },
-    { id: 3, name: "Developer Sticker Pack", price: "₦3,500", image: "https://images.unsplash.com/photo-1572945281861-68b122e3e116?w=150&h=150&fit=crop" }
-  ];
+  const storeProducts = Array.isArray(storeData.products) ? storeData.products.slice(0, 3) : [];
+  const resolveProductImage = (images) => {
+    const firstImage = Array.isArray(images) ? images[0] : images;
+    if (!firstImage) return "https://via.placeholder.com/150?text=No+Image";
+    return firstImage.startsWith("http") ? firstImage : `${API_BASE}${firstImage}`;
+  };
 
   return (
     <div className="info-box store-box">
@@ -683,7 +684,7 @@ function MyStoreSection({ storeData, isOwner }) {
         <div className="store-title-area">
           <Icons.ShoppingBag size={22} className="store-icon-header" />
           <div>
-            <h2>{storeData.name || "My Digital Store"}</h2>
+            <h2>{storeData.name || "My Store"}</h2>
             <p className="store-tagline">Explore premium products curated by this developer</p>
           </div>
         </div>
@@ -699,7 +700,7 @@ function MyStoreSection({ storeData, isOwner }) {
           </button>
         ) : (
           <button 
-            onClick={() => navigate(`/store/${storeData.slug}`)} 
+            onClick={() => navigate(`/store/${storeData.id}`)} 
             className="store-action-btn visitor-btn"
             style={{ cursor: 'pointer' }}
           >
@@ -710,14 +711,14 @@ function MyStoreSection({ storeData, isOwner }) {
 
       {/* Product Row Grid */}
       <div className="store-products-preview">
-        {dummyProducts.map((product) => (
+        {storeProducts.map((product) => (
           <div key={product.id} className="store-mini-card">
             <div className="store-img-wrapper">
-              <img src={product.image} alt={product.name} />
+              <img src={resolveProductImage(product.images)} alt={product.name} />
             </div>
             <div className="store-mini-details">
               <h4>{product.name}</h4>
-              <span className="store-price">{product.price}</span>
+              <span className="store-price">NGN {product.price}</span>
             </div>
           </div>
         ))}
@@ -857,10 +858,7 @@ function ProfilePage() {
   const modals = useModalManager();
   const { user, setUser } = useProfileData();
   const imageUpload = useImageUpload();
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  const [storeData, setStoreData] = useState({ hasStore: false, name: "", id: "", products: [] });
 
   const saveToBackend = async (updatedData) => {
   const token = localStorage.getItem("token");
@@ -913,12 +911,31 @@ const handleSaveSkills = async (updatedSkills) => {
   modals.setIsSkillManagerOpen(false);
 };
 
-const isOwner = true; 
-  const mockStoreData = {
-    hasStore: true, 
-    name: "Henry's Dev Hub",
-    slug: "henry-dev-hub"
-  };
+const isOwner = true;
+
+useEffect(() => {
+  if (!user?.id) return;
+  fetchStore(user.id)
+    .then((store) => {
+      if (!store || store.error) {
+        setStoreData({ hasStore: false, name: "", id: "", products: [] });
+        return;
+      }
+      setStoreData({
+        hasStore: true,
+        name: store.name || "",
+        id: store.id,
+        products: Array.isArray(store.products) ? store.products : [],
+      });
+    })
+    .catch(() => {
+      setStoreData({ hasStore: false, name: "", id: "", products: [] });
+    });
+}, [user?.id]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
   // ========================================================================
   // RENDER - Organized by sections
   // ========================================================================
@@ -981,8 +998,8 @@ const isOwner = true;
 
           {/* ===== RIGHT COLUMN ===== */}
           <div className="right-column">
-            <MyStoreSection storeData={mockStoreData} isOwner={isOwner} navigate={navigate} />
-            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} isOwner={isOwner} />
+            <MyStoreSection storeData={storeData} isOwner={isOwner} navigate={navigate} />
+            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} />
 
             <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} isOwner={isOwner} />
 

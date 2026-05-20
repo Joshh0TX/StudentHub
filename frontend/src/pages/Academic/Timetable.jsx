@@ -600,12 +600,19 @@ const TimetableGrid = ({ timetable, onDelete, onEdit, currentUserId }) => {
               const span = spanCount(cls.startTime, cls.endTime);
               const colors = CLASS_COLORS[cls.colorIdx] || CLASS_COLORS[0];
               const isCompact = span === 1;
+              const isTopRow = rowStart === 2; // +++ first data row in the grid
               const duration = formatDuration(cls.startTime, cls.endTime);
 
               return (
                 <div
                   key={cls.id}
-                  className={`grid-class-block ${isCompact ? "grid-class-block--compact" : ""}`}
+                  className={[
+                    "grid-class-block",
+                    isCompact ? "grid-class-block--compact" : "",
+                    isTopRow ? "grid-class-block--top-row" : "", // +++ flip tooltip
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   style={{
                     gridRow: `${rowStart} / span ${span}`,
                     gridColumn: colIdx + 2,

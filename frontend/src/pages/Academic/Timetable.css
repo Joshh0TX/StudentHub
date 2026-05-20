@@ -1,6 +1,5 @@
 /* ── Page ── */
 .timetable-page {
-  max-width: 1100px;
   width: 100%;
   font-family: "Inter", system-ui, sans-serif;
 }
@@ -96,12 +95,15 @@
   gap: 24px;
 }
 
-/* ── Timetable Card ── */
+/* ── Timetable Card ──
+   FIX: overflow changed from hidden → visible so that the compact-block
+   tooltip (absolutely positioned) is not clipped on the top row.
+   The card border-radius is preserved via the header's border-bottom. */
 .timetable-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -113,6 +115,9 @@
   padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
   gap: 12px;
+  /* Keep header corners rounded now that the card is overflow:visible */
+  border-radius: 12px 12px 0 0;
+  background: #ffffff;
 }
 
 .timetable-card-title {
@@ -163,14 +168,12 @@
   white-space: nowrap;
 }
 
-/* "Created by you" — highlighted in blue */
 .timetable-creator-badge--you {
   background: #eff6ff;
   color: #1d4ed8;
   border: 1px solid #bfdbfe;
 }
 
-/* "Created by someone else" — muted grey */
 .timetable-creator-badge--other {
   background: #f9fafb;
   color: #6b7280;
@@ -229,7 +232,7 @@
   border-color: #1a3a6b;
 }
 
-/* ── Delete button — only rendered for owners, styled more prominently ── */
+/* ── Delete button ── */
 .btn-delete {
   display: flex;
   align-items: center;
@@ -272,14 +275,22 @@
   color: #111827;
 }
 
-/* ── Grid Wrapper ── */
+/* ── Grid Wrapper ──
+   FIX: position:relative added so sticky children have a proper containing
+   block. overflow-y kept as visible so the tooltip can escape upward.    */
 .timetable-grid-wrapper {
   overflow-x: auto;
   overflow-y: visible;
   padding: 16px;
   padding-bottom: 32px;
+  position: relative;
+  /* Round the bottom corners of the wrapper to match the card */
+  border-radius: 0 0 12px 12px;
 }
 
+/* ── Grid ──
+   FIX: overflow changed to visible so the absolutely-positioned tooltip
+   is not clipped when a compact block sits in the first row.             */
 .timetable-grid {
   display: grid;
   min-width: 500px;
@@ -289,7 +300,8 @@
   position: relative;
 }
 
-/* ── Corner ── */
+/* ── Corner ──
+   FIX: z-index raised to 6 (above time labels at 5, above blocks at 3)  */
 .grid-corner {
   display: flex;
   align-items: center;
@@ -300,7 +312,7 @@
   color: #9ca3af;
   position: sticky;
   left: 0;
-  z-index: 2;
+  z-index: 6;
 }
 
 /* ── Day Headers ── */
@@ -322,7 +334,9 @@
   display: none;
 }
 
-/* ── Time Labels ── */
+/* ── Time Labels ──
+   FIX: z-index raised from 1 → 5 so time labels always paint on top of
+   class blocks. Background kept fully opaque to prevent bleed-through.  */
 .grid-time-label {
   display: flex;
   align-items: flex-start;
@@ -336,7 +350,7 @@
   white-space: nowrap;
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 5;
 }
 
 /* ── Background Cells ── */
@@ -406,7 +420,6 @@
   flex-shrink: 0;
 }
 
-/* Time range shown inside full-height (non-compact) blocks */
 .block-time-range {
   font-size: 10px;
   font-weight: 500;
@@ -430,7 +443,10 @@
   padding: 3px 6px;
 }
 
-/* ── Hover Tooltip ── */
+/* ── Hover Tooltip ──
+   Default position: above the block.
+   The primary fix is overflow:visible on the card/grid so it's no longer
+   clipped. The --top-row modifier flips it below when on the first row.  */
 .block-tooltip {
   display: none;
   position: absolute;
@@ -451,7 +467,6 @@
   white-space: nowrap;
 }
 
-/* Subject — bold title */
 .block-tooltip strong {
   font-size: 13px;
   font-weight: 700;
@@ -460,14 +475,12 @@
   margin-bottom: 2px;
 }
 
-/* Location line */
 .block-tooltip-location {
   font-size: 12px;
   color: #cbd5e1;
   display: block;
 }
 
-/* Time range — most prominent info line */
 .block-tooltip-time {
   font-size: 12px;
   font-weight: 600;
@@ -476,7 +489,6 @@
   margin-top: 2px;
 }
 
-/* Duration pill */
 .block-tooltip-duration {
   display: inline-block;
   margin-top: 4px;
@@ -493,7 +505,6 @@
   display: flex;
 }
 
-/* Caret arrow pointing up at the block */
 .block-tooltip::before {
   content: "";
   position: absolute;
@@ -505,6 +516,19 @@
   background: #1e293b;
   transform: rotate(45deg);
   border-radius: 2px;
+}
+
+/* ── Top-row tooltip flip ──
+   Applied via JS to compact blocks in the first visible grid row.
+   Renders the tooltip BELOW the block instead of above it.              */
+.grid-class-block--top-row .block-tooltip {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+.grid-class-block--top-row .block-tooltip::before {
+  bottom: auto;
+  top: -5px;
 }
 
 /* ── Loading / Error States ── */
@@ -890,7 +914,6 @@
   .btn-delete {
     padding: 6px 8px;
   }
-  /* Edit button — icon only on mobile, matching delete button behaviour */
   .btn-edit span {
     display: none;
   }
