@@ -530,8 +530,9 @@ function AboutSection({ user, setUser, isEditingAbout, setIsEditingAbout }) {
  * COMPONENT: BadgesSection
  * Responsibility: Display badges and trigger the editor modal
  */
-function BadgesSection({ user, onEdit }) {
+function BadgesSection({ user, onEdit, isOwner }) {
   const badgesToShow = Array.isArray(user.badges) ? user.badges.slice(0, 4) : [];
+  const hasBadges = badgesToShow.length > 0;
 
   return (
     <div className="info-box badges-box">
@@ -547,16 +548,27 @@ function BadgesSection({ user, onEdit }) {
           <Edit size={18} /> 
         </button>
       </div>
-      <div className="badges-grid">
-        {badgesToShow.map((badge) => (
-          <div key={badge.id} className="badge-btn" style={{ borderColor: badge.color || '#e2e8f0' }}>
-            <span className="badge-icon" style={{ color: badge.color || '#3b82f6' }}>
-              {renderBadgeIcon(badge.icon, badge.color)}
-            </span>
-            <span>{badge.name}</span>
-          </div>
-        ))}
-      </div>
+      {hasBadges ? (
+        <div className="badges-grid">
+          {badgesToShow.map((badge) => (
+            <div key={badge.id} className="badge-btn" style={{ borderColor: badge.color || '#e2e8f0' }}>
+              <span className="badge-icon" style={{ color: badge.color || '#3b82f6' }}>
+                {renderBadgeIcon(badge.icon, badge.color)}
+              </span>
+              <span>{badge.name}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty-state">
+          <p>{isOwner ? "You haven't added any achievement badges yet." : "No achievements listed yet."}</p>
+          {isOwner && (
+            <button className="empty-state-action" onClick={onEdit}>
+              Add Badges
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -565,13 +577,15 @@ function BadgesSection({ user, onEdit }) {
  * COMPONENT: SkillsSection
  * Responsibility: Display skills with progress bars
  */
-function SkillsSection({ skills, onEdit }) {
+function SkillsSection({ skills, onEdit, isOwner }) {
   const coreSkills = Array.isArray(skills) ? skills.filter((s) => s.core) : [];
   let visible = coreSkills.slice(0, 4);
 
   if (visible.length === 0 && Array.isArray(skills)) {
     visible = [...skills].sort((a, b) => b.level - a.level).slice(0, 4);
   }
+
+  const hasSkills = visible.length > 0;
 
   return (
     <div className="info-box skills-box">
@@ -581,22 +595,33 @@ function SkillsSection({ skills, onEdit }) {
           <Edit size={18} /> 
         </button>
       </div>
-      <div className="skills-list">
-        {visible.map((skill, i) => (
-          <div key={i} className="skill-item">
-            <div className="skill-header">
-              <span className="skill-name">{skill.name}</span>
-              <span className="skill-percent">{skill.level}%</span>
+      {hasSkills ? (
+        <div className="skills-list">
+          {visible.map((skill, i) => (
+            <div key={i} className="skill-item">
+              <div className="skill-header">
+                <span className="skill-name">{skill.name}</span>
+                <span className="skill-percent">{skill.level}%</span>
+              </div>
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${skill.level}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${skill.level}%` }}
-              ></div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty-state">
+          <p>{isOwner ? "Highlight your technical skill levels here." : "No skills highlighted yet."}</p>
+          {isOwner && (
+            <button className="empty-state-action" onClick={onEdit}>
+              Add Skills
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -605,7 +630,8 @@ function SkillsSection({ skills, onEdit }) {
  * COMPONENT: InterestsSection
  * Responsibility: Display user interests
  */
-function InterestsSection({ interests = [], onEdit }) {
+function InterestsSection({ interests = [], onEdit, isOwner }) {
+  const hasInterests = interests && interests.length > 0;
   return (
     <div className="info-box interests-box">
       <div className="box-header">
@@ -614,13 +640,24 @@ function InterestsSection({ interests = [], onEdit }) {
           <Edit size={18} /> 
         </button>
       </div>
-      <div className="interests-list">
-        {interests.map((interest, i) => (
-          <span key={i} className="interest-tag">
-            {interest}
-          </span>
-        ))}
-      </div>
+      {hasInterests ? (
+        <div className="interests-list">
+          {interests.map((interest, i) => (
+            <span key={i} className="interest-tag">
+              {interest}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty-state">
+          <p>{isOwner ? "Share some hobbies or topics you love." : "No interests shared yet."}</p>
+          {isOwner && (
+            <button className="empty-state-action" onClick={onEdit}>
+              Add Interests
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -693,7 +730,8 @@ function MyStoreSection({ storeData, isOwner }) {
  * COMPONENT: ProjectsSection
  * Responsibility: Display user projects
  */
-function ProjectsSection({ projects, onEdit }) {
+function ProjectsSection({ projects, onEdit, isOwner }) {
+  const hasProjects = projects && projects.length > 0;
   return (
     <div className="info-box projects-box">
       <div className="box-header">
@@ -702,24 +740,35 @@ function ProjectsSection({ projects, onEdit }) {
           <Edit size={18} /> 
         </button>
       </div>
-      <div className="projects-grid">
-        {projects.map((project, i) => (
-          <div key={i} className="project-card">
-            <img src={project.image} alt={project.title} />
-            <div className="project-content">
-              <h3>{project.title}</h3>
-              <p className="project-intro">{project.description}</p>
-              <div className="skills-row">
-                {project.skills.map((skill, j) => (
-                  <span key={j} className="skill-tag">
-                    {skill}
-                  </span>
-                ))}
+      {hasProjects ? (
+        <div className="projects-grid">
+          {projects.map((project, i) => (
+            <div key={i} className="project-card">
+              <img src={project.image} alt={project.title} />
+              <div className="project-content">
+                <h3>{project.title}</h3>
+                <p className="project-intro">{project.description}</p>
+                <div className="skills-row">
+                  {project.skills.map((skill, j) => (
+                    <span key={j} className="skill-tag">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty-state" style={{ minHeight: '160px' }}>
+          <p>{isOwner ? "Showcase your best builds, web apps, or repositories here." : "No projects published yet."}</p>
+          {isOwner && (
+            <button className="empty-state-action" onClick={onEdit}>
+              Add Project
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -728,8 +777,9 @@ function ProjectsSection({ projects, onEdit }) {
  * COMPONENT: AchievementsSection
  * Responsibility: Display user achievements
  */
-function AchievementsSection({ achievements = [], onEdit }) {
+function AchievementsSection({ achievements = [], onEdit, isOwner }) {
   const visible = Array.isArray(achievements) ? achievements.slice(0, 4) : [];
+  const hasAchievements = visible.length > 0;
 
   return (
     <div className="info-box achievements-box">
@@ -739,14 +789,25 @@ function AchievementsSection({ achievements = [], onEdit }) {
           <Edit size={18} /> 
         </button>
       </div>
-      <div className="achievements-list">
-        {visible.map((ach, i) => (
-          <div key={i} className="achievement-item">
-            <Trophy size={22} className="trophy-icon" />
-            <span>{ach}</span>
-          </div>
-        ))}
-      </div>
+      {hasAchievements ? (
+        <div className="achievements-list">
+          {visible.map((ach, i) => (
+            <div key={i} className="achievement-item">
+              <Trophy size={22} className="trophy-icon" />
+              <span>{ach}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty-state">
+          <p>{isOwner ? "Share certificates, hackathon wins, or key milestones." : "No milestones listed yet."}</p>
+          {isOwner && (
+            <button className="empty-state-action" onClick={onEdit}>
+              Add Achievement
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -908,11 +969,12 @@ const isOwner = true;
             <BadgesSection
               user={user}
               onEdit={() => modals.setIsBadgeManagerOpen(true)}
+              isOwner={isOwner}
             />
 
-            <SkillsSection skills={user.skills} onEdit={() => modals.setIsSkillManagerOpen(true)} />
+            <SkillsSection skills={user.skills} onEdit={() => modals.setIsSkillManagerOpen(true)} isOwner={isOwner}/>
 
-            <InterestsSection interests={user.interests} onEdit={() => modals.setIsInterestManagerOpen(true)} />
+            <InterestsSection interests={user.interests} onEdit={() => modals.setIsInterestManagerOpen(true)}isOwner={isOwner} />
 
             
           </div>
@@ -920,9 +982,9 @@ const isOwner = true;
           {/* ===== RIGHT COLUMN ===== */}
           <div className="right-column">
             <MyStoreSection storeData={mockStoreData} isOwner={isOwner} navigate={navigate} />
-            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} />
+            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} isOwner={isOwner} />
 
-            <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} />
+            <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} isOwner={isOwner} />
 
             <ActivitiesSection activities={ACTIVITIES_DATA} />
           </div>
