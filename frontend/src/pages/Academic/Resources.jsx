@@ -401,10 +401,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
     notes: "Tutorial",
   };
 
-  const categoryKey =
-    item.category || // new rows: use category
-    typeToCategory[item.type] || // old rows: derive from type enum
-    "Other"; // absolute fallback
+  const categoryKey = item.category || typeToCategory[item.type] || "Other";
   const tag = tagMap[categoryKey] || tagMap["Other"];
   const isOwner =
     String(item.createdBy || item.created_by) === String(currentUserId);
@@ -449,9 +446,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
               {item.fileSize ? ` · ${formatBytes(item.fileSize)}` : ""}
             </span>
           )}
-          {/* {item.creator?.name && (
-            <span className="resource-creator">by {item.creator.name}</span>
-          )} */}
         </div>
       </div>
 
@@ -495,7 +489,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 // ── Main Component ─────────────────────────────────────────────────────────────
 const Resources = () => {
   const { selectedProgram, selectedYear } = useOutletContext();
-  const { user, getToken } = useAuth();
+  const { user, loading: authLoading, getToken } = useAuth(); // +++ destructure authLoading
 
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -503,7 +497,7 @@ const Resources = () => {
   const [showModal, setShowModal] = useState(false);
 
   const fetchResources = useCallback(async () => {
-    if (!selectedProgram || !selectedYear) return;
+    if (!user?.id || !selectedProgram || !selectedYear) return; // +++ guard on user?.id
     setLoading(true);
     setError(null);
     try {
@@ -533,7 +527,7 @@ const Resources = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedProgram, selectedYear, getToken]);
+  }, [user?.id, selectedProgram, selectedYear, getToken]); // +++ user?.id in deps
 
   useEffect(() => {
     fetchResources();
@@ -572,6 +566,23 @@ const Resources = () => {
       alert(err.message);
     }
   };
+
+  // ── Guards (mirrors Timetable pattern) ────────────────────────
+  if (authLoading)
+    return (
+      <div className="groups-loading">
+        <RefreshCw size={20} className="spinner" />
+        <p>Loading session...</p>
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="groups-error">
+        <AlertCircle size={20} />
+        <p>You must be logged in to view resources.</p>
+      </div>
+    );
 
   if (loading)
     return (

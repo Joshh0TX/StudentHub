@@ -111,9 +111,6 @@ export default function AcademicHome() {
           <NavLink to="/academy/study-groups" state={navState}>
             <Users size={16} /> Study Groups
           </NavLink>
-          <NavLink to="/academy/exam-schedule" state={navState}>
-            <BookOpen size={16} /> Exam Schedule
-          </NavLink>
           <NavLink to="/academy/resources" state={navState}>
             <Link size={16} /> Resources
           </NavLink>
