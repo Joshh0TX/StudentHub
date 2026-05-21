@@ -17,6 +17,7 @@ import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
 import UserProfile from "./pages/Profile/UserProfile.jsx";
+import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="resources" element={<Resources />} />
         </Route>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<NotificationsPage/>} />
         <Route path="/newsroom" element={<NewsHome />} />
       </Route>
     </Routes>
