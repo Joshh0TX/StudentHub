@@ -1,5 +1,6 @@
 .study-groups-page {
   width: 100%;
+  display: block;
 }
 
 /* ── Page Header ── */
@@ -22,6 +23,128 @@
 .study-groups-header p {
   font-size: 14px;
   color: #6b7280;
+}
+
+.modal-context {
+  display: flex;
+  gap: 16px;
+  padding: 10px 14px;
+  background: #f8f9fb;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ── Char Count ── */
+.char-count {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: -8px;
+}
+
+/* ── Full Badge ── */
+.full-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+/* ── Full member count indicator ── */
+.group-members--full {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: fit-content;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0 16px;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.filter-btn--active {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.filter-btn--active .filter-count {
+  background: #bfdbfe;
+  color: #1d4ed8;
+}
+
+/* ── Member Badge ── */
+.group-card--member {
+  border-color: #bfdbfe;
+  background: #fafcff;
+}
+
+.member-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a3a6b;
+  background: #dbeafe;
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+/* ── Modal Error ── */
+.modal-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 24px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border-radius: 8px;
 }
 
 .btn-create {
@@ -446,121 +569,3 @@
 }
 
 /* ── Modal Context Info ── */
-.modal-context {
-  display: flex;
-  gap: 16px;
-  padding: 10px 14px;
-  background: #f8f9fb;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* ── Char Count ── */
-.char-count {
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: right;
-  margin-top: -8px;
-}
-
-/* ── Full Badge ── */
-.full-badge {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 500;
-  color: #92400e;
-  background: #fef3c7;
-  padding: 3px 10px;
-  border-radius: 999px;
-  width: fit-content;
-}
-
-/* ── Full member count indicator ── */
-.group-members--full {
-  color: #b91c1c;
-  background: #fee2e2;
-}
-
-/* ── Filter Bar ── */
-.filter-bar {
-  display: flex;
-  align-items: center;
-  /* gap: 8px; */
-  margin-bottom: 24px;
-}
-
-.filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.filter-btn:hover {
-  border-color: #9ca3af;
-  color: #111827;
-}
-
-.filter-btn--active {
-  color: #2563eb;
-  background: #eff6ff;
-  border-color: #bfdbfe;
-}
-
-.filter-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 999px;
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.filter-btn--active .filter-count {
-  background: #bfdbfe;
-  color: #1d4ed8;
-}
-
-/* ── Member Badge ── */
-.group-card--member {
-  border-color: #bfdbfe;
-  background: #fafcff;
-}
-
-.member-badge {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 500;
-  color: #1a3a6b;
-  background: #dbeafe;
-  padding: 3px 10px;
-  border-radius: 999px;
-  width: fit-content;
-}
-
-/* ── Modal Error ── */
-.modal-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 24px 0;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 8px;
-}
