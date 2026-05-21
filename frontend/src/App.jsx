@@ -4,7 +4,6 @@ import Layout from "./pages/Layout/Layout.jsx";
 import AcademicHome from "./pages/Academic/AcademicHome";
 import StudyGroups from "./pages/Academic/StudyGroups";
 import GroupDetail from "./pages/Academic/GroupDetail";
-import ExamSchedule from "./pages/Academic/ExamSchedule";
 import Resources from "./pages/Academic/Resources";
 import Login from "./pages/Login/Login.jsx";
 import Onboard from "./pages/Onboarding/Onboard.jsx";
@@ -20,6 +19,7 @@ import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
 import UserProfile from "./pages/Profile/UserProfile.jsx";
 import Landing from "./pages/Landing/Landing.jsx";
+import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
 
 function App() {
   return (
@@ -37,6 +37,8 @@ function App() {
         <Route path="/marketplace/:productId" element={<ProductDetail />} />
         <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
         <Route path="/marketplace/orders" element={<MyOrders />} />
+        <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
+        <Route path="/marketplace/orders" element={<MyOrders />} />
         <Route path="/store/:storeId" element={<StoreView />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>
@@ -44,10 +46,10 @@ function App() {
           <Route path="timetables" element={<Timetable />} />
           <Route path="study-groups" element={<StudyGroups />} />
           <Route path="study-groups/:id" element={<GroupDetail />} />
-          <Route path="exam-schedule" element={<ExamSchedule />} />
           <Route path="resources" element={<Resources />} />
         </Route>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<NotificationsPage/>} />
         <Route path="/newsroom" element={<NewsHome />} />
       </Route>
     </Routes>

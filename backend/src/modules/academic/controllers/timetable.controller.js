@@ -1,7 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../../../config/prisma");
 
-// GET /api/timetables?student_id=xxx
+// GET /api/timetables?department=xxx&year=xxx
 const getTimetables = async (req, res) => {
   const { department, year } = req.query;
   if (!department || !year)
@@ -18,7 +17,7 @@ const getTimetables = async (req, res) => {
           orderBy: [{ day: "asc" }, { startTime: "asc" }],
         },
         creator: {
-          select: { f_name: true, l_name: true }, // show who created it
+          select: { f_name: true, l_name: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -30,10 +29,22 @@ const getTimetables = async (req, res) => {
 };
 
 // POST /api/timetables
-// Body: { name, student_id, classes: [{ subject, location, day, startTime, endTime, colorIdx }] }
 const createTimetable = async (req, res) => {
+  const { id: createdBy, role, courseRepOf } = req.user;
   const { name, department, year, classes } = req.body;
-  const createdBy = req.user.id; // ← from token
+
+  if (role === "student")
+    return res.status(403).json({ error: "Students cannot create timetables." });
+
+  if (role === "course_rep") {
+    if (!courseRepOf ||
+      courseRepOf.department !== department ||
+      courseRepOf.level !== Number(year)) {
+      return res.status(403).json({
+        error: "Course reps can only create within their own department and year.",
+      });
+    }
+  }
 
   if (!name) return res.status(400).json({ error: "name is required" });
   if (!department || !year)
@@ -72,21 +83,27 @@ const createTimetable = async (req, res) => {
   }
 };
 
+// PUT /api/timetables/:id
 const updateTimetable = async (req, res) => {
   const { id } = req.params;
   const { name, classes } = req.body;
-  const requesterId = req.user.id;
+  const { id: requesterId, role, courseRepOf } = req.user;
 
   try {
     const timetable = await prisma.timetable.findUnique({
       where: { id: parseInt(id) },
     });
-    if (!timetable)
-      return res.status(404).json({ error: "Timetable not found" });
-    if (String(timetable.createdBy) !== String(requesterId))
-      return res.status(403).json({ error: "You can only edit your own timetables" });
+    if (!timetable) return res.status(404).json({ error: "Timetable not found" });
 
-    // Delete existing classes and recreate with updated ones
+    const isOwner = String(timetable.createdBy) === String(requesterId);
+    const isAdmin = role === "admin";
+    const isCourseRep = role === "course_rep" &&
+      courseRepOf?.department === timetable.department &&
+      courseRepOf?.level === timetable.year;
+
+    if (!isOwner && !isAdmin && !isCourseRep)
+      return res.status(403).json({ error: "You are not authorised to edit this timetable" });
+
     await prisma.timetableClass.deleteMany({
       where: { timetableId: parseInt(id) },
     });
@@ -123,7 +140,7 @@ const updateTimetable = async (req, res) => {
 // DELETE /api/timetables/:id
 const deleteTimetable = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user.id; // ← from token
+  const { id: requesterId, role, courseRepOf } = req.user;
 
   try {
     const timetable = await prisma.timetable.findUnique({
@@ -131,7 +148,14 @@ const deleteTimetable = async (req, res) => {
     });
     if (!timetable)
       return res.status(404).json({ error: "Timetable not found" });
-    if (String(timetable.createdBy) !== String(requesterId))
+
+    const isOwner = String(timetable.createdBy) === String(requesterId);
+    const isAdmin = role === "admin";
+    const isCourseRep = role === "course_rep" &&
+      courseRepOf?.department === timetable.department &&
+      courseRepOf?.level === timetable.year;
+
+    if (!isOwner && !isAdmin && !isCourseRep)
       return res.status(403).json({ error: "You can only delete your own timetables" });
 
     await prisma.timetable.delete({ where: { id: parseInt(id) } });

@@ -8,25 +8,27 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  password   String
-  f_name      String
-  l_name      String
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  f_name       String
+  l_name       String
   profileImage String?
-  coverImage String?
-  bio        String?
-  location   String?
-  course     String?
-  department String?
-  level      Int?
-  skills     Json?
-  interests  Json?
-  badges     Json?
+  coverImage   String?
+  bio          String?
+  location     String?
+  course       String?
+  department   String?
+  level        Int?
+  skills       Json?
+  interests    Json?
+  badges       Json?
   achievements Json?
-  projects    Json?
-  socials    Json?
-  createdAt  DateTime @default(now())
+  projects     Json?
+  socials      Json?
+  createdAt    DateTime @default(now())
+  role         String?   @default("student")
+
   requestsSent     FriendRequest[] @relation("RequestsSent")
   requestsReceived FriendRequest[] @relation("RequestsReceived")
 
@@ -42,12 +44,12 @@ model User {
   following Follow[] @relation("following")
 
   // Existing features
-  resources     Resource[]
-  pastQuestions PastQuestion[]
-  studyGroups   StudyGroup[]
-  GroupMember   StudyGroupMember[]
-  assignments Assignment[]
-  timetables Timetable[]
+  resources           Resource[]
+  pastQuestions       PastQuestion[]
+  studyGroups         StudyGroup[]
+  GroupMember         StudyGroupMember[]
+  assignments         Assignment[]
+  timetables          Timetable[]
 
   // Study group schedules created by this user
   studyGroupSchedules StudyGroupSchedule[]
@@ -57,6 +59,10 @@ model User {
   orders     Order[]
   reviews    Review[]
   favourites StoreFavourite[]
+
+  // Roles
+  courseRepOf  CourseRep?
+  assignedReps CourseRep[] @relation("AssignedBy")
 }
 
 model Course {
@@ -70,6 +76,18 @@ model Course {
   creator     User             @relation("UserCreatedCourses", fields: [createdBy], references: [id])
   members     CourseMember[]
   assignments Assignment[]
+}
+
+model CourseRep {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  department String
+  level      Int
+  assignedBy String
+  assignedAt DateTime @default(now())
+
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assigner User @relation("AssignedBy", fields: [assignedBy], references: [id])
 }
 
 model CourseMember {
