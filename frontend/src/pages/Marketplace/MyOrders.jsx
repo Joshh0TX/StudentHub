@@ -1,7 +1,7 @@
 import "./MyOrders.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchBuyerOrders } from "./marketplaceApi";
+// import { fetchBuyerOrders } from "./marketplaceApi";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 
