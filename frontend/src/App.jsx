@@ -14,16 +14,19 @@ import ProductDetail from "./pages/Marketplace/ProductDetail.jsx";
 import ProductReviews from "./pages/Marketplace/ProductReviews.jsx";
 import StoreView from "./pages/Marketplace/StoreView.jsx";
 import SearchPage from "./pages/Marketplace/SearchPage.jsx";
+import MyOrders from "./pages/Marketplace/MyOrders.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
 import UserProfile from "./pages/Profile/UserProfile.jsx";
+import Landing from "./pages/Landing/Landing.jsx";
 
 function App() {
   return (
     <Routes>
       {/* These pages have NO bottom nav */}
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/onboard" element={<Onboard />} />
 
       {/* Everything inside Layout gets the bottom nav */}
@@ -33,6 +36,7 @@ function App() {
         <Route path="/marketplace/search" element={<SearchPage />} />
         <Route path="/marketplace/:productId" element={<ProductDetail />} />
         <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
+        <Route path="/marketplace/orders" element={<MyOrders />} />
         <Route path="/store/:storeId" element={<StoreView />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>
