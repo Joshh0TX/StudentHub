@@ -37,8 +37,6 @@ function App() {
         <Route path="/marketplace/:productId" element={<ProductDetail />} />
         <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
         <Route path="/marketplace/orders" element={<MyOrders />} />
-        <Route path="/marketplace/:productId/reviews" element={<ProductReviews />} />
-        <Route path="/marketplace/orders" element={<MyOrders />} />
         <Route path="/store/:storeId" element={<StoreView />} />
         <Route path="/storefront" element={<Storefront />} />
         <Route path="/academy" element={<AcademicHome />}>

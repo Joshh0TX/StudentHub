@@ -1,0 +1,102 @@
+.myOrdersPage {
+  padding: 24px 32px 72px;
+}
+
+.myOrdersHeader h1 {
+  margin: 0;
+  font-size: 1.9rem;
+}
+
+.myOrdersHeader p {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+}
+
+.myOrdersGrid {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.myOrderCard {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.myOrderImgWrap {
+  width: 92px;
+  height: 92px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.myOrderImgWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.myOrderImgFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  background: var(--muted);
+}
+
+.myOrderTitle {
+  font-weight: 700;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.myOrderTitle:hover {
+  text-decoration: underline;
+}
+
+.myOrderMeta {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.myOrderStatus {
+  margin-top: 8px;
+  width: fit-content;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+}
+
+.myOrderStatus.pending {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.myOrderStatus.completed {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.myOrderStatus.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.myOrdersEmpty {
+  padding: 1rem 0.2rem;
+  color: var(--muted-foreground);
+}
