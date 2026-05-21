@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../../../config/prisma");
 
 // GET /api/groups?department=CSC&year=1
 const getGroups = async (req, res) => {
