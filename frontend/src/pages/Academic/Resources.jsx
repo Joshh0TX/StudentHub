@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../hooks/usePermissions";
 import {
   AlertCircle,
   ExternalLink,
@@ -393,7 +394,7 @@ const UploadModal = ({ onClose, onCreated, selectedProgram, selectedYear }) => {
 };
 
 // ── Resource Item ──────────────────────────────────────────────────────────────
-const ResourceItem = ({ item, currentUserId, onDelete }) => {
+const ResourceItem = ({ item, onDelete, canDelete }) => {
   const typeToCategory = {
     link: "Other",
     pdf: "Docs",
@@ -403,8 +404,6 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 
   const categoryKey = item.category || typeToCategory[item.type] || "Other";
   const tag = tagMap[categoryKey] || tagMap["Other"];
-  const isOwner =
-    String(item.createdBy || item.created_by) === String(currentUserId);
   const isFile = item.isFile || item.is_file;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -471,7 +470,7 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
           </a>
         )}
 
-        {isOwner && (
+        {canDelete && (
           <button
             className={`resource-action-btn resource-action-btn--delete ${confirmDelete ? "resource-action-btn--confirm" : ""}`}
             onClick={handleDeleteClick}
@@ -490,6 +489,8 @@ const ResourceItem = ({ item, currentUserId, onDelete }) => {
 const Resources = () => {
   const { selectedProgram, selectedYear } = useOutletContext();
   const { user, loading: authLoading, getToken } = useAuth(); // +++ destructure authLoading
+  const { canCreateIn, canModify } = usePermissions();
+  const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -567,7 +568,6 @@ const Resources = () => {
     }
   };
 
-  // ── Guards (mirrors Timetable pattern) ────────────────────────
   if (authLoading)
     return (
       <div className="groups-loading">
@@ -620,12 +620,14 @@ const Resources = () => {
           >
             <RefreshCw size={16} />
           </button>
-          <button
-            className="btn-add-resource"
-            onClick={() => setShowModal(true)}
-          >
-            <Plus size={16} /> Add Resource
-          </button>
+          {userCanCreate && (
+            <button
+              className="btn-add-resource"
+              onClick={() => setShowModal(true)}
+            >
+              <Plus size={16} /> Add Resource
+            </button>
+          )}
         </div>
       </div>
 
@@ -633,12 +635,14 @@ const Resources = () => {
         <div className="resources-empty-state">
           <BookOpen size={36} color="#d1d5db" />
           <p>No resources yet for this selection.</p>
-          <button
-            className="btn-add-resource"
-            onClick={() => setShowModal(true)}
-          >
-            <Plus size={14} /> Add the first resource
-          </button>
+          {userCanCreate && (
+            <button
+              className="btn-add-resource"
+              onClick={() => setShowModal(true)}
+            >
+              <Plus size={14} /> Add the first resource
+            </button>
+          )}
         </div>
       ) : (
         <div className="resources-list">
@@ -655,6 +659,7 @@ const Resources = () => {
                     item={item}
                     currentUserId={user?.id}
                     onDelete={handleDelete}
+                    canDelete={canModify(item.createdBy ?? item.created_by)}
                   />
                 ))}
               </div>
