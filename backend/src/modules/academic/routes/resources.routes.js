@@ -8,6 +8,7 @@ const {
   createResource,
   deleteResource,
 } = require("../controllers/resources.controller");
+const { canCreate, scopedToOwn } = require("../../../middleware/rbac");
 const authMiddleware = require("../../auth/authMiddleware");
 
 // ── Cloudinary config ─────────────────────────────────────────────
@@ -46,7 +47,7 @@ const upload = multer({
 });
 
 router.get("/", getResources);
-router.post("/", authMiddleware, upload.single("file"), createResource);
-router.delete("/:id", authMiddleware, deleteResource);
+router.post("/", authMiddleware, canCreate, scopedToOwn, upload.single("file"), createResource);
+router.delete("/:id", authMiddleware, canCreate, deleteResource);
 
 module.exports = router;
