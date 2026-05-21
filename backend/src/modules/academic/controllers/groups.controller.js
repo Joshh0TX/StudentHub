@@ -90,21 +90,8 @@ const getMyGroups = async (req, res) => {
 
 // POST /api/groups
 const createGroup = async (req, res) => {
-  const { id: createdBy, role, courseRepOf } = req.user;
+  const { id: createdBy } = req.user;
   const { name, course_code, course_title, description, max_members, year, department } = req.body;
-
-  if (role === "student")
-    return res.status(403).json({ error: "Students cannot create study groups." });
-
-  if (role === "course_rep") {
-    if (!courseRepOf ||
-      courseRepOf.department !== department ||
-      courseRepOf.level !== Number(year)) {
-      return res.status(403).json({
-        error: "Course reps can only create within their own department and year.",
-      });
-    }
-  }
 
   const missing = ["name", "department"].filter((f) => !req.body[f]);
   if (missing.length)

@@ -1,6 +1,7 @@
 // Check if user can create (admin or course_rep only)
 const canCreate = (req, res, next) => {
   const { role } = req.user;
+  if (role === "admin") return next(); // ← admins always pass
   if (role === "student")
     return res.status(403).json({ error: "Students cannot create content." });
   next();

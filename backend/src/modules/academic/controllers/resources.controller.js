@@ -62,7 +62,7 @@ const getResources = async (req, res) => {
 
 // POST /api/resources
 const createResource = async (req, res) => {
-  const { id: uploadedBy, role, courseRepOf } = req.user;
+  const { id: uploadedBy } = req.user;
 
   const {
     title,
@@ -75,19 +75,6 @@ const createResource = async (req, res) => {
     year,
     groupId,
   } = req.body;
-
-  if (role === "student")
-    return res.status(403).json({ error: "Students cannot create resources." });
-
-  if (role === "course_rep") {
-    if (!courseRepOf ||
-      courseRepOf.department !== department ||
-      courseRepOf.level !== Number(year)) {
-      return res.status(403).json({
-        error: "Course reps can only create within their own department and year.",
-      });
-    }
-  }
 
   if (!url && !req.file)
     return res.status(400).json({ error: "Please provide either a link or upload a file" });

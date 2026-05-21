@@ -30,21 +30,8 @@ const getTimetables = async (req, res) => {
 
 // POST /api/timetables
 const createTimetable = async (req, res) => {
-  const { id: createdBy, role, courseRepOf } = req.user;
+  const { id: createdBy } = req.user;
   const { name, department, year, classes } = req.body;
-
-  if (role === "student")
-    return res.status(403).json({ error: "Students cannot create timetables." });
-
-  if (role === "course_rep") {
-    if (!courseRepOf ||
-      courseRepOf.department !== department ||
-      courseRepOf.level !== Number(year)) {
-      return res.status(403).json({
-        error: "Course reps can only create within their own department and year.",
-      });
-    }
-  }
 
   if (!name) return res.status(400).json({ error: "name is required" });
   if (!department || !year)
