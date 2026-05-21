@@ -91,8 +91,21 @@ const getMyGroups = async (req, res) => {
 
 // POST /api/groups
 const createGroup = async (req, res) => {
-  const createdBy = req.user.id;
+  const { id: createdBy, role, courseRepOf } = req.user;
   const { name, course_code, course_title, description, max_members, year, department } = req.body;
+
+  if (role === "student")
+    return res.status(403).json({ error: "Students cannot create study groups." });
+
+  if (role === "course_rep") {
+    if (!courseRepOf ||
+      courseRepOf.department !== department ||
+      courseRepOf.level !== Number(year)) {
+      return res.status(403).json({
+        error: "Course reps can only create within their own department and year.",
+      });
+    }
+  }
 
   const missing = ["name", "department"].filter((f) => !req.body[f]);
   if (missing.length)
@@ -148,18 +161,23 @@ const joinGroup = async (req, res) => {
 // DELETE /api/groups/:id
 const deleteGroup = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user.id;
+  const { id: requesterId, role, courseRepOf } = req.user;
 
   try {
     const group = await prisma.studyGroup.findUnique({ where: { id } });
     if (!group) return res.status(404).json({ error: "Group not found" });
-    if (group.createdBy !== requesterId)
+
+    const isOwner = group.createdBy === requesterId;
+    const isAdmin = role === "admin";
+    const isCourseRep = role === "course_rep" &&
+      courseRepOf?.department === group.department &&
+      courseRepOf?.level === group.year;
+
+    if (!isOwner && !isAdmin && !isCourseRep)
       return res.status(403).json({ error: "Not authorised" });
 
-    // ← delete members first
     await prisma.studyGroupMember.deleteMany({ where: { groupId: id } });
     await prisma.studyGroup.delete({ where: { id } });
-    
     return res.json({ message: "Group deleted" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
