@@ -275,22 +275,18 @@
   color: #111827;
 }
 
-/* ── Grid Wrapper ──
-   FIX: position:relative added so sticky children have a proper containing
-   block. overflow-y kept as visible so the tooltip can escape upward.    */
+/* ── Grid Wrapper ──*/
 .timetable-grid-wrapper {
   overflow-x: auto;
   overflow-y: visible;
   padding: 16px;
   padding-bottom: 32px;
   position: relative;
-  /* Round the bottom corners of the wrapper to match the card */
   border-radius: 0 0 12px 12px;
+  isolation: isolate;
 }
 
-/* ── Grid ──
-   FIX: overflow changed to visible so the absolutely-positioned tooltip
-   is not clipped when a compact block sits in the first row.             */
+/* ── Grid ── */
 .timetable-grid {
   display: grid;
   min-width: 500px;
@@ -300,8 +296,7 @@
   position: relative;
 }
 
-/* ── Corner ──
-   FIX: z-index raised to 6 (above time labels at 5, above blocks at 3)  */
+/* ── Corner ── */
 .grid-corner {
   display: flex;
   align-items: center;
@@ -313,6 +308,7 @@
   position: sticky;
   left: 0;
   z-index: 6;
+  box-shadow: 2px 0 0 0 #e5e7eb;
 }
 
 /* ── Day Headers ── */
@@ -334,9 +330,7 @@
   display: none;
 }
 
-/* ── Time Labels ──
-   FIX: z-index raised from 1 → 5 so time labels always paint on top of
-   class blocks. Background kept fully opaque to prevent bleed-through.  */
+/* ── Time Labels ── */
 .grid-time-label {
   display: flex;
   align-items: flex-start;
@@ -347,10 +341,12 @@
   border-right: 1px solid #e5e7eb;
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
+  background-color: #fafafa;
   white-space: nowrap;
   position: sticky;
   left: 0;
   z-index: 5;
+  box-shadow: 2px 0 0 0 #e5e7eb;
 }
 
 /* ── Background Cells ── */
@@ -927,6 +923,11 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .timetable-grid-wrapper {
+    padding: 0;
+  }
+
   .btn-create {
     width: 100%;
     justify-content: center;
