@@ -206,6 +206,8 @@ input[type="button"]:focus-visible {
   width: 220px;
   min-height: 260px;
   transition: transform 180ms ease, box-shadow 180ms ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .marketCard:hover {
@@ -562,8 +564,8 @@ input[type="button"]:focus-visible {
 }
 
 .mButton {
-  margin-top: 8px;
-  width: fit-content;
+  margin-top: auto;
+  width: 100%;
   background: #4f46e5;
   color: var(--primary-foreground);
   border: 1px solid var(--border);

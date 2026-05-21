@@ -110,6 +110,7 @@ export default function MarketHome() {
                   window.scrollTo({ top, behavior: "smooth" });
                 }
               }}>Shop Now</button>
+              {user && <button className="marketHeroSecondary" type="button" onClick={() => navigate("/marketplace/orders")}>My Orders</button>}
               {isSeller
                 ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
                 : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>

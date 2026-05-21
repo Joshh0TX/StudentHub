@@ -49,7 +49,7 @@
 
 .landingTopButton {
   text-decoration: none;
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
   border-radius: 999px;
   padding: 8px 14px;
@@ -97,19 +97,19 @@
 }
 
 .landingPrimary {
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
 }
 
 .landingSecondary {
   background: #ffffff;
-  color: #3b82f6;
-  border-color: #3b82f6;
+  color: #224b8d;
+  border-color: #224b8d;
 }
 
 .landingHeroArt {
   position: relative;
-  border: 1px solid #3b82f6;
+  border: 1px solid #224b8d;
   border-radius: 14px;
   background: #f8fbff;
   min-height: 260px;
@@ -124,7 +124,7 @@
 .orbA {
   width: 130px;
   height: 130px;
-  background: #3b82f6;
+  background: #224b8d;
   top: 18px;
   right: 24px;
 }
@@ -132,7 +132,7 @@
 .orbB {
   width: 96px;
   height: 96px;
-  background: #3b82f6;
+  background: #224b8d;
   bottom: 20px;
   left: 34px;
 }
@@ -163,7 +163,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid #3b82f6;
+  border: 1px solid #224b8d;
   display: grid;
   place-items: center;
   font-size: 0.9rem;
@@ -184,7 +184,7 @@
 .heroBadge.share {
   top: 106px;
   right: 22px;
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
 }
 
@@ -218,7 +218,7 @@
 }
 
 .landingSectionTitle h2 span {
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
   border-radius: 6px;
   padding: 1px 8px;
@@ -239,7 +239,7 @@
 
 .serviceCard {
   border-radius: 16px;
-  border: 1px solid #3b82f6;
+  border: 1px solid #224b8d;
   padding: 18px;
   min-height: 158px;
   display: flex;
@@ -252,7 +252,7 @@
 }
 
 .serviceCard h3 span {
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
   border-radius: 6px;
   padding: 1px 6px;
@@ -273,7 +273,7 @@
 }
 
 .serviceCard.dark {
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
 }
 
@@ -287,7 +287,7 @@
 
 .landingCtaBand {
   margin-top: 18px;
-  border: 1px solid #3b82f6;
+  border: 1px solid #224b8d;
   border-radius: 16px;
   padding: 20px;
   display: flex;
@@ -309,7 +309,7 @@
 
 .landingCaseRow {
   margin-top: 14px;
-  background: #3b82f6;
+  background: #224b8d;
   color: #ffffff;
   border-radius: 16px;
   padding: 16px;
@@ -337,7 +337,7 @@
 .landingCaseRow span {
   display: inline-block;
   margin-top: 10px;
-  color: #3b82f6;
+  color: #224b8d;
   font-size: 0.83rem;
 }
 
