@@ -55,8 +55,10 @@ const Login = () => {
       return;
     }
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    console.log("Login response:", data);
+localStorage.setItem("token", data.token);
+localStorage.setItem("user", JSON.stringify(data.user));
+
     navigate("/onboarding");
   };
 

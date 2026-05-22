@@ -61,12 +61,20 @@ const PostItem = ({ post, currentUser }) => {
   const handleDeletePost = async () => {
   if (!window.confirm('Delete this post?')) return;
   const token = localStorage.getItem("token");
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/${post.id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (res.ok) {
-    window.location.reload();
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/${post.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      const data = await res.json();
+      alert(`Failed to delete: ${data.message}`);
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
   }
 };
 
@@ -176,7 +184,7 @@ const PostItem = ({ post, currentUser }) => {
             <div key={c.id} className="comment-item">
               <img
                 src={
-                  c.user?.profileImage ||
+                  c.user?.profile_pic ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(`${c.user?.f_name || ''} ${c.user?.l_name || ''}`)}&background=random`
                 }
                 className="comment-avatar"

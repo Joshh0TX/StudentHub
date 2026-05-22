@@ -5,10 +5,16 @@ exports.sendFriendRequest = async (req, res) => {
     const senderId = req.user.id;
     const { receiverId } = req.params;
 
-    const existing = await prisma.friendRequest.findUnique({
-      where: { senderId_receiverId: { senderId, receiverId } }
+    // Check both directions
+    const existing = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId }
+        ]
+      }
     });
-    if (existing) return res.status(400).json({ message: 'Request already sent' });
+    if (existing) return res.status(400).json({ message: 'Request already exists' });
 
     await prisma.friendRequest.create({
       data: { senderId, receiverId }
@@ -83,7 +89,7 @@ exports.getConnections = async (req, res) => {
 exports.respondToRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
-    const { action } = req.body; // 'accepted' or 'rejected'
+    const { action } = req.body;
     const userId = req.user.id;
 
     const request = await prisma.friendRequest.findUnique({ where: { id: requestId } });
@@ -93,9 +99,19 @@ exports.respondToRequest = async (req, res) => {
     if (action === 'rejected') {
       await prisma.friendRequest.delete({ where: { id: requestId } });
     } else {
+      // Accept this request
       await prisma.friendRequest.update({
         where: { id: requestId },
         data: { status: 'accepted' }
+      });
+
+      // Delete the reverse request if it exists (user A sent to user B, user B sent to user A)
+      await prisma.friendRequest.deleteMany({
+        where: {
+          senderId: request.receiverId,
+          receiverId: request.senderId,
+          status: 'pending'
+        }
       });
     }
 
