@@ -269,7 +269,14 @@ export default function MarketHome() {
           </div>
         </div>
 
-        <p className="itemNumber">{filteredItems.length} items available</p>
+        <div className="marketListHeader">
+          <p className="itemNumber">{filteredItems.length} items available</p>
+          {user && (
+            <button className="marketOrdersQuickBtn" type="button" onClick={() => navigate("/marketplace/orders")}>
+              My Orders
+            </button>
+          )}
+        </div>
         <section className="markettopGird">
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
@@ -295,24 +302,26 @@ export default function MarketHome() {
               <div className="locationChips">
                 {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}
               </div>
-              <Link to={`/store/${encodeURIComponent(item.store?.id)}`} className="sellerName">{item.store?.name}</Link>
-              <button className="mButton" type="button" onClick={() => setActiveContactStore((prev) => prev === item.store?.id ? null : item.store?.id)}>
-                {activeContactStore === item.store?.id ? "Hide Contacts" : "Contact Seller"}
-              </button>
-              {activeContactStore === item.store?.id && (
-                <div className="contactPanel">
-                  {item.store?.contacts?.length ? (
-                    item.store.contacts.map((c) => (
-                      <div className="contactRow" key={`${c.type}-${c.value}`}>
-                        <span className="contactType">{c.type}</span>
-                        <span className="contactValue">{c.value}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="contactEmpty">No contact info posted yet.</p>
-                  )}
-                </div>
-              )}
+              <div className="marketCardFooter">
+                <Link to={`/store/${encodeURIComponent(item.store?.id)}`} className="sellerName">{item.store?.name}</Link>
+                <button className="mButton" type="button" onClick={() => setActiveContactStore((prev) => prev === item.store?.id ? null : item.store?.id)}>
+                  {activeContactStore === item.store?.id ? "Hide Contacts" : "Contact Seller"}
+                </button>
+                {activeContactStore === item.store?.id && (
+                  <div className="contactPanel">
+                    {item.store?.contacts?.length ? (
+                      item.store.contacts.map((c) => (
+                        <div className="contactRow" key={`${c.type}-${c.value}`}>
+                          <span className="contactType">{c.type}</span>
+                          <span className="contactValue">{c.value}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="contactEmpty">No contact info posted yet.</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </section>
