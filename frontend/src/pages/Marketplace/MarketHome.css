@@ -969,21 +969,26 @@ input[type="button"]:focus-visible {
 
 .marketHeroActions {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .marketHeroCta {
   background: #fff;
   color: #1a3a6b;
   border: none;
-  padding: 10px 22px;
+  height: 42px;
+  min-width: 118px;
+  padding: 0 22px;
   border-radius: 999px;
   font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
   transition: transform 150ms, box-shadow 150ms;
   box-shadow: none;
+  margin-left: 0;
 }
 
 .marketHeroCta:hover {
@@ -995,7 +1000,9 @@ input[type="button"]:focus-visible {
   background: transparent;
   color: #fff;
   border: 1.5px solid rgba(255,255,255,0.5);
-  padding: 10px 22px;
+  height: 42px;
+  min-width: 118px;
+  padding: 0 22px;
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.88rem;
@@ -1038,7 +1045,24 @@ input[type="button"]:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   margin-bottom: 12px;
+}
+
+.popularSliderLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.popularSliderLeft .sliderNavBtn {
+  align-self: flex-start;
+  margin-left: 0;
+}
+
+.popularSliderTitleBlock {
+  position: static;
 }
 
 .popularSliderHeader h2 {
@@ -1072,6 +1096,7 @@ input[type="button"]:focus-visible {
   cursor: pointer;
   min-width: unset;
   box-shadow: none;
+  flex-shrink: 0;
 }
 
 .sliderNavBtn:hover {

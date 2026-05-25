@@ -3,107 +3,74 @@ import "./Landing.css";
 
 export default function Landing() {
   return (
-    <main className="landingPage">
-      <section className="landingShell">
-        <div className="landingContent">
-          <header className="landingTopbar">
-            <div className="landingBrand">StudentHub</div>
-            <nav className="landingNav">
-              <a href="#services">Services</a>
-              <a href="#community">Community</a>
-              <a href="#cases">Case Studies</a>
-            </nav>
-            <Link className="landingTopButton" to="/login?mode=signup">Get Started</Link>
-          </header>
+    <main className="landing">
+      <header className="landingHeader">
+        <div className="brand">
+          <h1 className="stuudoLogo">stuudo<span>.</span></h1>
+        </div>
+        <nav className="headerNav">
+          <a href="#features">Features</a>
+          <a href="#why">Why us</a>
+          <a href="#reviews">Reviews</a>
+        </nav>
+        <Link to="/login" className="ghostBtn">Sign in</Link>
+      </header>
 
-          <section className="landingHero">
-          <div>
-            <h1>Navigate campus life with clarity and speed.</h1>
-            <p className="landingLead">
-              One place for academics, student marketplace, social feed, and profile growth.
-              Built for students who need things done.
-            </p>
-            <div className="landingActions">
-              <Link className="landingPrimary" to="/login?mode=signup">Create account</Link>
-              <Link className="landingSecondary" to="/login">Sign in</Link>
-            </div>
+      <section className="hero">
+        <div className="heroText">
+          <p className="eyebrow">Built for campus</p>
+          <h1>Run your student life from one dashboard.</h1>
+          <p>
+            Plan classes, buy and sell on campus, grow your profile, and stay updated with your school community.
+          </p>
+          <div className="heroCtas">
+            <Link to="/login?mode=signup" className="primaryBtn">Create account</Link>
+            <Link to="/login" className="ghostBtn">I already have an account</Link>
           </div>
-          <div className="landingHeroArt" aria-hidden="true">
-            <div className="heroBadge heart">&hearts;</div>
-            <div className="heroBadge play">&#9654;</div>
-            <div className="heroBadge share">&#8599;</div>
-            <div className="orb orbA" />
-            <div className="orb orbB" />
-            <div className="ring" />
-            <div className="ring ringB" />
-            <div className="rocket">*</div>
+        </div>
+        <div className="heroPanel" aria-hidden="true">
+          <div className="panelCard panelA">
+            <strong>Marketplace</strong>
+            <span>Orders, stores, product discovery</span>
           </div>
-          </section>
-
-          <section className="landingLogos" id="community">
-          <span>Timetable</span>
-          <span>Marketplace</span>
-          <span>Study Groups</span>
-          <span>Newsroom</span>
-          <span>Profile</span>
-          <span>Resources</span>
-          </section>
-
-          <section className="landingSectionTitle" id="services">
-          <h2><span>Services</span></h2>
-          <p>Everything students use every week, unified in one platform.</p>
-          </section>
-
-          <section className="landingServiceGrid">
-          <article className="serviceCard light">
-            <h3><span>Academic</span> planning</h3>
-            <p>Build class timetables, exam schedule reminders, and study routines.</p>
-            <a href="#!">Learn more</a>
-          </article>
-          <article className="serviceCard dark">
-            <h3><span>Campus</span> marketplace</h3>
-            <p>Buy and sell goods, manage stores, and track buyer or seller orders.</p>
-            <a href="#!">Learn more</a>
-          </article>
-          <article className="serviceCard dark">
-            <h3><span>Student</span> network</h3>
-            <p>Connect with students, discover profiles, and grow your community.</p>
-            <a href="#!">Learn more</a>
-          </article>
-          <article className="serviceCard light">
-            <h3><span>Resource</span> hub</h3>
-            <p>Access academic resources, group activities, and school updates fast.</p>
-            <a href="#!">Learn more</a>
-          </article>
-          </section>
-
-          <section className="landingCtaBand">
-          <div>
-            <h3>Ready to simplify your student workflow?</h3>
-            <p>Join now and get your dashboard set up in minutes.</p>
+          <div className="panelCard panelB">
+            <strong>Academics</strong>
+            <span>Timetable, resources, study groups</span>
           </div>
-          <Link className="landingPrimary" to="/login?mode=signup">Start free</Link>
-          </section>
+          <div className="panelCard panelC">
+            <strong>Profile & Social</strong>
+            <span>Connections, feed, achievements</span>
+          </div>
+        </div>
+      </section>
 
-          <section className="landingSectionTitle" id="cases">
-          <h2><span>Case study</span></h2>
-          <p>Real outcomes from students and campus creators using StudentHub.</p>
-          </section>
+      <section className="featureBand" id="features">
+        <article>
+          <h3>Manage academics</h3>
+          <p>Timetable, study groups, and resources in one flow.</p>
+        </article>
+        <article>
+          <h3>Grow your store</h3>
+          <p>Sell products, track orders, and respond faster.</p>
+        </article>
+        <article>
+          <h3>Build your network</h3>
+          <p>Profile visibility, updates, and community engagement.</p>
+        </article>
+      </section>
 
-          <section className="landingCaseRow">
-          <article>
-            <p>Marketplace sellers processed repeat orders faster with live order status tracking.</p>
-            <span>Learn more</span>
-          </article>
-          <article>
-            <p>Students improved weekly planning by combining timetable and reminders in one flow.</p>
-            <span>Learn more</span>
-          </article>
-          <article>
-            <p>Campus groups increased collaboration using shared updates and quick profile discovery.</p>
-            <span>Learn more</span>
-          </article>
-          </section>
+      <section className="stats" id="why">
+        <div><strong>3</strong><span>Core modules</span></div>
+        <div><strong>1</strong><span>Unified experience</span></div>
+        <div><strong>24/7</strong><span>Access anywhere</span></div>
+      </section>
+
+      <section className="reviews" id="reviews">
+        <h2>Students move faster with stuudo.</h2>
+        <div className="reviewGrid">
+          <blockquote>"The marketplace + order tracking is exactly what we needed."</blockquote>
+          <blockquote>"I stopped juggling multiple apps for class planning."</blockquote>
+          <blockquote>"Profile and networking features helped me find collaborators."</blockquote>
         </div>
       </section>
     </main>

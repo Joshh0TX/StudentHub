@@ -127,12 +127,14 @@ export default function MarketHome() {
         {allStores.length > 0 && (
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
-            <div>
-              <h2>Popular Stores</h2>
-              <p>Trusted sellers on campus.</p>
-              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
+            <div className="popularSliderLeft">
+              <div className="popularSliderTitleBlock">
+                <h2>Popular Stores</h2>
+                <p>Trusted sellers on campus.</p>
+              </div>
+              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>&lsaquo;</button>
             </div>
-            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
+            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>&rsaquo;</button>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
             {allStores.map((store) => {
@@ -271,11 +273,6 @@ export default function MarketHome() {
 
         <div className="marketListHeader">
           <p className="itemNumber">{filteredItems.length} items available</p>
-          {user && (
-            <button className="marketOrdersQuickBtn" type="button" onClick={() => navigate("/marketplace/orders")}>
-              My Orders
-            </button>
-          )}
         </div>
         <section className="markettopGird">
           {filteredItems.map((item) => (
