@@ -489,7 +489,7 @@ const ResourceItem = ({ item, onDelete, canDelete }) => {
 const Resources = () => {
   const { selectedProgram, selectedYear } = useOutletContext();
   const { user, loading: authLoading, getToken } = useAuth(); // +++ destructure authLoading
-  const { canCreateIn, canModify } = usePermissions();
+  const { canCreateIn, canModifyIn } = usePermissions();
   const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   const [sections, setSections] = useState([]);
@@ -659,7 +659,11 @@ const Resources = () => {
                     item={item}
                     currentUserId={user?.id}
                     onDelete={handleDelete}
-                    canDelete={canModify(item.createdBy ?? item.created_by)}
+                    canDelete={canModifyIn(
+                      item.createdBy ?? item.created_by, // already had fallback, keep it
+                      item.department ?? selectedProgram, // prefer item-level, fall back to context
+                      item.year ?? selectedYear,
+                    )}
                   />
                 ))}
               </div>

@@ -19,11 +19,36 @@ export const usePermissions = () => {
     return false;
   };
 
+  // NEW: scope-aware modify check
+  const canModifyIn = (createdById, department, year) => {
+    if (isAdmin) return true;
+    if (isStudent) return false;
+    if (isCourseRep) {
+      // Can modify anything within their own department + year
+      const inScope =
+        user.department === department && Number(user.year) === Number(year);
+      if (inScope) return true;
+      // Outside their scope, only their own content
+      return String(createdById) === String(user?.id);
+    }
+    return false;
+  };
+
+  // Keep canModify for backwards compatibility (ownership-only fallback)
   const canModify = (createdById) => {
     if (isAdmin) return true;
     if (isStudent) return false;
-    return String(createdById) === String(user?.id);
+    if (isCourseRep) return true; // Course reps can modify within their scope;
+    return false;
   };
 
-  return { isAdmin, isCourseRep, isStudent, canCreate, canCreateIn, canModify };
+  return {
+    isAdmin,
+    isCourseRep,
+    isStudent,
+    canCreate,
+    canCreateIn,
+    canModify,
+    canModifyIn,
+  };
 };

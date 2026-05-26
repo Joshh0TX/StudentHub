@@ -287,7 +287,7 @@ const GroupCard = ({
 const StudyGroups = () => {
   const { user, loading: authLoading } = useAuth(); // ← also pull loading from auth
   const { selectedProgram, selectedYear } = useOutletContext();
-  const { canCreateIn, canModify } = usePermissions();
+  const { canCreateIn, canModifyIn } = usePermissions();
   const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   const [groups, setGroups] = useState([]);
@@ -482,7 +482,11 @@ const StudyGroups = () => {
               isMember={myGroupIds.has(group.id)}
               isJoining={joiningId === group.id}
               currentUserId={user.id}
-              canDelete={canModify(group.createdBy)}
+              canDelete={canModifyIn(
+                group.createdBy ?? group.created_by, // fix snake_case fallback
+                group.department, // or selectedProgram
+                group.year, // or selectedYear
+              )}
             />
           ))}
         </div>

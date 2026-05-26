@@ -697,7 +697,7 @@ const Timetable = () => {
 
   const { user, loading: authLoading, getToken } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
-  const { canCreateIn, canModify } = usePermissions();
+  const { canCreateIn, canModifyIn } = usePermissions();
   const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   // ── Fetch timetables ──────────────────────────────────────────
@@ -918,7 +918,13 @@ const Timetable = () => {
               onDelete={handleDelete}
               onEdit={handleEdit}
               currentUserId={user.id}
-              canModify={canModify(tt.createdBy)}
+              selectedProgram={selectedProgram} // add
+              selectedYear={selectedYear} // add
+              canModify={canModifyIn(
+                tt.createdBy ?? tt.created_by, // fix snake_case fallback
+                tt.department, // or selectedProgram if not on the object
+                tt.year, // or selectedYear
+              )}
             />
           ))}
         </div>
