@@ -185,9 +185,8 @@ const createSchedule = async (req, res) => {
   const { id } = req.params;
   const { title, date_time, is_online, location, meeting_url, notes } =
     req.body;
-  const userId = req.user.id; // ← populated by authMiddleware
+  const userId = req.user.id;
 
-  // Validation
   if (!title?.trim())
     return res.status(400).json({ error: "Session title is required." });
   if (!date_time)
@@ -206,20 +205,18 @@ const createSchedule = async (req, res) => {
     if (!group) return res.status(404).json({ error: "Group not found." });
 
     const schedule = await prisma.studyGroupSchedule.create({
-      // ← correct model name
       data: {
         groupId: id,
-        createdBy: userId, // ← required field from schema
+        createdBy: userId,
         title: title.trim(),
-        date_time: new Date(date_time), // ← schema uses snake_case, no conversion needed
-        isOnline: is_online,
+        date_time: new Date(date_time),
+        is_online: Boolean(is_online),
         location: location?.trim() || null,
         meeting_url: meeting_url?.trim() || null,
         notes: notes?.trim() || null,
       },
     });
 
-    // Schema already uses snake_case so response maps directly
     return res.status(201).json({
       id: schedule.id,
       title: schedule.title,
@@ -231,7 +228,7 @@ const createSchedule = async (req, res) => {
     });
   } catch (err) {
     console.error("createSchedule error:", err);
-    return res.status(500).json({ error: "Failed to create schedule." });
+    return res.status(500).json({ error: err.message });
   }
 };
 

@@ -17,10 +17,23 @@ const API = import.meta.env.VITE_API_URL;
 
 // ── Reusable fetch helper ─────────────────────────────────────────
 const apiFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("You must be logged in to perform this action.");
+  }
+
+  const { headers: extraHeaders, ...restOptions } = options; // ← separate headers out
+
   const res = await fetch(`${API}${endpoint}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
+    ...restOptions,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...extraHeaders, // ← merge instead of overwrite
+    },
   });
+
   if (!res.ok) {
     const text = await res.text();
     let message;
@@ -98,7 +111,7 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
       onAdded(normaliseSchedule(data));
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to post Schedule. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -368,8 +381,6 @@ const GroupDetail = () => {
 
   // ── Safety check — group failed to load silently ──────────────
   if (!group) return <p className="detail-empty">Group not found.</p>;
-
-
 
   return (
     <div className="group-detail-page">
