@@ -235,6 +235,43 @@ const createSchedule = async (req, res) => {
   }
 };
 
+const deleteSchedule = async (req, res) => {
+  const { id, scheduleId } = req.params;
+  const { id: userId, role } = req.user;
+
+  try {
+    // Check the schedule exists and belongs to this group
+    const schedule = await prisma.studyGroupSchedule.findUnique({
+      where: { id: scheduleId },
+    });
+
+    if (!schedule)
+      return res.status(404).json({ error: "Schedule not found." });
+
+    // Confirm it actually belongs to the group in the URL
+    if (schedule.groupId !== id)
+      return res
+        .status(400)
+        .json({ error: "Schedule does not belong to this group." });
+
+    // Only the creator or an admin can delete
+    const isCreator = schedule.createdBy === userId;
+    const isAdmin = role === "admin";
+
+    if (!isCreator && !isAdmin)
+      return res
+        .status(403)
+        .json({ error: "Not authorised to delete this session." });
+
+    await prisma.studyGroupSchedule.delete({ where: { id: scheduleId } });
+
+    return res.json({ message: "Session deleted successfully." });
+  } catch (err) {
+    console.error("deleteSchedule error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getGroups,
   getGroupById,
@@ -243,4 +280,5 @@ module.exports = {
   deleteGroup,
   joinGroup,
   createSchedule,
+  deleteSchedule,
 };
