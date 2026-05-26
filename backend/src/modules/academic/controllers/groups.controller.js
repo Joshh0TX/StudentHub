@@ -14,6 +14,9 @@ const getGroups = async (req, res) => {
       },
       include: {
         _count: { select: { members: true } },
+        schedules: {
+          orderBy: { date_time: "asc" },
+        },
         creator: {
           select: { f_name: true, l_name: true },
         },
