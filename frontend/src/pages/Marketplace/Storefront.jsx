@@ -120,6 +120,30 @@ export default function Storefront() {
     }
   };
 
+  const isSoldOut = (item) => item?.isSoldOut === true || String(item?.availability || "").toLowerCase() === "sold_out";
+
+  const handleToggleSoldOut = async (item) => {
+    try {
+      const nextSoldOut = !isSoldOut(item);
+      const updated = await updateProduct(item.id, {
+        isSoldOut: nextSoldOut,
+        availability: nextSoldOut ? "sold_out" : "available",
+      });
+      setProducts((prev) => prev.map((p) => (
+        p.id === item.id
+          ? {
+              ...p,
+              ...(updated && !updated.error ? updated : {}),
+              isSoldOut: updated?.isSoldOut ?? nextSoldOut,
+              availability: updated?.availability ?? (nextSoldOut ? "sold_out" : "available"),
+            }
+          : p
+      )));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const updated = await updateOrderStatus(orderId, newStatus);
@@ -285,6 +309,11 @@ export default function Storefront() {
                   <div className="productCardBody">
                     <div className="productName">{item.name}</div>
                     <div className="productMeta">{item.category} · ₦{item.price}</div>
+                    {isSoldOut(item) && (
+                      <div style={{ fontSize: "0.72rem", color: "#b91c1c", marginTop: "3px", fontWeight: 700 }}>
+                        Sold out
+                      </div>
+                    )}
                     {item.locations?.length > 0 && (
                       <div style={{ fontSize: "0.72rem", color: "#999", marginTop: "2px" }}>{item.locations.join(", ")}</div>
                     )}
@@ -293,6 +322,9 @@ export default function Storefront() {
                   </Link>
                   <div className="productCardActions">
                     <button type="button" className="btnOutline" onClick={() => handleEdit(item)}>Edit</button>
+                    <button type="button" className="btnOutline" onClick={() => handleToggleSoldOut(item)}>
+                      {isSoldOut(item) ? "Mark Available" : "Mark Sold Out"}
+                    </button>
                     <button type="button" className="btnDanger" onClick={() => handleDelete(item.id)}>Delete</button>
                   </div>
                 </div>

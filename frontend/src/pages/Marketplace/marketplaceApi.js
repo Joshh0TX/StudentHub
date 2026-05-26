@@ -108,6 +108,8 @@ export const updateOrderStatus = (id, status) =>
     body: JSON.stringify({ status }),
   }).then((r) => r.json());
 
+export const cancelOrder = (id) => updateOrderStatus(id, "Cancelled");
+
 export const fetchReviews = (productId) =>
   fetch(`${BASE}/${productId}/reviews`).then((r) => r.json());
 
