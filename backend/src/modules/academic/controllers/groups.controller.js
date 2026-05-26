@@ -55,7 +55,6 @@ const getGroupById = async (req, res) => {
     return res.json({
       ...group,
       member_count: group._count.members,
-      schedules: [],
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });

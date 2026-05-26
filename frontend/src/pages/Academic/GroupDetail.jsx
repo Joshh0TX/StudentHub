@@ -10,7 +10,9 @@ import {
   Clock,
   RefreshCw,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import "./GroupDetail.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -23,14 +25,14 @@ const apiFetch = async (endpoint, options = {}) => {
     throw new Error("You must be logged in to perform this action.");
   }
 
-  const { headers: extraHeaders, ...restOptions } = options; // ← separate headers out
+  const { headers: extraHeaders, ...restOptions } = options;
 
   const res = await fetch(`${API}${endpoint}`, {
     ...restOptions,
     headers: {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...extraHeaders, // ← merge instead of overwrite
+      Authorization: `Bearer ${token}`,
+      ...extraHeaders,
     },
   });
 
@@ -49,9 +51,6 @@ const apiFetch = async (endpoint, options = {}) => {
 };
 
 // ── Normalise schedule field names ────────────────────────────────
-// Prisma returns camelCase (dateTime, isOnline, meetingUrl)
-// Raw SQL returns snake_case (date_time, is_online, meeting_url)
-// This function handles both so the UI never breaks
 const normaliseSchedule = (s) => ({
   id: s.id,
   title: s.title,
@@ -60,6 +59,7 @@ const normaliseSchedule = (s) => ({
   is_online: s.is_online ?? s.isOnline ?? false,
   location: s.location,
   meeting_url: s.meeting_url ?? s.meetingUrl,
+  createdBy: s.createdBy,
 });
 
 // ── Add Schedule Modal ────────────────────────────────────────────
@@ -111,7 +111,7 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
       onAdded(normaliseSchedule(data));
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to post Schedule. Please try again.");
+      setError(err.message || "Failed to add schedule. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -229,7 +229,7 @@ const AddScheduleModal = ({ groupId, onClose, onAdded }) => {
 };
 
 // ── Schedule Card ─────────────────────────────────────────────────
-const ScheduleCard = ({ schedule }) => {
+const ScheduleCard = ({ schedule, onDelete, canDelete }) => {
   const s = normaliseSchedule(schedule);
   const date = new Date(s.date_time);
   const isValidDate = !isNaN(date.getTime());
@@ -302,6 +302,17 @@ const ScheduleCard = ({ schedule }) => {
       >
         {s.is_online ? "Online" : "In Person"}
       </span>
+
+      {/* ── Delete button — only visible to creator or admin ── */}
+      {canDelete && (
+        <button
+          className="btn-delete-schedule"
+          onClick={() => onDelete(s.id)}
+          title="Delete session"
+        >
+          <Trash2 size={15} />
+        </button>
+      )}
     </div>
   );
 };
@@ -310,6 +321,7 @@ const ScheduleCard = ({ schedule }) => {
 const GroupDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth(); // ← same pattern as StudyGroups.jsx
 
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -323,12 +335,9 @@ const GroupDetail = () => {
     try {
       const data = await apiFetch(`/api/groups/${id}`);
 
-      // Normalise member_count to a number regardless of SQL/Prisma source
       const memberCount = Number(
         data.member_count ?? data._count?.members ?? 0,
       );
-
-      // Normalise schedule field names from either Prisma or raw SQL
       const schedules = (data.schedules ?? []).map(normaliseSchedule);
 
       setGroup({ ...data, member_count: memberCount, schedules });
@@ -348,6 +357,28 @@ const GroupDetail = () => {
       ...prev,
       schedules: [...(prev.schedules || []), newSchedule],
     }));
+  };
+
+  // ── Delete schedule ───────────────────────────────────────────
+  const handleDeleteSchedule = async (scheduleId) => {
+    if (!window.confirm("Delete this session?")) return;
+    try {
+      await apiFetch(`/api/groups/${id}/schedules/${scheduleId}`, {
+        method: "DELETE",
+      });
+      setGroup((prev) => ({
+        ...prev,
+        schedules: prev.schedules.filter((s) => s.id !== scheduleId),
+      }));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // ── Permission helper — mirrors canModify in StudyGroups.jsx ──
+  const canDeleteSchedule = (scheduleCreatedBy) => {
+    if (!user) return false;
+    return user.role === "admin" || user.id === scheduleCreatedBy;
   };
 
   // ── Loading ───────────────────────────────────────────────────
@@ -379,7 +410,6 @@ const GroupDetail = () => {
       </div>
     );
 
-  // ── Safety check — group failed to load silently ──────────────
   if (!group) return <p className="detail-empty">Group not found.</p>;
 
   return (
@@ -438,7 +468,12 @@ const GroupDetail = () => {
         ) : (
           <div className="schedules-list">
             {group.schedules.map((s) => (
-              <ScheduleCard key={s.id} schedule={s} />
+              <ScheduleCard
+                key={s.id}
+                schedule={s}
+                onDelete={handleDeleteSchedule}
+                canDelete={canDeleteSchedule(s.createdBy)}
+              />
             ))}
           </div>
         )}
