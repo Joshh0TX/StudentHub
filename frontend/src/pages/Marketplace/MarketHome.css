@@ -981,13 +981,20 @@ input[type="button"]:focus-visible {
   justify-content: flex-start;
 }
 
+.marketHeroActionTail {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .marketHeroCta {
   background: #fff;
   color: #1a3a6b;
   border: none;
   height: 42px;
-  min-width: 118px;
-  padding: 0 22px;
+  min-width: 0;
+  padding: 0 18px;
   border-radius: 999px;
   font-weight: 700;
   font-size: 0.88rem;
@@ -1007,8 +1014,8 @@ input[type="button"]:focus-visible {
   color: #fff;
   border: 1.5px solid rgba(255,255,255,0.5);
   height: 42px;
-  min-width: 118px;
-  padding: 0 22px;
+  min-width: 0;
+  padding: 0 18px;
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.88rem;
