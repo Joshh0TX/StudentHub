@@ -12,6 +12,36 @@
   color: var(--muted-foreground);
 }
 
+.myOrdersTabs {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.myOrdersTab {
+  background: var(--muted);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.myOrdersTab:hover {
+  background: color-mix(in oklch, var(--muted) 70%, white);
+  box-shadow: none;
+  transform: none;
+}
+
+.myOrdersTab.active {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
 .myOrdersGrid {
   margin-top: 18px;
   display: grid;
