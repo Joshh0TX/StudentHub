@@ -9,6 +9,8 @@ import { categoriesByType } from "./marketplaceData";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 
+const normalizeStatus = (status) => String(status || "").trim().toLowerCase();
+
 export default function Storefront() {
   const user = getUser();
 
@@ -394,8 +396,9 @@ export default function Storefront() {
           </div>
           {/* Status tabs */}
           <div className="orderTabs">
-            {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((tab) => {
-              const count = orders.filter((o) => o.status === tab).length;
+            {["Pending", "Preparing", "Ready", "Shipped", "Completed", "Cancelled"].map((tab) => {
+              const tabKey = normalizeStatus(tab);
+              const count = orders.filter((o) => normalizeStatus(o.status) === tabKey).length;
               return (
                 <button
                   key={tab}
@@ -414,7 +417,7 @@ export default function Storefront() {
             })}
           </div>
           <div className="orderList">
-            {orders.filter((o) => o.status === orderTab).map((order) => (
+            {orders.filter((o) => normalizeStatus(o.status) === normalizeStatus(orderTab)).map((order) => (
               <div className="orderRow" key={order.id}>
                 <div style={{ flex: 1 }}>
                   <div className="orderTitle">{order.product?.name || "Product"}</div>
@@ -430,13 +433,13 @@ export default function Storefront() {
                   onChange={(e) => handleStatusChange(order.id, e.target.value)}
                   style={order.status === "Completed" ? { background: "#dcfce7", color: "#166534", borderColor: "#86efac" } : {}}
                 >
-                  {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((s) => (
+                  {["Pending", "Preparing", "Ready", "Shipped", "Completed", "Cancelled"].map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </div>
             ))}
-            {orders.filter((o) => o.status === orderTab).length === 0 && (
+            {orders.filter((o) => normalizeStatus(o.status) === normalizeStatus(orderTab)).length === 0 && (
               <p style={{ padding: "1rem", color: "#888" }}>No {orderTab.toLowerCase()} orders.</p>
             )}
           </div>

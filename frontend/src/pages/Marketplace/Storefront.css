@@ -309,15 +309,25 @@
 }
 
 .productCardActions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 6px;
   padding: 0 10px 10px;
 }
 
 .productCardActions button {
-  flex: 1;
-  padding: 5px 8px;
-  font-size: 0.78rem;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 0.76rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  margin: 0;
+}
+
+.productCardActions .btnDanger {
+  grid-column: 1 / -1;
 }
 
 .productRow,
