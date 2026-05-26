@@ -147,3 +147,24 @@
   color: var(--muted-foreground);
   padding: 1rem 0;
 }
+
+@media (max-width: 760px) {
+  .reviewsPage {
+    padding: 18px 14px 52px;
+    max-width: 100%;
+  }
+
+  .reviewsHeader h1 {
+    font-size: 1.2rem;
+  }
+
+  .reviewFullTop {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .reviewDeleteBtn {
+    margin-left: 0;
+  }
+}
