@@ -270,7 +270,7 @@
 
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 12px;
 }
 
@@ -319,7 +319,10 @@
   width: 100%;
   min-height: 34px;
   padding: 7px 8px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
   margin: 0;
 }
 
@@ -430,7 +433,7 @@
   }
 
   .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
 
