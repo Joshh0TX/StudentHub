@@ -1,28 +1,20 @@
 import "./MyOrders.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchBuyerOrders } from "./marketplaceApi";
+import { cancelOrder, fetchBuyerOrders } from "./marketplaceApi";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
-
-const ORDER_TABS = [
-  { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
-  { key: "completed", label: "Completed" },
-  { key: "cancelled", label: "Cancelled" },
-];
 
 const statusClass = (status) => {
   const s = String(status || "").toLowerCase();
   if (s === "completed") return "completed";
   if (s === "cancelled") return "cancelled";
+  if (s === "shipped" || s === "ready" || s === "preparing") return "active";
   return "pending";
 };
 
 const normalizeStatus = (status) => {
-  const s = String(status || "").toLowerCase();
-  if (s === "completed" || s === "cancelled" || s === "pending") return s;
-  return "pending";
+  return String(status || "pending").toLowerCase();
 };
 
 const resolveImage = (images) => {
@@ -51,6 +43,7 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     if (!user?.id) {
@@ -70,6 +63,21 @@ export default function MyOrders() {
     if (activeTab === "all") return true;
     return normalizeStatus(order.status) === activeTab;
   });
+  const statusTabs = ["all", ...Array.from(new Set(orders.map((o) => normalizeStatus(o.status))))];
+
+  const handleCancelOrder = async (orderId) => {
+    setCancellingId(orderId);
+    try {
+      const updated = await cancelOrder(orderId);
+      setOrders((prev) => prev.map((o) => (
+        o.id === orderId ? { ...o, status: updated?.status || "Cancelled" } : o
+      )));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   return (
     <main className="myOrdersPage">
@@ -79,16 +87,16 @@ export default function MyOrders() {
       </div>
 
       <div className="myOrdersTabs" role="tablist" aria-label="Order status tabs">
-        {ORDER_TABS.map((tab) => (
+        {statusTabs.map((tabKey) => (
           <button
-            key={tab.key}
+            key={tabKey}
             type="button"
             role="tab"
-            aria-selected={activeTab === tab.key}
-            className={`myOrdersTab ${activeTab === tab.key ? "active" : ""}`}
-            onClick={() => setActiveTab(tab.key)}
+            aria-selected={activeTab === tabKey}
+            className={`myOrdersTab ${activeTab === tabKey ? "active" : ""}`}
+            onClick={() => setActiveTab(tabKey)}
           >
-            {tab.label}
+            {tabKey === "all" ? "All" : `${tabKey.charAt(0).toUpperCase()}${tabKey.slice(1)}`}
           </button>
         ))}
       </div>
@@ -116,6 +124,21 @@ export default function MyOrders() {
                   )}
                 </p>
                 <div className={`myOrderStatus ${statusClass(order.status)}`}>{order.status || "Pending"}</div>
+                <div className="myOrderActions">
+                  {normalizeStatus(order.status) === "completed" && (
+                    <Link className="myOrderAgainLink" to={`/marketplace/${order.productId}`}>Order again</Link>
+                  )}
+                  {!["completed", "cancelled"].includes(normalizeStatus(order.status)) && (
+                    <button
+                      type="button"
+                      className="myOrderCancelBtn"
+                      onClick={() => handleCancelOrder(order.id)}
+                      disabled={cancellingId === order.id}
+                    >
+                      {cancellingId === order.id ? "Cancelling..." : "Cancel order"}
+                    </button>
+                  )}
+                </div>
               </div>
             </article>
           );

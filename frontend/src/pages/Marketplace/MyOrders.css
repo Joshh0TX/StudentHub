@@ -45,22 +45,26 @@
 .myOrdersGrid {
   margin-top: 18px;
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, minmax(0, auto));
+  grid-auto-columns: minmax(270px, 330px);
+  align-items: start;
 }
 
 .myOrderCard {
   display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: 68px 1fr;
+  gap: 10px;
+  padding: 10px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--card);
 }
 
 .myOrderImgWrap {
-  width: 92px;
-  height: 92px;
+  width: 68px;
+  height: 68px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -86,6 +90,7 @@
   font-weight: 700;
   color: var(--foreground);
   text-decoration: none;
+  font-size: 0.92rem;
 }
 
 .myOrderTitle:hover {
@@ -93,9 +98,9 @@
 }
 
 .myOrderMeta {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .myOrderStatus {
@@ -106,6 +111,43 @@
   font-weight: 700;
   padding: 4px 10px;
   border: 1px solid var(--border);
+}
+
+.myOrderStatus.active {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+.myOrderActions {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.myOrderAgainLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #1d4ed8;
+  color: #1d4ed8;
+  text-decoration: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.myOrderCancelBtn {
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  line-height: 1;
 }
 
 .myOrderStatus.pending {
@@ -129,4 +171,35 @@
 .myOrdersEmpty {
   padding: 1rem 0.2rem;
   color: var(--muted-foreground);
+}
+
+@media (max-width: 760px) {
+  .myOrdersPage {
+    padding: 18px 14px 52px;
+  }
+
+  .myOrdersHeader h1 {
+    font-size: 1.45rem;
+  }
+
+  .myOrderCard {
+    grid-template-columns: 64px 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .myOrderImgWrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .myOrderMeta {
+    font-size: 0.84rem;
+  }
+
+  .myOrdersGrid {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-auto-columns: 1fr;
+  }
 }

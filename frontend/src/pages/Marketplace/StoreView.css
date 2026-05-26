@@ -207,3 +207,38 @@
 .storeReviewEmpty {
   color: var(--muted-foreground);
 }
+
+@media (max-width: 900px) {
+  .storeViewPage {
+    padding: 18px 14px 52px;
+  }
+
+  .storeViewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .storeProductCard img {
+    height: 130px;
+  }
+}
+
+@media (max-width: 640px) {
+  .storeViewHeader {
+    align-items: flex-start;
+  }
+
+  .storeViewHeaderMain {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .storeViewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .favouriteBtn {
+    width: 40px;
+    height: 40px;
+  }
+}

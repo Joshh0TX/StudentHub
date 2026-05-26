@@ -114,6 +114,7 @@ export default function ProductDetail() {
   };
 
   const isOwnStore = user?.id && item?.store?.ownerId === user.id;
+  const isSoldOut = item?.isSoldOut === true || String(item?.availability || "").toLowerCase() === "sold_out";
 
   const rawImages = item.images?.length ? item.images.map(resolveImg).filter(Boolean) : [];
   // pad to 4 slots with default image
@@ -174,6 +175,11 @@ export default function ProductDetail() {
             <span>🛒 {item._count?.orders ?? 0} orders</span>
           </div>
           <h1>{item.name}</h1>
+          {isSoldOut && (
+            <p style={{ margin: "2px 0 6px", color: "#b91c1c", fontWeight: 700, fontSize: "0.86rem" }}>
+              Sold out
+            </p>
+          )}
           <p className="productDetailPrice">₦{item.price}</p>
           <p className="productDetailDesc">{item.description}</p>
           <div className="productDetailMeta">
@@ -198,7 +204,9 @@ export default function ProductDetail() {
 
           <div className="productDetailActions">
             {!isOwnStore && (
-              <button className="mButton" type="button" onClick={() => setShowOrderForm(true)}>Place Order</button>
+              <button className="mButton" type="button" onClick={() => setShowOrderForm(true)} disabled={isSoldOut}>
+                {isSoldOut ? "Sold Out" : "Place Order"}
+              </button>
             )}
             {!isOwnStore && (
               <button className="btnOutline" type="button" onClick={() => setShowContacts((prev) => !prev)}>
@@ -228,7 +236,7 @@ export default function ProductDetail() {
       </section>
 
       {/* Order Form Modal */}
-      {showOrderForm && (
+      {showOrderForm && !isSoldOut && (
         <div className="storeModal" role="dialog" aria-modal="true" aria-label="Place order">
           <button className="storeModalBackdrop" type="button" onClick={() => setShowOrderForm(false)} />
           <div className="storeModalCard" role="document">
