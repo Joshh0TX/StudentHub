@@ -270,7 +270,7 @@
 
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
 }
 
@@ -309,15 +309,22 @@
 }
 
 .productCardActions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 6px;
   padding: 0 10px 10px;
 }
 
 .productCardActions button {
-  flex: 1;
-  padding: 5px 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
   font-size: 0.78rem;
+  margin: 0;
+}
+
+.productCardActions .btnDanger {
+  grid-column: 1 / -1;
 }
 
 .productRow,
@@ -423,7 +430,7 @@
   }
 
   .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 

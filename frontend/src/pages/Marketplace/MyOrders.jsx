@@ -63,7 +63,8 @@ export default function MyOrders() {
     if (activeTab === "all") return true;
     return normalizeStatus(order.status) === activeTab;
   });
-  const statusTabs = ["all", ...Array.from(new Set(orders.map((o) => normalizeStatus(o.status))))];
+  const baseTabs = ["all", "pending", "preparing", "ready", "shipped", "completed", "cancelled"];
+  const statusTabs = Array.from(new Set([...baseTabs, ...orders.map((o) => normalizeStatus(o.status))]));
 
   const handleCancelOrder = async (orderId) => {
     setCancellingId(orderId);

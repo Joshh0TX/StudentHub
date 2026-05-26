@@ -17,6 +17,7 @@ export default function MarketHome() {
   const searchRef = useRef(null);
 
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [showStoreForm, setShowStoreForm] = useState(false);
   const [isSeller, setIsSeller] = useState(false);
   const [query, setQuery] = useState("");
@@ -32,7 +33,11 @@ export default function MarketHome() {
   });
 
   useEffect(() => {
-    fetchProducts().then(setProducts).catch(console.error);
+    setProductsLoading(true);
+    fetchProducts()
+      .then(setProducts)
+      .catch(console.error)
+      .finally(() => setProductsLoading(false));
     if (user) {
       fetchStore(user.id)
         .then((store) => { if (store && !store.error) setIsSeller(true); })
@@ -126,7 +131,26 @@ export default function MarketHome() {
 
       
         {/* Popular Stores Slider */}
-        {allStores.length > 0 && (
+        {productsLoading && (
+          <div className="popularSliderSection">
+            <div className="popularSliderHeader">
+              <div className="popularSliderTitleBlock">
+                <h2>Popular Stores</h2>
+                <p>Loading stores...</p>
+              </div>
+            </div>
+            <div className="popularSliderTrack">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div className="popularSliderCard popularSliderCardSkeleton" key={`store-skeleton-${idx}`}>
+                  <div className="popularSliderImg popularSkeletonBlock" />
+                  <div className="popularSliderName popularSkeletonLine" />
+                  <div className="popularSliderCat popularSkeletonLine short" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!productsLoading && allStores.length > 0 && (
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
             <div className="popularSliderLeft">
@@ -274,9 +298,20 @@ export default function MarketHome() {
         </div>
 
         <div className="marketListHeader">
-          <p className="itemNumber">{filteredItems.length} items available</p>
+          <p className="itemNumber">{productsLoading ? "Loading products..." : `${filteredItems.length} items available`}</p>
         </div>
         <section className="markettopGird">
+          {productsLoading && Array.from({ length: 8 }).map((_, idx) => (
+            <div className="marketCard marketCardSkeleton" key={`product-skeleton-${idx}`}>
+              <div className="marketImage marketSkeletonBlock" />
+              <div className="marketMeta">
+                <span className="marketTag marketSkeletonTag" />
+                <span className="marketTag marketSkeletonTag" />
+              </div>
+              <p className="cardTitle marketSkeletonLine" />
+              <p className="marketPrice marketSkeletonLine short" />
+            </div>
+          ))}
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
               <img
