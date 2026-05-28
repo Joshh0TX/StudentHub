@@ -20,14 +20,16 @@ import Timetable from "./pages/Academic/Timetable.jsx";
 import UserProfile from "./pages/Profile/UserProfile.jsx";
 import Landing from "./pages/Landing/Landing.jsx";
 import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
+import LandingPage from "./pages/LandingPage/LandingPage.jsx";
 
 function App() {
   return (
     <Routes>
       {/* These pages have NO bottom nav */}
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<LandingPage/>} />
       <Route path="/login" element={<Login />} />
       <Route path="/onboard" element={<Onboard />} />
+      <Route path="/landingpage" element={<Landing/>} />
 
       {/* Everything inside Layout gets the bottom nav */}
       <Route element={<Layout />}>
