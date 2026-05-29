@@ -1,1057 +1,434 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './profile.css';
-import * as Icons from 'lucide-react';
-import BadgeManager from './profileSubsection/BadgeManager';
-import SkillsManager from './profileSubsection/SkillsManager';
-import InterestsManager from './profileSubsection/InterestsManager';
-import ProjectsManager from './profileSubsection/ProjectsManager';
-import AchievementsManager from './profileSubsection/AchievementsManager';
-import EditAbout from './profileSubsection/EditAbout';
-import RequestOverlay from './profileSubsection/RequestOverlay';
-import { Edit, Award, Trophy, Star, Zap, Users, X, Camera } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Edit } from 'lucide-react'; 
 import {
-  FaAward,
-  FaTrophy,
-  FaStar,
-  FaBolt,
-  FaMedal,
-  FaGithub,
-  FaCode,
-  FaUsers as FaUsersIcon,
-  FaBook,
-  FaReact,
-  FaShieldHalved,
-} from 'react-icons/fa6';
-import API_BASE from '../../config';
-import { fetchStore } from '../Marketplace/marketplaceApi';
+  FaLinkedin,
+  FaInstagram,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaCamera,
+  FaSun,
+  FaMoon
+} from 'react-icons/fa'; 
+import AboutTab from './aboutTab';
+import ProfileEditModal from './profileEditModel';
+import ProjectsTab from './projectsTab';
+import ProjectModal from './projectModel';
+import AchievementsTab from './achievementsTab';
+import AchievementModal from './achievementsModel';
+import MyShopTab from './storeTab';
 
-// ============================================================================
-// SECTION 1: CUSTOM HOOKS - Modal and State Management
-// ============================================================================
+import './profile.css';
 
-/**
- * Hook to manage multiple modal states
- * Follows Single Responsibility Principle
- */
-function useModalManager() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRequestOpen, setIsRequestOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isEditingAbout, setIsEditingAbout] = useState(false);
-  const [isBadgeManagerOpen, setIsBadgeManagerOpen] = useState(false);
-  const [isSkillManagerOpen, setIsSkillManagerOpen] = useState(false);
-  const [isInterestManagerOpen, setIsInterestManagerOpen] = useState(false);
-  const [isProjectsManagerOpen, setIsProjectsManagerOpen] = useState(false);
-  const [isAchievementsManagerOpen, setIsAchievementsManagerOpen] = useState(false);
-
-  return {
-    isModalOpen,
-    setIsModalOpen,
-    isRequestOpen,
-    setIsRequestOpen,
-    isProfileMenuOpen,
-    setIsProfileMenuOpen,
-    isEditingAbout,
-    setIsEditingAbout,
-    isBadgeManagerOpen,
-    setIsBadgeManagerOpen,
-    isSkillManagerOpen,
-    setIsSkillManagerOpen,
-    isInterestManagerOpen,
-    setIsInterestManagerOpen,
-    isProjectsManagerOpen,
-    setIsProjectsManagerOpen,
-    isAchievementsManagerOpen,
-    setIsAchievementsManagerOpen,
-  };
-}
-
-/**
- * Hook to manage user profile data
- * Decouples state management from component logic
- */
-function useProfileData() {
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setUser({
-        ...data,
-        skills: data.skills || [],
-        interests: data.interests || [],
-        badges: data.badges || [],
-        achievements: data.achievements || [],
-        projects: data.projects || [],
-        socials: data.socials || [],
-      });
-    };
-    fetchProfile();
-  }, []);
-  return { user, setUser };
-}
-
-/**
- * Hook to handle profile data fetching
- * Follows Dependency Inversion by abstracting API calls
- */
-/**
- * Hook to handle image file uploads
- * Single Responsibility: handles only file input logic
- */
-function useImageUpload() {
+// =========================================================================
+// 1. SUB-COMPONENT: PROFILE COVER
+// =========================================================================
+const ProfileCover = ({ coverImage, onCoverChange,isOwner }) => {
   const coverInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      onCoverChange(URL.createObjectURL(file));
+    }
+  };
+
+  return (
+    <div className="profile-cover-wrapper">
+      {coverImage ? (
+        <img src={coverImage} alt="Profile Cover" className="cover-image-asset" />
+      ) : (
+        <div className="cover-default-premium-bg" />
+      )}
+      {/* CONDITIONAL: Only show edit button if looking at your own profile */}
+      {isOwner && (
+        <button onClick={() => coverInputRef.current.click()} className="cover-edit-floating-icon" aria-label="Change cover image">
+          <Edit className="edit-svg-dimension" />
+        </button>
+      )}
+      <input type="file" ref={coverInputRef} onChange={handleFileChange} accept="image/*" className="hidden-input" />
+    </div>
+  );
+};
+
+// =========================================================================
+// 2. SUB-COMPONENT: STUDENT INFO SIDEBAR CARD (With theme toggle & profile upload)
+// =========================================================================
+const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileData }) => {
+  const [profileImage, setProfileImage] = useState(null);
   const profileInputRef = useRef(null);
 
-  const handleCoverUpdate = () => {
-    if (coverInputRef.current) coverInputRef.current.click();
-  };
-
-  const uploadImage = async (file, endpoint, key, setUser) => {
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${endpoint}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      setUser((prev) => ({ ...prev, [key]: data[key] }));
-    } else {
-      alert("Image upload failed");
-    }
-  };
-
-  const onCoverChange = (e, setUser) => {
-    const file = e.target.files?.[0];
-    if (file) uploadImage(file, "profile/cover", "coverImage", setUser);
-  };
-
-  const onProfileChange = (e, setUser, setIsProfileMenuOpen) => {
-    const file = e.target.files?.[0];
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
-      uploadImage(file, "profile/image", "profileImage", setUser);
-      setIsProfileMenuOpen(false);
+      setProfileImage(URL.createObjectURL(file));
     }
   };
 
-  return {
-    coverInputRef,
-    profileInputRef,
-    handleCoverUpdate,
-    onCoverChange,
-    onProfileChange,
-  };
-}
-
-// ============================================================================
-// SECTION 2: STATIC DATA - Externalized for easier maintenance
-// ============================================================================
-
-const SKILLS_DATA = [
-  { name: 'React', level: 85 },
-  { name: 'Node.js', level: 78 },
-  { name: 'UI/UX Design', level: 92 },
-  { name: 'Python', level: 65 },
-];
-
-const INTERESTS_DATA = [
-  'Photography',
-  'Reading Tech Blogs',
-  'Gaming',
-  'Travel',
-  'Music Production',
-];
-
-const SOCIALS_DATA = [
-  { platform: 'Twitter', handle: '@henrydev', link: '#' },
-  { platform: 'LinkedIn', handle: 'henry-ade', link: '#' },
-  { platform: 'GitHub', handle: 'henrycodes', link: '#' },
-];
-
-const ACHIEVEMENTS_DATA = [
-  '1st Place - University Hackathon 2025',
-  'Google Developer Scholarship Recipient',
-  'Best Project Award - TechFest 2024',
-];
-
-const PROJECTS_DATA = [
-  {
-    title: 'Campus Connect App',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=500&fit=crop',
-    description:
-      'A mobile platform that helps students find study groups and campus events easily.',
-    skills: ['React Native', 'Firebase', 'Tailwind'],
-  },
-  {
-    title: 'E-commerce Dashboard',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop',
-    description:
-      'Real-time sales analytics dashboard with beautiful charts and user management.',
-    skills: ['Next.js', 'Chart.js', 'Node.js'],
-  },
-  {
-    title: 'Personal Portfolio Website',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop',
-    description:
-      'Modern responsive portfolio built with clean design and smooth animations.',
-    skills: ['React', 'Framer Motion', 'CSS'],
-  },
-];
-
-const ACTIVITIES_DATA = [
-  {
-    name: 'Henry',
-    time: '2 hours ago',
-    content:
-      'Just completed the new dashboard UI for Campus Connect. Feedback welcome!',
-  },
-  {
-    name: 'Henry',
-    time: 'Yesterday',
-    content: 'Participated in the monthly code review session with the team.',
-  },
-  {
-    name: 'Henry',
-    time: '3 days ago',
-    content: "Liked and commented on Sarah's new portfolio redesign.",
-  },
-];
-
-const BADGE_ICON_MAP = {
-  FaAward,
-  FaTrophy,
-  FaStar,
-  FaBolt,
-  FaMedal,
-  FaGithub,
-  FaCode,
-  FaUsers: FaUsersIcon,
-  FaBook,
-  FaReact,
-  FaShieldHalved,
-};
-
-const BADGE_ICON_OPTIONS = [
-  { key: 'FaAward', label: 'Award', color: '#f59e0b' },
-  { key: 'FaTrophy', label: 'Trophy', color: '#3b82f6' },
-  { key: 'FaStar', label: 'Star', color: '#10b981' },
-  { key: 'FaBolt', label: 'Bolt', color: '#ef4444' },
-  { key: 'FaMedal', label: 'Medal', color: '#8b5cf6' },
-  { key: 'FaGithub', label: 'GitHub', color: '#111827' },
-  { key: 'FaCode', label: 'Code', color: '#14b8a6' },
-  { key: 'FaUsers', label: 'Community', color: '#f97316' },
-  { key: 'FaBook', label: 'Book', color: '#0ea5e9' },
-  { key: 'FaReact', label: 'React', color: '#06b6d4' },
-  { key: 'FaShieldHalved', label: 'Shield', color: '#6366f1' },
-];
-
-function renderBadgeIcon(iconName, color = '#3b82f6') {
-  const BadgeIcon = BADGE_ICON_MAP[iconName] || FaAward;
-  return <BadgeIcon style={{ color }} />;
-}
-
-// ============================================================================
-// SECTION 3: UTILITY FUNCTIONS - Reusable helpers
-// ============================================================================
-
-/**
- * Renders the appropriate social platform icon
- */
-function renderSocialIcon(platform) {
-  const platformLower = platform.toLowerCase();
-
-  if (platformLower === 'github') {
-    return (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-      </svg>
-    );
-  }
-
-  if (platformLower === 'linkedin') {
-    return (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-        <rect x="2" y="9" width="4" height="12"></rect>
-        <circle cx="4" cy="4" r="2"></circle>
-      </svg>
-    );
-  }
-
-  if (platformLower === 'twitter' || platformLower === 'x') {
-    return (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-      </svg>
-    );
-  }
-
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-      <polyline points="22,6 12,13 2,6"></polyline>
-    </svg>
-  );
-}
-
-// ============================================================================
-// SECTION 4: SUB-COMPONENTS - Each follows Single Responsibility Principle
-// ============================================================================
-
-/**
- * COMPONENT: CoverPhotoSection
- * Responsibility: Display and manage cover photo
- */
-function CoverPhotoSection({ user, isModalOpen, setIsModalOpen, onCoverChange, handleCoverUpdate, coverInputRef }) {
-  return (
-    <>
-      <div
-        className="cover-wrapper"
-        onClick={() => setIsModalOpen(true)}
-        style={{ cursor: 'pointer' }}
-      >
-        <img
-          src={
-            user.coverImage ||
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=300&fit=crop'
-          }
-          alt="Cover"
-          className="coverimg"
-        />
-        <div className="cover-overlay">Click to expand</div>
-      </div>
-
-      {isModalOpen && (
-        <div className="full-screen-modal">
-          <div className="modal-content">
-            <button
-              className="close-modal"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <X size={30} />
-            </button>
-            <img
-              src={
-                user.coverImage ||
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=300&fit=crop'
-              }
-              alt="Full Cover"
-              className="full-img"
-            />
-            <div className="modal-actions">
-              <button className="change-photo-btn" onClick={handleCoverUpdate}>
-                <Camera size={20} /> Change Cover Photo
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <input
-        type="file"
-        ref={coverInputRef}
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={onCoverChange}
-      />
-    </>
-  );
-}
-
-/**
- * COMPONENT: ProfileHeader
- * Responsibility: Display user profile name, course, bio, and socials
- */
-function ProfileHeader({ user, setIsRequestOpen, socials }) {
-  return (
-    <div className="profile-main">
-      <div className="profile-text">
-        <h1>{user.f_name} {user.l_name}</h1>
-        <p className="profile-course">{user.course || 'Computer Science'}</p>
-        <p className="profile-bio">{user.bio || 'Passionate full-stack developer.'}</p>
-        <div className="profile-socials-list">
-          {socials.map((social, i) => (
-            <a key={i} href={social.link} className="social-pill-item" target="_blank" rel="noreferrer">
-              {renderSocialIcon(social.platform)}
-              <span>{social.handle}</span>
-            </a>
-          ))}
-        </div>
-      </div>
-      <div className="profile-actions">
-        <button className="edit-btn" onClick={() => setIsRequestOpen(true)}>
-          <Edit size={18} style={{ marginRight: '8px' }} /> View Request
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * COMPONENT: ProfileImageSection
- * Responsibility: Display and manage profile image upload
- */
-function ProfileImageSection({
-  user,
-  isProfileMenuOpen,
-  setIsProfileMenuOpen,
-  onProfileChange,
-  profileInputRef,
-}) {
-  return (
-    <div
-      className="profileImg"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsProfileMenuOpen(!isProfileMenuOpen);
-      }}
-    >
-      <img
-        src={
-          user.profileImage ||
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
-        }
-        alt="Profile"
-      />
-      {isProfileMenuOpen && (
-        <div className="profile-upload-tooltip">
-          <button onClick={() => profileInputRef.current?.click()}>
-            <Camera size={16} />
-            <span>Upload Photo</span>
-          </button>
-        </div>
-      )}
-
-      <input
-        type="file"
-        ref={profileInputRef}
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={onProfileChange}
-      />
-    </div>
-  );
-}
-
-/**
- * COMPONENT: AboutSection
- * Responsibility: Display and edit user about information
- */
-function AboutSection({ user, setUser, isEditingAbout, setIsEditingAbout }) {
-  if (isEditingAbout) {
-    return (
-      <EditAbout
-        initialData={user}
-        onCancel={() => setIsEditingAbout(false)}
-        onSave={(newData) => {
-          setUser((prev) => ({ ...prev, ...newData }));
-          setIsEditingAbout(false);
-        }}
-      />
-    );
-  }
-
-  return (
-    <div className="info-box about-box">
-      <div className="box-header">
-        <h2>About</h2>
-        <button
-          className="edit-rect-btn"
-          onClick={() => setIsEditingAbout(true)}
-        >
-          <Edit size={18} /> 
-        </button>
-      </div>
-      <p className="about-text">
-        {user.bio || "I'm a passionate developer and designer..."}
-      </p>
-      <div className="details-list">
-        <div className="detail-item">
-          <strong>Course:</strong> {user.course}
-        </div>
-        <div className="detail-item">
-          <strong>Location:</strong> {user.location}
-        </div>
-        <div className="detail-item">
-          <strong>Joined:</strong> {user.joinedDate}
-        </div>
-        <div className="detail-item">
-          <strong>Email:</strong> {user.email}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * COMPONENT: BadgesSection
- * Responsibility: Display badges and trigger the editor modal
- */
-function BadgesSection({ user, onEdit, isOwner }) {
-  const badgesToShow = Array.isArray(user.badges) ? user.badges.slice(0, 4) : [];
-  const hasBadges = badgesToShow.length > 0;
-
-  return (
-    <div className="info-box badges-box">
-      <div className="box-header">
-        <h2>Achievements</h2>
-        <button
-          className="edit-rect-btn"
-          type="button"
-          onClick={onEdit}
-          aria-label="Edit badges"
-          title="Edit badges"
-        >
-          <Edit size={18} /> 
-        </button>
-      </div>
-      {hasBadges ? (
-        <div className="badges-grid">
-          {badgesToShow.map((badge) => (
-            <div key={badge.id} className="badge-btn" style={{ borderColor: badge.color || '#e2e8f0' }}>
-              <span className="badge-icon" style={{ color: badge.color || '#3b82f6' }}>
-                {renderBadgeIcon(badge.icon, badge.color)}
-              </span>
-              <span>{badge.name}</span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="profile-empty-state">
-          <p>{isOwner ? "You haven't added any achievement badges yet." : "No achievements listed yet."}</p>
-          {isOwner && (
-            <button className="empty-state-action" onClick={onEdit}>
-              Add Badges
-            </button>
+    <div className="profile-info-card">
+      {/* Circle Profile Image Layout Block */}
+      <div className="profile-avatar-wrapper">
+        <div className="profile-avatar-placeholder">
+          {profileImage ? (
+            <img src={profileImage} alt="Avatar" className="avatar-image-render" />
+          ) : (
+            <span>ST</span>
           )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * COMPONENT: SkillsSection
- * Responsibility: Display skills with progress bars
- */
-function SkillsSection({ skills, onEdit, isOwner }) {
-  const coreSkills = Array.isArray(skills) ? skills.filter((s) => s.core) : [];
-  let visible = coreSkills.slice(0, 4);
-
-  if (visible.length === 0 && Array.isArray(skills)) {
-    visible = [...skills].sort((a, b) => b.level - a.level).slice(0, 4);
-  }
-
-  const hasSkills = visible.length > 0;
-
-  return (
-    <div className="info-box skills-box">
-      <div className="box-header">
-        <h2>Skills</h2>
-        <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> 
-        </button>
-      </div>
-      {hasSkills ? (
-        <div className="skills-list">
-          {visible.map((skill, i) => (
-            <div key={i} className="skill-item">
-              <div className="skill-header">
-                <span className="skill-name">{skill.name}</span>
-                <span className="skill-percent">{skill.level}%</span>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${skill.level}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="profile-empty-state">
-          <p>{isOwner ? "Highlight your technical skill levels here." : "No skills highlighted yet."}</p>
-          {isOwner && (
-            <button className="empty-state-action" onClick={onEdit}>
-              Add Skills
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * COMPONENT: InterestsSection
- * Responsibility: Display user interests
- */
-function InterestsSection({ interests = [], onEdit, isOwner }) {
-  const hasInterests = interests && interests.length > 0;
-  return (
-    <div className="info-box interests-box">
-      <div className="box-header">
-        <h2>Interests</h2>
-        <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> 
-        </button>
-      </div>
-      {hasInterests ? (
-        <div className="interests-list">
-          {interests.map((interest, i) => (
-            <span key={i} className="interest-tag">
-              {interest}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div className="profile-empty-state">
-          <p>{isOwner ? "Share some hobbies or topics you love." : "No interests shared yet."}</p>
-          {isOwner && (
-            <button className="empty-state-action" onClick={onEdit}>
-              Add Interests
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * COMPONENT: MyStoreSection
- * Responsibility: Displays a preview of the user's store if it exists
- */
-function MyStoreSection({ storeData, isOwner, navigate }) {
-  // If the user hasn't created a store, render nothing at all
-  if (!storeData || !storeData.hasStore) return null;
-  const storeProducts = Array.isArray(storeData.products) ? storeData.products.slice(0, 3) : [];
-  const resolveProductImage = (images) => {
-    const firstImage = Array.isArray(images) ? images[0] : images;
-    if (!firstImage) return "https://via.placeholder.com/150?text=No+Image";
-    return firstImage.startsWith("http") ? firstImage : `${API_BASE}${firstImage}`;
-  };
-
-  return (
-    <div className="info-box store-box">
-      <div className="box-header">
-        <div className="store-title-area">
-          <Icons.ShoppingBag size={22} className="store-icon-header" />
-          <div>
-            <h2>{storeData.name || "My Store"}</h2>
-            <p className="store-tagline">Explore premium products curated by this developer</p>
-          </div>
         </div>
         
-        {/* Dynamic Button Target based on Viewer Ownership */}
-        {isOwner ? (
-          <button 
-            onClick={() => navigate("/storefront")} 
-            className="store-action-btn owner-btn"
-            style={{ cursor: 'pointer' }}
-          >
-            <Icons.Settings size={16} /> Manage Store
-          </button>
-        ) : (
-          <button 
-            onClick={() => navigate(`/store/${storeData.id}`)} 
-            className="store-action-btn visitor-btn"
-            style={{ cursor: 'pointer' }}
-          >
-            Visit Store <Icons.ArrowRight size={16} />
+        {/* CONDITIONAL: Hide avatar camera trigger from public visitors */}
+        {isOwner && (
+          <button onClick={() => profileInputRef.current.click()} className="avatar-camera-trigger" aria-label="Change profile picture">
+            <FaCamera className="camera-icon-internal" />
           </button>
         )}
+        <input type="file" ref={profileInputRef} onChange={handleProfileChange} accept="image/*" className="hidden-input" />
       </div>
 
-      {/* Product Row Grid */}
-      <div className="store-products-preview">
-        {storeProducts.map((product) => (
-          <div key={product.id} className="store-mini-card">
-            <div className="store-img-wrapper">
-              <img src={resolveProductImage(product.images)} alt={product.name} />
-            </div>
-            <div className="store-mini-details">
-              <h4>{product.name}</h4>
-              <span className="store-price">NGN {product.price}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+      {/* Student Details */}
+      <div className="profile-details-content">
+        <h2 className="student-name">{profileData.name}</h2>
+        <p className="student-email">{profileData.email}</p>
 
-/**
- * COMPONENT: ProjectsSection
- * Responsibility: Display user projects
- */
-function ProjectsSection({ projects, onEdit, isOwner }) {
-  const hasProjects = projects && projects.length > 0;
-  return (
-    <div className="info-box projects-box">
-      <div className="box-header">
-        <h2>Projects &amp; Portfolios</h2>
-        <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> 
+        {/* Location Row */}
+        <div className="info-row">
+          <FaMapMarkerAlt className="info-icon" /> 
+          <span className="info-text">{profileData.location}</span>
+        </div>
+
+        {/* Date of Birth Row */}
+        <div className="info-row">
+          <FaCalendarAlt className="info-icon" /> 
+          <span className="info-text">Born: {profileData.dob}</span>
+        </div>
+
+        <hr className="card-divider" />
+
+        {/* Social Connections */}
+        <div className="profile-socials-stacked">
+          <a href={profileData.linkedin} className="social-text-link" aria-label="LinkedIn">
+            <FaLinkedin className="social-link-icon linkedin-brand" />
+            <span>Connect on LinkedIn</span>
+          </a>
+          <a href={profileData.instagram} className="social-text-link" aria-label="Instagram">
+            <FaInstagram className="social-link-icon instagram-brand" />
+            <span>Follow on Instagram</span>
+          </a>
+        </div>
+
+        <hr className="card-divider" />
+
+        {/* Dynamic Light/Dark Theme Switch Controller Button */}
+        <button onClick={onToggleTheme} className="theme-toggle-control-btn">
+          {theme === 'light' ? (
+            <>
+              <FaMoon className="toggle-btn-icon" />
+              <span>Dark Mode</span>
+            </>
+          ) : (
+            <>
+              <FaSun className="toggle-btn-icon" />
+              <span>Light Mode</span>
+            </>
+          )}
+        </button>
+        {/* NEW SIMULATION SWITCH: Placed directly below your theme toggle */}
+        <button 
+          onClick={() => setIsOwner(!isOwner)} 
+          className="theme-toggle-control-btn" 
+          style={{ marginTop: '10px', borderColor: isOwner ? '#22c55e' : '#f97316' }}
+        >
+          <span>View As: <strong>{isOwner ? "Profile Owner" : "Visitor"}</strong></span>
         </button>
       </div>
-      {hasProjects ? (
-        <div className="projects-grid">
-          {projects.map((project, i) => (
-            <div key={i} className="project-card">
-              <img src={project.image} alt={project.title} />
-              <div className="project-content">
-                <h3>{project.title}</h3>
-                <p className="project-intro">{project.description}</p>
-                <div className="skills-row">
-                  {project.skills.map((skill, j) => (
-                    <span key={j} className="skill-tag">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="profile-empty-state" style={{ minHeight: '160px' }}>
-          <p>{isOwner ? "Showcase your best builds, web apps, or repositories here." : "No projects published yet."}</p>
-          {isOwner && (
-            <button className="empty-state-action" onClick={onEdit}>
-              Add Project
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
-}
+};
 
-/**
- * COMPONENT: AchievementsSection
- * Responsibility: Display user achievements
- */
-function AchievementsSection({ achievements = [], onEdit, isOwner }) {
-  const visible = Array.isArray(achievements) ? achievements.slice(0, 4) : [];
-  const hasAchievements = visible.length > 0;
+// =========================================================================
+// 3. SUB-COMPONENT: PREMIUM MINI NAVBAR (With View Request Action)
+// =========================================================================
+const ProfileMiniNav = ({ activeTab, setActiveTab, isOwner }) => {
+  const navItems = ['My Shop', 'About', 'Projects', 'Achievements'];
+
+  const handleViewRequests = () => {
+    // Add your click logic or modal trigger for requests here
+    console.log("Viewing requests panel...");
+  };
 
   return (
-    <div className="info-box achievements-box">
-      <div className="box-header">
-        <h2>Notable Achievements</h2>
-        <button className="edit-rect-btn" onClick={onEdit}>
-          <Edit size={18} /> 
-        </button>
-      </div>
-      {hasAchievements ? (
-        <div className="achievements-list">
-          {visible.map((ach, i) => (
-            <div key={i} className="achievement-item">
-              <Trophy size={22} className="trophy-icon" />
-              <span>{ach}</span>
-            </div>
+    <div className="profile-mini-nav-container">
+      <nav className="profile-mini-navbar">
+        
+        {/* Left-aligned floating links cluster */}
+        <div className="mini-nav-links-cluster">
+          {navItems.map((item) => (
+            <button
+              key={item}
+              onClick={() => setActiveTab(item)}
+              className={`mini-nav-item ${activeTab === item ? 'is-active' : ''}`}
+            >
+              <span className="mini-nav-text-label">{item}</span>
+              {activeTab === item && <div className="active-nav-bottom-line" />}
+            </button>
           ))}
         </div>
-      ) : (
-        <div className="profile-empty-state">
-          <p>{isOwner ? "Share certificates, hackathon wins, or key milestones." : "No milestones listed yet."}</p>
-          {isOwner && (
-            <button className="empty-state-action" onClick={onEdit}>
-              Add Achievement
-            </button>
-          )}
-        </div>
-      )}
+
+        {/* CONDITIONAL: Only show 'View Request' when looking at someone else's profile (Visitor Mode) */}
+        {!isOwner && (
+          <button onClick={() => console.log("Requests modal...")} className="mini-nav-request-action-btn">
+            View Request
+          </button>
+        )}
+
+      </nav>
     </div>
   );
-}
+};
+// =========================================================================
+// 4. MAIN HUB EXPORT
+// =========================================================================
+const StudentProfile = () => {
+  const [coverImage, setCoverImage] = useState(null);
+  const [theme, setTheme] = useState('light'); 
+  const [activeTab, setActiveTab] = useState('About');
+  
+  // --- NEW: Local Simulation Toggle State ---
+  const [isOwner, setIsOwner] = useState(true); 
+  // Inside the StudentProfile component body, add this state bucket:
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [profileData, setProfileData] = useState({
+  name: "Anyanwuocha-Collins David",
+  email: "david.collins@student.futo.edu.ng",
+  dob: "October 24, 2003",
+  location: "Owerri, Nigeria",
+  linkedin: "#linkedin",
+  instagram: "#instagram",
+  overview: "Undergraduate Information Technology student at the Federal University of Technology, Owerri (FUTO)...",
+  skills: ["Full-Stack Dev", "UI/UX Design", "React", "Tailwind CSS", "JavaScript", "Network Defense", "IoT Architecture"],
+  
+  // CHANGED: Restructured into dynamic arrays of objects
+  education: [
+    {
+      id: 1,
+      degree: "Information Technology (IFT)",
+      school: "Federal University of Technology, Owerri",
+      meta: "400 Level • Undergraduate Degree Course"
+    }
+  ],
+  certifications: [
+    {
+      id: 1,
+      title: "Cisco Certified Network Defense",
+      authority: "Cisco Networking Academy Credential",
+      meta: "Security Architecture & Infrastructure Defense"
+    }
+  ]
+});
 
-/**
- * COMPONENT: ActivitiesSection
- * Responsibility: Display recent user activities
- */
-function ActivitiesSection({ activities }) {
-  return (
-    <div className="info-box activity-box">
-      <div className="box-header">
-        <h2>Recent Activity</h2>
-      </div>
-      <div className="activity-list">
-        {activities.map((activity, i) => (
-          <div key={i} className="activity-item">
-            <div className="activity-avatar">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop" alt={activity.name} />
-            </div>
-            <div className="activity-content">
-              <div className="activity-header">
-                <strong>{activity.name}</strong>
-                <span className="activity-time">{activity.time}</span>
-              </div>
-              <p className="activity-text">{activity.content}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+// Project list array configuration states
+const [projectsList, setProjectsList] = useState([
+  {
+    id: 1,
+    title: "Stuudo Platform Canvas Hub",
+    description: "Centralized university structural framework engine mapped out to synchronize and process campus hub digital service parameters across institutional records tracking spaces.",
+    link: "https://stuudo.io",
+    image: null
+  },
+  {
+    id: 2,
+    title: "VaultTrack Asset System Tracker",
+    description: "Multi-asset automated checking system engineered to index and graph transactional market metrics, valuations, and positions across active network platforms safely.",
+    link: "https://vaulttrack.io",
+    image: null
+  }
+]);
 
-// ============================================================================
-// SECTION 5: MAIN COMPONENT
-// ============================================================================
 
-/**
- * COMPONENT: ProfilePage
- * Responsibility: Orchestrate all profile sections and manage state
- * Follows: Open/Closed Principle - Easy to extend with new sections
- */
-function ProfilePage() {
-  // State Management
-  const navigate = useNavigate();
-  const modals = useModalManager();
-  const { user, setUser } = useProfileData();
-  const imageUpload = useImageUpload();
-  const [storeData, setStoreData] = useState({ hasStore: false, name: "", id: "", products: [] });
 
-  const saveToBackend = async (updatedData) => {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(updatedData),
+// Project modal visibility routing flags
+const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+const [selectedProjectToEdit, setSelectedProjectToEdit] = useState(null);
+
+// Project array processing mechanics
+const handleOpenAddProject = () => {
+  setSelectedProjectToEdit(null);
+  setIsProjectModalOpen(true);
+};
+
+const handleOpenEditProject = (project) => {
+  setSelectedProjectToEdit(project);
+  setIsProjectModalOpen(true);
+};
+
+const handleSaveProjectCard = (projectData) => {
+  setProjectsList((prevList) => {
+    const existingIndex = prevList.findIndex((item) => item.id === projectData.id);
+    if (existingIndex > -1) {
+      // Update item logic execution
+      const updatedList = [...prevList];
+      updatedList[existingIndex] = projectData;
+      return updatedList;
+    } else {
+      // Add item logic execution
+      return [...prevList, projectData];
+    }
   });
-  if (!res.ok) {
-    alert("Failed to save changes");
+};
+
+const handleDeleteProjectCard = (id) => {
+  setProjectsList((prevList) => prevList.filter((item) => item.id !== id));
+};
+
+// Achievements tracker list states
+const [achievementsList, setAchievementsList] = useState([
+  {
+    id: 1,
+    title: "Appointed Chair of IEEE SIGHT Chapter",
+    issuer: "IEEE Special Interest Group on Humanitarian Technology",
+    meta: "Institutional Chapter Leadership Execution • 2026",
+    badgeType: "trophy"
+  },
+  {
+    id: 2,
+    title: "Cisco Certified Security Practitioner",
+    issuer: "Cisco Networking Academy Defense Program",
+    meta: "Infrastructure Security & Perimeter Defense Operations",
+    badgeType: "security"
   }
+]);
+
+const [isAchieveModalOpen, setIsAchieveModalOpen] = useState(false);
+const [selectedAchieveToEdit, setSelectedAchieveToEdit] = useState(null);
+
+// Achievements processing logic loops
+const handleOpenAddAchieve = () => {
+  setSelectedAchieveToEdit(null);
+  setIsAchieveModalOpen(true);
 };
 
-const handleOnCoverChange = (e) => imageUpload.onCoverChange(e, setUser);
-const handleOnProfileChange = (e) => {
-  console.log("file selected:", e.target.files?.[0]);
-  imageUpload.onProfileChange(e, setUser, modals.setIsProfileMenuOpen);
+const handleOpenEditAchieve = (item) => {
+  setSelectedAchieveToEdit(item);
+  setIsAchieveModalOpen(true);
 };
 
-  const handleSaveInterests = async (updatedInterests) => {
-  await saveToBackend({ interests: updatedInterests });
-  setUser((prev) => ({ ...prev, interests: updatedInterests }));
-  modals.setIsInterestManagerOpen(false);
+const handleSaveAchieveCard = (itemData) => {
+  setAchievementsList((prevList) => {
+    const existingIndex = prevList.findIndex((item) => item.id === itemData.id);
+    if (existingIndex > -1) {
+      const updatedList = [...prevList];
+      updatedList[existingIndex] = itemData;
+      return updatedList;
+    } else {
+      return [...prevList, itemData];
+    }
+  });
 };
 
-const handleSaveBadges = async (updatedBadges) => {
-  await saveToBackend({ badges: updatedBadges });
-  setUser((prev) => ({ ...prev, badges: updatedBadges }));
-  modals.setIsBadgeManagerOpen(false);
+const handleDeleteAchieveCard = (id) => {
+  setAchievementsList((prevList) => prevList.filter((item) => item.id !== id));
 };
-
-const handleSaveAchievements = async (updatedAchievements) => {
-  await saveToBackend({ achievements: updatedAchievements });
-  setUser((prev) => ({ ...prev, achievements: updatedAchievements }));
-  modals.setIsAchievementsManagerOpen(false);
-};
-
-const handleSaveProjects = async (updatedProjects) => {
-  await saveToBackend({ projects: updatedProjects });
-  setUser((prev) => ({ ...prev, projects: updatedProjects }));
-  modals.setIsProjectsManagerOpen(false);
-};
-
-const handleSaveSkills = async (updatedSkills) => {
-  await saveToBackend({ skills: updatedSkills });
-  setUser((prev) => ({ ...prev, skills: updatedSkills }));
-  modals.setIsSkillManagerOpen(false);
-};
-
-const isOwner = true;
-
-useEffect(() => {
-  if (!user?.id) return;
-  fetchStore(user.id)
-    .then((store) => {
-      if (!store || store.error) {
-        setStoreData({ hasStore: false, name: "", id: "", products: [] });
-        return;
-      }
-      setStoreData({
-        hasStore: true,
-        name: store.name || "",
-        id: store.id,
-        products: Array.isArray(store.products) ? store.products : [],
-      });
-    })
-    .catch(() => {
-      setStoreData({ hasStore: false, name: "", id: "", products: [] });
-    });
-}, [user?.id]);
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-  // ========================================================================
-  // RENDER - Organized by sections
-  // ========================================================================
+// Marketplace store products default preview data collection
+const [shopProductsList, setShopProductsList] = useState([
+  { id: 1, title: "IFT 400L Comprehensive Exam Coursepack", price: "₦3,500.00", image: null },
+  { id: 2, title: "Wireless Smart IoT Node Breadboard Kit", price: "₦18,500.00", image: null },
+  { id: 3, title: "Premium Tailored Dark Hoodie (FUTO IFT Edition)", price: "₦12,000.00", image: null },
+  { id: 4, title: "V5 Network Infrastructure Lab Reference Log", price: "₦4,000.00", image: null },
+  { id: 5, title: "Bonus Unrendered Item (Filtered Out Over Capacity)", price: "₦5,000.00", image: null } // This item stays hidden automatically
+]);
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   return (
-    <>
-      <div className="container">
-        <section className="profile-section">
-          {/* ===== COVER PHOTO & PROFILE IMAGE ===== */}
-          <CoverPhotoSection
-            user={user}
-            isModalOpen={modals.isModalOpen}
-            setIsModalOpen={modals.setIsModalOpen}
-            onCoverChange={handleOnCoverChange}
-            handleCoverUpdate={imageUpload.handleCoverUpdate}
-            coverInputRef={imageUpload.coverInputRef}
-          />
+    <div className="profile-page-container" data-theme={theme}>
+      {/* 1. Passed isOwner to Cover */}
+      <ProfileCover coverImage={coverImage} onCoverChange={setCoverImage} isOwner={isOwner} />
+      
+      <div className="profile-content-layout">
+        {/* 2. Passed isOwner and state handlers to the Sidebar Card */}
+        <ProfileInfoCard 
+  theme={theme} 
+  onToggleTheme={toggleTheme} 
+  isOwner={isOwner} 
+  setIsOwner={setIsOwner}
+  profileData={profileData} /* Pass down */
+/>
+        
+        {/* Right Content Area */}
+        <div className="profile-main-display-area">
+          
+          {/* 3. Passed isOwner to Mini-Navbar */}
+          <ProfileMiniNav activeTab={activeTab} setActiveTab={setActiveTab} isOwner={isOwner} />
 
-          <div className="profile-intro-row">
-            <ProfileImageSection
-              user={user}
-              isProfileMenuOpen={modals.isProfileMenuOpen}
-              setIsProfileMenuOpen={modals.setIsProfileMenuOpen}
-              onProfileChange={handleOnProfileChange}
-              profileInputRef={imageUpload.profileInputRef}
-            />
+          {/* Main Context Display Box Container */}
+          {/* Main Context Display Box Container */}
+<div className="profile-content-display-box">
+  {(() => {
+    switch (activeTab) {
+      case 'About':
+  return (
+    <AboutTab 
+      isOwner={isOwner} 
+      profileData={profileData} 
+      onOpenEdit={() => setIsModalOpen(true)} /* Send modal trigger down */
+    />
+  );
+      case 'Projects':
+  return (
+    <ProjectsTab 
+      isOwner={isOwner}
+      projectsData={projectsList}
+      onOpenAddModal={handleOpenAddProject}
+      onOpenEditModal={handleOpenEditProject}
+      onDeleteProject={handleDeleteProjectCard}
+    />
+  );
+      case 'Achievements':
+  return (
+    <AchievementsTab 
+      isOwner={isOwner}
+      achievementsData={achievementsList}
+      onOpenAddModal={handleOpenAddAchieve}
+      onOpenEditModal={handleOpenEditAchieve}
+      onDeleteAchievement={handleDeleteAchieveCard}
+    />
+  );
+      case 'My Shop':
+  return (
+    <MyShopTab 
+      isOwner={isOwner}
+      shopProductsData={shopProductsList}
+    />
+  );
+      default:
+        return <AboutTab isOwner={isOwner} profileData={profileData} onOpenEdit={() => setIsModalOpen(true)} />;
+    }
+  })()}
+</div>
 
-            {/* ===== PROFILE HEADER ===== */}
-            <ProfileHeader
-              user={user}
-              setIsRequestOpen={modals.setIsRequestOpen}
-              socials={SOCIALS_DATA}
-            />
-          </div>
-        </section>
-
-        {/* ===== MAIN CONTENT GRID ===== */}
-        <div className="info-grid">
-          {/* ===== LEFT COLUMN ===== */}
-          <div className="left-column">
-            <AboutSection
-              user={user}
-              setUser={setUser}
-              isEditingAbout={modals.isEditingAbout}
-              setIsEditingAbout={modals.setIsEditingAbout}
-            />
-
-            <BadgesSection
-              user={user}
-              onEdit={() => modals.setIsBadgeManagerOpen(true)}
-              isOwner={isOwner}
-            />
-
-            <SkillsSection skills={user.skills} onEdit={() => modals.setIsSkillManagerOpen(true)} isOwner={isOwner}/>
-
-            <InterestsSection interests={user.interests} onEdit={() => modals.setIsInterestManagerOpen(true)}isOwner={isOwner} />
-
-            
-          </div>
-
-          {/* ===== RIGHT COLUMN ===== */}
-          <div className="right-column">
-            <MyStoreSection storeData={storeData} isOwner={isOwner} navigate={navigate} />
-            <ProjectsSection projects={user.projects || []} onEdit={() => modals.setIsProjectsManagerOpen(true)} />
-
-            <AchievementsSection achievements={user.achievements} onEdit={() => modals.setIsAchievementsManagerOpen(true)} isOwner={isOwner} />
-
-            <ActivitiesSection activities={ACTIVITIES_DATA} />
-          </div>
         </div>
       </div>
-
-      {/* ===== OVERLAY MODALS ===== */}
-      <RequestOverlay
-        isOpen={modals.isRequestOpen}
-        onClose={() => modals.setIsRequestOpen(false)}
+      <ProfileEditModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={profileData}
+        onSave={(updatedData) => setProfileData(updatedData)}
       />
-
-      <BadgeManager
-        isOpen={modals.isBadgeManagerOpen}
-        badges={user.badges}
-        achievements={ACHIEVEMENTS_DATA}
-        iconOptions={BADGE_ICON_OPTIONS}
-        onClose={() => modals.setIsBadgeManagerOpen(false)}
-        onSave={handleSaveBadges}
+      <ProjectModal 
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        onSave={handleSaveProjectCard}
+        projectToEdit={selectedProjectToEdit}
       />
-
-      <SkillsManager
-        isOpen={modals.isSkillManagerOpen}
-        skills={user.skills}
-        onClose={() => modals.setIsSkillManagerOpen(false)}
-        onSave={handleSaveSkills}
+      <AchievementModal 
+        isOpen={isAchieveModalOpen}
+        onClose={() => setIsAchieveModalOpen(false)}
+        onSave={handleSaveAchieveCard}
+        achievementToEdit={selectedAchieveToEdit}
       />
-
-      <InterestsManager
-        isOpen={modals.isInterestManagerOpen}
-        interests={user.interests}
-        onClose={() => modals.setIsInterestManagerOpen(false)}
-        onSave={handleSaveInterests}
-      />
-
-      <ProjectsManager
-        isOpen={modals.isProjectsManagerOpen}
-        projects={user.projects}
-        onClose={() => modals.setIsProjectsManagerOpen(false)}
-        onSave={handleSaveProjects}
-      />
-
-      <AchievementsManager
-        isOpen={modals.isAchievementsManagerOpen}
-        achievements={user.achievements}
-        onClose={() => modals.setIsAchievementsManagerOpen(false)}
-        onSave={handleSaveAchievements}
-      />
-    </>
+    </div>
   );
-}
+};
 
-export default ProfilePage;
+export default StudentProfile;

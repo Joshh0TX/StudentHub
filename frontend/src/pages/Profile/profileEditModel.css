@@ -1,0 +1,274 @@
+.modal-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(3, 7, 18, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Geist', -apple-system, sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Expanded & Bound Container Panel */
+.modal-sheet-container.large-modal {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  width: 100%;
+  max-width: 650px; /* Increased from 500px to 650px for a roomier feel */
+  max-height: 85vh; /* Locks modal height to a safe percentage of the screen layout */
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPopUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--divider-color);
+  flex-shrink: 0; /* Keeps header from squeezing */
+}
+
+.modal-sheet-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.modal-close-naked-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
+  display: flex;
+}
+
+.modal-close-naked-btn:hover { color: var(--text-primary); }
+
+.modal-form-tabs-row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 24px 0 24px;
+  border-bottom: 1px solid var(--divider-color);
+  flex-shrink: 0;
+}
+
+.modal-tab-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  position: relative;
+}
+
+.modal-tab-btn.is-active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.modal-tab-btn.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+}
+
+/* NEW: Scrollable Form Track Core */
+.modal-form-scroll-body {
+  padding: 24px;
+  overflow-y: auto; /* Activates independent vertical scrolling */
+  flex-grow: 1;    /* Allows body to occupy all remaining workspace */
+}
+
+/* Custom internal scrollbar track sizing for Webkit devices */
+.modal-form-scroll-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-form-scroll-body::-webkit-scrollbar-thumb {
+  background-color: var(--divider-color);
+  border-radius: 99px;
+}
+
+.modal-form-group-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-input-field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-input-field input, 
+.modal-input-field textarea {
+  background-color: var(--btn-toggle-bg);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.modal-input-field input:focus, 
+.modal-input-field textarea:focus {
+  border-color: var(--accent-color);
+}
+
+/* Meta section separation labels inside the form */
+.form-section-divider-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--divider-color);
+}
+
+.modal-sheet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--divider-color);
+  background-color: var(--bg-card);
+  flex-shrink: 0; /* Keeps footer absolute and pinned to the bottom track boundary */
+}
+
+.modal-cancel-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+
+.modal-save-submit-btn {
+  background-color: var(--text-primary);
+  color: var(--bg-card);
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.modal-save-submit-btn:hover { opacity: 0.9; }
+
+/* Layout alignment adjustments for the array section headers */
+.form-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  border-bottom: 1px dashed var(--divider-color);
+  padding-bottom: 6px;
+}
+
+.form-section-header-row .form-section-divider-label {
+  margin-top: 0;
+  border-bottom: none;
+}
+
+/* Add Row Action Button Layout Style */
+.form-add-row-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-color);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+.form-add-row-btn:hover {
+  background-color: var(--btn-toggle-hover);
+}
+
+/* Repeated Row Frame Wrapper */
+.modal-array-repeater-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: rgba(0, 0, 0, 0.01);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed var(--divider-color);
+}
+
+.repeater-inputs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+/* Individual Delete Action Button */
+.form-delete-row-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ef4444; /* Clean Warning Red System Tint */
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: background-color 0.2s ease;
+}
+.form-delete-row-btn:hover {
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+@keyframes modalPopUp {
+  from { opacity: 0; transform: scale(0.98) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

@@ -1,0 +1,167 @@
+/* =========================================================================
+   PREMIUM STANDALONE MY SHOP MATRIX DESIGN SYSTEM (Header Action Edition)
+   ========================================================================= */
+
+.my-shop-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  font-family: 'Geist', -apple-system, sans-serif;
+  animation: shopTabFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Master Shop Tab Heading with Unified Action Alignment */
+.my-shop-tab-master-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--divider-color);
+  padding-bottom: 14px;
+}
+
+.my-shop-tab-master-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* NEW: Top Right Naked Store Redirect Button (Matching your Edit Button feel) */
+.shop-storefront-header-redirect-btn {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-color);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.shop-storefront-header-redirect-btn:hover {
+  color: var(--text-primary);
+  transform: translateX(1px); /* Delicate micro-nudge right on hover */
+}
+
+.redirect-btn-svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+/* Product Entry Blueprint Grid Layout */
+.shop-products-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .shop-products-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Individual Premium Product Canvas Grid Frame */
+.product-preview-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-preview-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-card);
+}
+
+/* Item Graphic Box Display Aspect Frame */
+.product-thumbnail-frame {
+  width: 100%;
+  height: 140px;
+  background-color: var(--btn-toggle-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-card);
+  position: relative;
+}
+
+.product-thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Floating Action Trigger Badges for Shop Owners */
+.product-owner-inline-action {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+}
+
+.product-inline-naked-btn {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  color: var(--text-secondary);
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.product-inline-naked-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+/* Product Content Rows Compartments */
+.product-card-details-box {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-card-details-box h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-item-price-tag {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+@keyframes shopTabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

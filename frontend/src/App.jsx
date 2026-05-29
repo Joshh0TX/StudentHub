@@ -17,7 +17,7 @@ import SearchPage from "./pages/Marketplace/SearchPage.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
-import UserProfile from "./pages/Profile/UserProfile.jsx";
+
 
 function App() {
   return (
@@ -28,7 +28,6 @@ function App() {
 
       {/* Everything inside Layout gets the bottom nav */}
       <Route element={<Layout />}>
-        <Route path="/profile/:userId" element={<UserProfile />} />
         <Route path="/marketplace" element={<MarketHome />} />
         <Route path="/marketplace/search" element={<SearchPage />} />
         <Route path="/marketplace/:productId" element={<ProductDetail />} />

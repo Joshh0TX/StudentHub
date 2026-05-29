@@ -5,7 +5,7 @@
 
 .content-area {
   /* This pushes the content down so it doesn't hide under the fixed TopNav */
-  padding-top: 64px; 
+  padding-top: 55px;
   
   /* Remove the old padding-bottom unless you want extra scroll space */
   padding-bottom: 20px; 

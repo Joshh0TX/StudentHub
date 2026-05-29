@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Home, ShoppingBag, BookOpen, User, LogOut } from 'lucide-react';
+import { Home, ShoppingBag, BookOpen, Bell, LogOut } from 'lucide-react';
 import './Bottomnav.css';
 
 const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -50,7 +50,7 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
           <NavIcon to="/newsroom" Icon={Home} />
           <NavIcon to="/marketplace" Icon={ShoppingBag} />
           <NavIcon to="/academy" Icon={BookOpen} />
-          <NavIcon to="/profile" Icon={User} />
+          <NavIcon to="/profile" Icon={Bell} />
         </nav>
       </div>
 

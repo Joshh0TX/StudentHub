@@ -1,0 +1,202 @@
+/* =========================================================================
+   PREMIUM STANDALONE PROJECTS TAB DESIGN SYSTEM
+   ========================================================================= */
+
+.projects-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  animation: projectTabFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Master Header Area with Single Add Action Button */
+.projects-tab-master-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--divider-color);
+  padding-bottom: 14px;
+}
+
+.projects-tab-master-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Minimalist Add Project Plus Naked Trigger */
+.projects-master-add-naked-btn {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.projects-master-add-naked-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.master-add-svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+}
+
+/* Responsive Projects Showcase Grid Layout */
+.projects-display-showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .projects-display-showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Individual Project Card Canvas */
+.project-showcase-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.project-showcase-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-card);
+}
+
+/* Image Snapshot Frame Area */
+.project-media-banner-frame {
+  width: 100%;
+  height: 160px;
+  background-color: var(--btn-toggle-bg);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.project-banner-asset {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-banner-fallback-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+  opacity: 0.6;
+}
+
+/* Floating Inline Actions Tray on Hover Contexts */
+.project-card-inline-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.card-inline-naked-action-btn {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  color: var(--text-secondary);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.card-inline-naked-action-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.card-inline-naked-action-btn.delete-type:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Card Content Compartments */
+.project-card-body-compartment {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.project-card-body-compartment h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.project-card-body-compartment p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Clips long logs neatly at 3 reading text blocks */
+  -webkit-box-orient: vertical;
+}
+
+/* Micro Mini Link Anchors Layout Footprint */
+.project-card-link-anchor {
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--accent-color);
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+  transition: opacity 0.2s ease;
+}
+
+.project-card-link-anchor:hover {
+  opacity: 0.8;
+}
+
+@keyframes projectTabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
