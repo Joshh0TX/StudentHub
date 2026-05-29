@@ -8,7 +8,7 @@ export default function AmeboLayout({ user }) {
   const safeUser = {
     name: user?.name || "Amebo Chief",
     profileImg: user?.profileImg || "https://ui-avatars.com/api/?name=Amebo+Chief&background=3b82f6&color=fff",
-    coverImg: user?.coverImg || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500",
+    coverImg: user?.coverImage || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500",
     email: user?.email || "chief@stuudo.app"
   };
 

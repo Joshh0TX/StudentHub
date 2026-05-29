@@ -6,7 +6,7 @@ import './AmeboSide.css';
 const ProfileCard = ({ user }) => (
   <div className="profile-card">
     <div className="cover-photo">
-      <img src={user.coverImg} alt="Cover" />
+      <img src={user.coverImg} alt="UI" />
     </div>
     <div className="avatar-wrapper">
       <img src={user.profileImg} alt={user.name} className="profile-avatar-large" />
@@ -24,6 +24,7 @@ export default function AmeboSidebar({ user }) {
   const [inbound, setInbound] = useState([]);
   const [connections, setConnections] = useState([]);
   const [sent, setSent] = useState([]);
+  const [profileData, setProfileData] = useState(null);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
@@ -32,19 +33,22 @@ export default function AmeboSidebar({ user }) {
     const headers = { Authorization: `Bearer ${token}` };
 
     const fetchAll = async () => {
-      const [inboundRes, connectionsRes, sentRes] = await Promise.all([
+      const [inboundRes, connectionsRes, sentRes, profileRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/inbound`, { headers }),
         fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, { headers }),
         fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/sent`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, { headers }),
       ]);
-      const [inboundData, connectionsData, sentData] = await Promise.all([
+      const [inboundData, connectionsData, sentData, profileRes2] = await Promise.all([
         inboundRes.json(),
         connectionsRes.json(),
         sentRes.json(),
+        profileRes.json(),
       ]);
       setInbound(Array.isArray(inboundData) ? inboundData : []);
       setConnections(Array.isArray(connectionsData) ? connectionsData : []);
       setSent(Array.isArray(sentData) ? sentData : []);
+      setProfileData(profileRes2);
     };
     fetchAll();
   }, []);
@@ -59,7 +63,6 @@ export default function AmeboSidebar({ user }) {
     if (res.ok) {
       setInbound((prev) => prev.filter((r) => r.id !== requestId));
       if (action === 'accepted') {
-        // Refresh connections
         const token = localStorage.getItem("token");
         const connectionsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -80,11 +83,12 @@ export default function AmeboSidebar({ user }) {
   };
 
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const activeUser = profileData || storedUser;
   const safeUser = {
-    name: `${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`.trim() || "Student",
-    email: storedUser?.email || "",
-    coverImg: user?.coverImg || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500",
-    profileImg: storedUser?.profile_pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`,
+    name: `${activeUser?.f_name || ''} ${activeUser?.l_name || ''}`.trim() || "Student",
+    email: activeUser?.email || "",
+    coverImg: activeUser?.coverImage || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500",
+    profileImg: activeUser?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(`${activeUser?.f_name || ''} ${activeUser?.l_name || ''}`)}&background=random`,
   };
 
   const listData = { requests: inbound, connections, sent };

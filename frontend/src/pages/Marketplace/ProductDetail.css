@@ -177,6 +177,13 @@
   margin: 0;
 }
 
+.productDetailActions .mButton,
+.productDetailActions .btnOutline {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 140px;
+}
+
 .orderForm {
   margin-top: 12px;
   display: grid;
@@ -398,4 +405,64 @@
 .similarProductStore {
   font-size: 0.75rem;
   color: var(--muted-foreground);
+}
+
+@media (max-width: 900px) {
+  .productDetailPage {
+    padding: 18px 14px 52px;
+  }
+
+  .productDetailMedia {
+    flex-direction: column-reverse;
+  }
+
+  .productDetailGallery {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .productThumb {
+    width: 72px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+
+  .productMainImg {
+    height: 240px;
+  }
+}
+
+@media (max-width: 640px) {
+  .productDetailInfo h1 {
+    font-size: 1.28rem;
+  }
+
+  .productDetailPrice {
+    font-size: 1.15rem;
+  }
+
+  .productDetailActions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .productDetailActions .mButton,
+  .productDetailActions .btnOutline,
+  .heartBtn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .heartBtn {
+    border-radius: 999px;
+    height: 42px;
+  }
+
+  .similarProductsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
 }

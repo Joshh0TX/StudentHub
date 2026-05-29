@@ -27,7 +27,7 @@ model User {
   projects     Json?
   socials      Json?
   createdAt    DateTime @default(now())
-  role         String   @default("student")
+  role         String?   @default("student")
 
   requestsSent     FriendRequest[] @relation("RequestsSent")
   requestsReceived FriendRequest[] @relation("RequestsReceived")

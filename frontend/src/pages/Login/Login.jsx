@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "./Login.css";
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -14,6 +15,11 @@ const Login = () => {
     password: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    setIsLogin(mode !== "signup");
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({
@@ -49,8 +55,10 @@ const Login = () => {
       return;
     }
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    console.log("Login response:", data);
+localStorage.setItem("token", data.token);
+localStorage.setItem("user", JSON.stringify(data.user));
+
     navigate("/onboarding");
   };
 

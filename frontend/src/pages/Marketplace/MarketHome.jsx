@@ -17,6 +17,7 @@ export default function MarketHome() {
   const searchRef = useRef(null);
 
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [showStoreForm, setShowStoreForm] = useState(false);
   const [isSeller, setIsSeller] = useState(false);
   const [query, setQuery] = useState("");
@@ -32,7 +33,11 @@ export default function MarketHome() {
   });
 
   useEffect(() => {
-    fetchProducts().then(setProducts).catch(console.error);
+    setProductsLoading(true);
+    fetchProducts()
+      .then(setProducts)
+      .catch(console.error)
+      .finally(() => setProductsLoading(false));
     if (user) {
       fetchStore(user.id)
         .then((store) => { if (store && !store.error) setIsSeller(true); })
@@ -110,10 +115,13 @@ export default function MarketHome() {
                   window.scrollTo({ top, behavior: "smooth" });
                 }
               }}>Shop Now</button>
-              {isSeller
-                ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
-                : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
-              }
+              <div className="marketHeroActionTail">
+                {user && <button className="marketHeroSecondary" type="button" onClick={() => navigate("/marketplace/orders")}>My Orders</button>}
+                {isSeller
+                  ? <button className="marketHeroSecondary" type="button" onClick={() => navigate("/storefront")}>My Store</button>
+                  : <button className="marketHeroSecondary" type="button" onClick={() => setShowStoreForm(true)}>Create My Store</button>
+                }
+              </div>
             </div>
           </div>
           <div className="marketHeroIllustration">
@@ -123,15 +131,36 @@ export default function MarketHome() {
 
       
         {/* Popular Stores Slider */}
-        {allStores.length > 0 && (
+        {productsLoading && (
+          <div className="popularSliderSection">
+            <div className="popularSliderHeader">
+              <div className="popularSliderTitleBlock">
+                <h2>Popular Stores</h2>
+                <p>Loading stores...</p>
+              </div>
+            </div>
+            <div className="popularSliderTrack">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div className="popularSliderCard popularSliderCardSkeleton" key={`store-skeleton-${idx}`}>
+                  <div className="popularSliderImg popularSkeletonBlock" />
+                  <div className="popularSliderName popularSkeletonLine" />
+                  <div className="popularSliderCat popularSkeletonLine short" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!productsLoading && allStores.length > 0 && (
         <div className="popularSliderSection">
           <div className="popularSliderHeader">
-            <div>
-              <h2>Popular Stores</h2>
-              <p>Trusted sellers on campus.</p>
-              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>
+            <div className="popularSliderLeft">
+              <div className="popularSliderTitleBlock">
+                <h2>Popular Stores</h2>
+                <p>Trusted sellers on campus.</p>
+              </div>
+              <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: -200, behavior: "smooth" })}>&lsaquo;</button>
             </div>
-            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>›</button>
+            <button type="button" className="sliderNavBtn" onClick={() => sliderRef.current?.scrollBy({ left: 200, behavior: "smooth" })}>&rsaquo;</button>
           </div>
           <div className="popularSliderTrack" ref={sliderRef}>
             {allStores.map((store) => {
@@ -268,8 +297,21 @@ export default function MarketHome() {
           </div>
         </div>
 
-        <p className="itemNumber">{filteredItems.length} items available</p>
+        <div className="marketListHeader">
+          <p className="itemNumber">{productsLoading ? "Loading products..." : `${filteredItems.length} items available`}</p>
+        </div>
         <section className="markettopGird">
+          {productsLoading && Array.from({ length: 8 }).map((_, idx) => (
+            <div className="marketCard marketCardSkeleton" key={`product-skeleton-${idx}`}>
+              <div className="marketImage marketSkeletonBlock" />
+              <div className="marketMeta">
+                <span className="marketTag marketSkeletonTag" />
+                <span className="marketTag marketSkeletonTag" />
+              </div>
+              <p className="cardTitle marketSkeletonLine" />
+              <p className="marketPrice marketSkeletonLine short" />
+            </div>
+          ))}
           {filteredItems.map((item) => (
             <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
               <img
@@ -294,24 +336,26 @@ export default function MarketHome() {
               <div className="locationChips">
                 {item.locations?.map((loc) => <span className="locationChip" key={loc}>{loc}</span>)}
               </div>
-              <Link to={`/store/${encodeURIComponent(item.store?.id)}`} className="sellerName">{item.store?.name}</Link>
-              <button className="mButton" type="button" onClick={() => setActiveContactStore((prev) => prev === item.store?.id ? null : item.store?.id)}>
-                {activeContactStore === item.store?.id ? "Hide Contacts" : "Contact Seller"}
-              </button>
-              {activeContactStore === item.store?.id && (
-                <div className="contactPanel">
-                  {item.store?.contacts?.length ? (
-                    item.store.contacts.map((c) => (
-                      <div className="contactRow" key={`${c.type}-${c.value}`}>
-                        <span className="contactType">{c.type}</span>
-                        <span className="contactValue">{c.value}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="contactEmpty">No contact info posted yet.</p>
-                  )}
-                </div>
-              )}
+              <div className="marketCardFooter">
+                <Link to={`/store/${encodeURIComponent(item.store?.id)}`} className="sellerName">{item.store?.name}</Link>
+                <button className="mButton" type="button" onClick={() => setActiveContactStore((prev) => prev === item.store?.id ? null : item.store?.id)}>
+                  {activeContactStore === item.store?.id ? "Hide Contacts" : "Contact Seller"}
+                </button>
+                {activeContactStore === item.store?.id && (
+                  <div className="contactPanel">
+                    {item.store?.contacts?.length ? (
+                      item.store.contacts.map((c) => (
+                        <div className="contactRow" key={`${c.type}-${c.value}`}>
+                          <span className="contactType">{c.type}</span>
+                          <span className="contactValue">{c.value}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="contactEmpty">No contact info posted yet.</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </section>

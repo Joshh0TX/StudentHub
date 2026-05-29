@@ -50,7 +50,7 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
           <NavIcon to="/newsroom" Icon={Home} />
           <NavIcon to="/marketplace" Icon={ShoppingBag} />
           <NavIcon to="/academy" Icon={BookOpen} />
-          <NavIcon to="/profile" Icon={Bell} />
+          <NavIcon to="/notifications" Icon={Bell} />
         </nav>
       </div>
 

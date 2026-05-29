@@ -9,6 +9,8 @@ import { categoriesByType } from "./marketplaceData";
 import { getUser } from "./testUser";
 import API_BASE from "../../config";
 
+const normalizeStatus = (status) => String(status || "").trim().toLowerCase();
+
 export default function Storefront() {
   const user = getUser();
 
@@ -115,6 +117,30 @@ export default function Storefront() {
     try {
       await deleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const isSoldOut = (item) => item?.isSoldOut === true || String(item?.availability || "").toLowerCase() === "sold_out";
+
+  const handleToggleSoldOut = async (item) => {
+    try {
+      const nextSoldOut = !isSoldOut(item);
+      const updated = await updateProduct(item.id, {
+        isSoldOut: nextSoldOut,
+        availability: nextSoldOut ? "sold_out" : "available",
+      });
+      setProducts((prev) => prev.map((p) => (
+        p.id === item.id
+          ? {
+              ...p,
+              ...(updated && !updated.error ? updated : {}),
+              isSoldOut: updated?.isSoldOut ?? nextSoldOut,
+              availability: updated?.availability ?? (nextSoldOut ? "sold_out" : "available"),
+            }
+          : p
+      )));
     } catch (err) {
       console.error(err);
     }
@@ -285,6 +311,11 @@ export default function Storefront() {
                   <div className="productCardBody">
                     <div className="productName">{item.name}</div>
                     <div className="productMeta">{item.category} · ₦{item.price}</div>
+                    {isSoldOut(item) && (
+                      <div style={{ fontSize: "0.72rem", color: "#b91c1c", marginTop: "3px", fontWeight: 700 }}>
+                        Sold out
+                      </div>
+                    )}
                     {item.locations?.length > 0 && (
                       <div style={{ fontSize: "0.72rem", color: "#999", marginTop: "2px" }}>{item.locations.join(", ")}</div>
                     )}
@@ -293,6 +324,9 @@ export default function Storefront() {
                   </Link>
                   <div className="productCardActions">
                     <button type="button" className="btnOutline" onClick={() => handleEdit(item)}>Edit</button>
+                    <button type="button" className="btnOutline" onClick={() => handleToggleSoldOut(item)}>
+                      {isSoldOut(item) ? "Mark Available" : "Mark Sold Out"}
+                    </button>
                     <button type="button" className="btnDanger" onClick={() => handleDelete(item.id)}>Delete</button>
                   </div>
                 </div>
@@ -362,8 +396,9 @@ export default function Storefront() {
           </div>
           {/* Status tabs */}
           <div className="orderTabs">
-            {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((tab) => {
-              const count = orders.filter((o) => o.status === tab).length;
+            {["Pending", "Preparing", "Ready", "Shipped", "Completed", "Cancelled"].map((tab) => {
+              const tabKey = normalizeStatus(tab);
+              const count = orders.filter((o) => normalizeStatus(o.status) === tabKey).length;
               return (
                 <button
                   key={tab}
@@ -382,7 +417,7 @@ export default function Storefront() {
             })}
           </div>
           <div className="orderList">
-            {orders.filter((o) => o.status === orderTab).map((order) => (
+            {orders.filter((o) => normalizeStatus(o.status) === normalizeStatus(orderTab)).map((order) => (
               <div className="orderRow" key={order.id}>
                 <div style={{ flex: 1 }}>
                   <div className="orderTitle">{order.product?.name || "Product"}</div>
@@ -398,13 +433,13 @@ export default function Storefront() {
                   onChange={(e) => handleStatusChange(order.id, e.target.value)}
                   style={order.status === "Completed" ? { background: "#dcfce7", color: "#166534", borderColor: "#86efac" } : {}}
                 >
-                  {["Pending", "Preparing", "Ready", "Shipped", "Completed"].map((s) => (
+                  {["Pending", "Preparing", "Ready", "Shipped", "Completed", "Cancelled"].map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </div>
             ))}
-            {orders.filter((o) => o.status === orderTab).length === 0 && (
+            {orders.filter((o) => normalizeStatus(o.status) === normalizeStatus(orderTab)).length === 0 && (
               <p style={{ padding: "1rem", color: "#888" }}>No {orderTab.toLowerCase()} orders.</p>
             )}
           </div>

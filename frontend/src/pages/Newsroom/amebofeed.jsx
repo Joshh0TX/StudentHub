@@ -48,26 +48,28 @@ const handlePost = async () => {
   if (!content.trim() && !image && !video) return;
   const token = localStorage.getItem("token");
 
-  let imageUrl = null;
-  let videoUrl = null;
-
-  if (image) {
+  try {
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", image);
-    formData.append("upload_preset", "stuudo_uploads"); 
-    formData.append("folder", "studenthub");
 
-    const cloudRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: "POST", body: formData }
-    );
-    const cloudData = await cloudRes.json();
-    imageUrl = cloudData.secure_url;
-    setUploading(false);
-  }
+    let imageUrl = null;
+    let videoUrl = null;
 
-  if (video) {
+    if (image) {
+      const formData = new FormData();
+      formData.append("file", image);
+      formData.append("upload_preset", "stuudo_uploads");
+      formData.append("folder", "studenthub");
+
+      const cloudRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const cloudData = await cloudRes.json();
+      if (!cloudData.secure_url) throw new Error("Image upload failed");
+      imageUrl = cloudData.secure_url;
+    }
+
+    if (video) {
       const formData = new FormData();
       formData.append("file", video);
       formData.append("upload_preset", "stuudo_uploads");
@@ -78,27 +80,33 @@ const handlePost = async () => {
         { method: "POST", body: formData }
       );
       const cloudData = await cloudRes.json();
+      if (!cloudData.secure_url) throw new Error("Video upload failed");
       videoUrl = cloudData.secure_url;
     }
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ content: content.trim() || "", image: imageUrl, video: videoUrl }),
-  });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ content: content.trim() || "", image: imageUrl, video: videoUrl }),
+    });
 
-  if (res.ok) {
+    if (!res.ok) throw new Error("Failed to post");
+
     setContent('');
     setImage(null);
     setImagePreview(null);
     setVideo(null);
     setVideoPreview(null);
     window.location.reload();
-  } else {
-    alert("Failed to post");
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Something went wrong");
+  } finally {
+    setUploading(false);
   }
 };
 
@@ -220,4 +228,3 @@ export default function AmeboFeed({ user }) {
     </div>
   );
 }
-

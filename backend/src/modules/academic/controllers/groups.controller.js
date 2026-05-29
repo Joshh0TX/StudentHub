@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../../../config/prisma");
 
 // GET /api/groups?department=CSC&year=1
 const getGroups = async (req, res) => {
@@ -15,6 +14,7 @@ const getGroups = async (req, res) => {
       },
       include: {
         _count: { select: { members: true } },
+
         creator: {
           select: { f_name: true, l_name: true },
         },
@@ -41,6 +41,9 @@ const getGroupById = async (req, res) => {
       where: { id },
       include: {
         resources: true,
+        schedules: {
+          orderBy: { date_time: "asc" },
+        },
         creator: {
           select: { f_name: true, l_name: true },
         },
@@ -52,7 +55,6 @@ const getGroupById = async (req, res) => {
     return res.json({
       ...group,
       member_count: group._count.members,
-      schedules: [],
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -91,12 +93,22 @@ const getMyGroups = async (req, res) => {
 
 // POST /api/groups
 const createGroup = async (req, res) => {
-  const createdBy = req.user.id;
-  const { name, course_code, course_title, description, max_members, year, department } = req.body;
+  const { id: createdBy } = req.user;
+  const {
+    name,
+    course_code,
+    course_title,
+    description,
+    max_members,
+    year,
+    department,
+  } = req.body;
 
   const missing = ["name", "department"].filter((f) => !req.body[f]);
   if (missing.length)
-    return res.status(400).json({ error: `Missing required fields: ${missing.join(", ")}` });
+    return res
+      .status(400)
+      .json({ error: `Missing required fields: ${missing.join(", ")}` });
 
   try {
     const group = await prisma.studyGroup.create({
@@ -148,22 +160,125 @@ const joinGroup = async (req, res) => {
 // DELETE /api/groups/:id
 const deleteGroup = async (req, res) => {
   const { id } = req.params;
-  const requesterId = req.user.id;
+  const { id: requesterId, role, courseRepOf } = req.user;
 
   try {
     const group = await prisma.studyGroup.findUnique({ where: { id } });
     if (!group) return res.status(404).json({ error: "Group not found" });
-    if (group.createdBy !== requesterId)
+
+    const isOwner = group.createdBy === requesterId;
+    const isAdmin = role === "admin";
+    const isCourseRep =
+      role === "course_rep" &&
+      courseRepOf?.department === group.department &&
+      courseRepOf?.level === group.year;
+
+    if (!isOwner && !isAdmin && !isCourseRep)
       return res.status(403).json({ error: "Not authorised" });
 
-    // ← delete members first
     await prisma.studyGroupMember.deleteMany({ where: { groupId: id } });
     await prisma.studyGroup.delete({ where: { id } });
-    
     return res.json({ message: "Group deleted" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-module.exports = { getGroups, getGroupById, getMyGroups, createGroup, deleteGroup, joinGroup };
+const createSchedule = async (req, res) => {
+  const { id } = req.params;
+  const { title, date_time, is_online, location, meeting_url, notes } =
+    req.body;
+  const userId = req.user.id;
+
+  if (!title?.trim())
+    return res.status(400).json({ error: "Session title is required." });
+  if (!date_time)
+    return res.status(400).json({ error: "Date and time are required." });
+  if (is_online && !meeting_url?.trim())
+    return res
+      .status(400)
+      .json({ error: "Meeting URL is required for online sessions." });
+  if (!is_online && !location?.trim())
+    return res
+      .status(400)
+      .json({ error: "Location is required for in-person sessions." });
+
+  try {
+    const group = await prisma.studyGroup.findUnique({ where: { id } });
+    if (!group) return res.status(404).json({ error: "Group not found." });
+
+    const schedule = await prisma.studyGroupSchedule.create({
+      data: {
+        groupId: id,
+        createdBy: userId,
+        title: title.trim(),
+        date_time: new Date(date_time),
+        is_online: Boolean(is_online),
+        location: location?.trim() || null,
+        meeting_url: meeting_url?.trim() || null,
+        notes: notes?.trim() || null,
+      },
+    });
+
+    return res.status(201).json({
+      id: schedule.id,
+      title: schedule.title,
+      date_time: schedule.date_time,
+      is_online: schedule.is_online,
+      location: schedule.location,
+      meeting_url: schedule.meeting_url,
+      notes: schedule.notes,
+    });
+  } catch (err) {
+    console.error("createSchedule error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const deleteSchedule = async (req, res) => {
+  const { id, scheduleId } = req.params;
+  const { id: userId, role } = req.user;
+
+  try {
+    // Check the schedule exists and belongs to this group
+    const schedule = await prisma.studyGroupSchedule.findUnique({
+      where: { id: scheduleId },
+    });
+
+    if (!schedule)
+      return res.status(404).json({ error: "Schedule not found." });
+
+    // Confirm it actually belongs to the group in the URL
+    if (schedule.groupId !== id)
+      return res
+        .status(400)
+        .json({ error: "Schedule does not belong to this group." });
+
+    // Only the creator or an admin can delete
+    const isCreator = schedule.createdBy === userId;
+    const isAdmin = role === "admin";
+
+    if (!isCreator && !isAdmin)
+      return res
+        .status(403)
+        .json({ error: "Not authorised to delete this session." });
+
+    await prisma.studyGroupSchedule.delete({ where: { id: scheduleId } });
+
+    return res.json({ message: "Session deleted successfully." });
+  } catch (err) {
+    console.error("deleteSchedule error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = {
+  getGroups,
+  getGroupById,
+  getMyGroups,
+  createGroup,
+  deleteGroup,
+  joinGroup,
+  createSchedule,
+  deleteSchedule,
+};

@@ -309,15 +309,25 @@
 }
 
 .productCardActions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 6px;
   padding: 0 10px 10px;
 }
 
 .productCardActions button {
-  flex: 1;
-  padding: 5px 8px;
-  font-size: 0.78rem;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 0.76rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  margin: 0;
+}
+
+.productCardActions .btnDanger {
+  grid-column: 1 / -1;
 }
 
 .productRow,
@@ -454,4 +464,57 @@
 
 .storeAvatarEdit:hover .storeAvatarOverlay {
   opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .storefrontPage {
+    padding: 18px 14px 52px;
+  }
+
+  .storefrontCard {
+    max-width: 100%;
+    padding: 14px;
+  }
+
+  .productRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .productStats {
+    text-align: left;
+  }
+
+  .productActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .storefrontCardHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .addProductBtn {
+    width: 100%;
+  }
+
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .storefrontModalCard {
+    width: min(100vw - 16px, 640px);
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .storefrontModalActions button {
+    flex-basis: 100%;
+  }
+
+  .productActions {
+    grid-template-columns: 1fr;
+  }
 }

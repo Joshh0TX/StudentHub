@@ -107,6 +107,13 @@ exports.getMe = async (userId) => {
       l_name: true,
       department: true,
       level: true,
+      role: true,          // ← add
+      courseRepOf: {       // ← add
+        select: {
+          department: true,
+          level: true,
+        },
+      },
     },
   });
 

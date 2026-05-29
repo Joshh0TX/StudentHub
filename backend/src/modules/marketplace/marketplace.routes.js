@@ -123,6 +123,25 @@ router.get("/orders/store/:storeId", async (req, res) => {
   }
 });
 
+router.get("/orders/buyer/:userId", async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { buyerId: req.params.userId },
+      include: {
+        product: {
+          include: {
+            store: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/orders/buyer/:userId/product/:productId", async (req, res) => {
   try {
     const orders = await prisma.order.findMany({

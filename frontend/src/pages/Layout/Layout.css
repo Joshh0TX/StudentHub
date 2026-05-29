@@ -8,8 +8,8 @@
   padding-top: 55px;
   
   /* Remove the old padding-bottom unless you want extra scroll space */
-  padding-bottom: 20px; 
-  
+  padding-bottom: 20px;
+
   /* Ensures the content centers nicely if you have a max-width */
   width: 100%;
   box-sizing: border-box;

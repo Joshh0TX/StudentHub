@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Users, UserPlus, X, RefreshCw, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../hooks/usePermissions";
 import "./StudyGroups.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -207,9 +208,15 @@ const CreateGroupModal = ({
 };
 
 // ── Group Card ────────────────────────────────────────────────────
-const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId }) => {
+const GroupCard = ({
+  group,
+  onJoin,
+  onDelete,
+  isMember,
+  isJoining,
+  canDelete,
+}) => {
   const navigate = useNavigate();
-  const isCreator = group.createdBy === currentUserId;
   const memberCount = isNaN(Number(group.member_count))
     ? 0
     : Number(group.member_count ?? 0);
@@ -266,7 +273,7 @@ const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId
         <button className="btn-details" onClick={handleViewDetails}>
           View Details
         </button>
-        {isCreator && (
+        {canDelete && (
           <button className="btn-delete" onClick={() => onDelete(group.id)}>
             Delete Group
           </button>
@@ -280,6 +287,8 @@ const GroupCard = ({ group, onJoin, onDelete, isMember, isJoining, currentUserId
 const StudyGroups = () => {
   const { user, loading: authLoading } = useAuth(); // ← also pull loading from auth
   const { selectedProgram, selectedYear } = useOutletContext();
+  const { canCreateIn, canModifyIn } = usePermissions();
+  const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   const [groups, setGroups] = useState([]);
   const [myGroupIds, setMyGroupIds] = useState(new Set());
@@ -302,7 +311,7 @@ const StudyGroups = () => {
         apiFetch(
           `/api/groups?department=${encodeURIComponent(selectedProgram)}&year=${selectedYear}`,
         ),
-        apiFetch(`/api/groups/my-groups`), 
+        apiFetch(`/api/groups/my-groups`),
       ]);
 
       const safeGroups = Array.isArray(allData) ? allData : [];
@@ -321,7 +330,7 @@ const StudyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedProgram, selectedYear, user?.id]); // ← user?.id not user (avoids rerun on unrelated user changes)
+  }, [selectedProgram, selectedYear, user?.id]);
 
   useEffect(() => {
     fetchGroups();
@@ -427,9 +436,11 @@ const StudyGroups = () => {
           <button className="btn-refresh" onClick={fetchGroups} title="Refresh">
             <RefreshCw size={16} />
           </button>
-          <button className="btn-create" onClick={() => setShowModal(true)}>
-            <UserPlus size={18} /> Create Group
-          </button>
+          {userCanCreate && (
+            <button className="btn-create" onClick={() => setShowModal(true)}>
+              <UserPlus size={18} /> Create Group
+            </button>
+          )}
         </div>
       </div>
 
@@ -464,14 +475,19 @@ const StudyGroups = () => {
         <div className="groups-grid">
           {visibleGroups.map((group) => (
             <GroupCard
-            key={group.id}
-            group={group}
-            onJoin={handleJoin}
-            onDelete={handleDelete}
-            isMember={myGroupIds.has(group.id)}
-            isJoining={joiningId === group.id}
-            currentUserId={user.id}
-          />
+              key={group.id}
+              group={group}
+              onJoin={handleJoin}
+              onDelete={handleDelete}
+              isMember={myGroupIds.has(group.id)}
+              isJoining={joiningId === group.id}
+              currentUserId={user.id}
+              canDelete={canModifyIn(
+                group.createdBy ?? group.created_by, // fix snake_case fallback
+                group.department, // or selectedProgram
+                group.year, // or selectedYear
+              )}
+            />
           ))}
         </div>
       )}

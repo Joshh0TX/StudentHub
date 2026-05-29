@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import "./Timetable.css";
 import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../hooks/usePermissions";
 import { useOutletContext } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_URL;
@@ -425,7 +426,13 @@ const CreatorBadge = ({ name, isOwner }) => {
 };
 
 // ── Timetable Grid View ───────────────────────────────────────────
-const TimetableGrid = ({ timetable, onDelete, onEdit, currentUserId }) => {
+const TimetableGrid = ({
+  timetable,
+  onDelete,
+  onEdit,
+  canModify,
+  currentUserId,
+}) => {
   const isOwner = String(timetable.createdBy) === String(currentUserId);
   const [collapsed, setCollapsed] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -494,7 +501,7 @@ const TimetableGrid = ({ timetable, onDelete, onEdit, currentUserId }) => {
 
         {/* ── Actions ── */}
         <div className="timetable-card-actions">
-          {isOwner && (
+          {canModify && (
             <>
               {/* Edit button */}
               <button
@@ -690,6 +697,8 @@ const Timetable = () => {
 
   const { user, loading: authLoading, getToken } = useAuth();
   const { selectedProgram, selectedYear } = useOutletContext();
+  const { canCreateIn, canModifyIn } = usePermissions();
+  const userCanCreate = canCreateIn(selectedProgram, selectedYear);
 
   // ── Fetch timetables ──────────────────────────────────────────
   const fetchTimetables = useCallback(async () => {
@@ -884,9 +893,11 @@ const Timetable = () => {
           >
             <RefreshCw size={16} />
           </button>
-          <button className="btn-create" onClick={() => setShowModal(true)}>
-            <Plus size={18} /> Add Timetable
-          </button>
+          {userCanCreate && (
+            <button className="btn-create" onClick={() => setShowModal(true)}>
+              <Plus size={18} /> Add Timetable
+            </button>
+          )}
         </div>
       </div>
 
@@ -907,6 +918,13 @@ const Timetable = () => {
               onDelete={handleDelete}
               onEdit={handleEdit}
               currentUserId={user.id}
+              selectedProgram={selectedProgram} // add
+              selectedYear={selectedYear} // add
+              canModify={canModifyIn(
+                tt.createdBy ?? tt.created_by, // fix snake_case fallback
+                tt.department, // or selectedProgram if not on the object
+                tt.year, // or selectedYear
+              )}
             />
           ))}
         </div>
