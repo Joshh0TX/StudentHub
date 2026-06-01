@@ -32,28 +32,29 @@
 }
 
 /* --- LOGO STYLE --- */
-/* --- UPDATED LOGO STYLE --- */
 .stuudo-logo {
   font-size: 2.2rem !important;
   font-weight: 900;
   color: #1a202c;
-  /* Reduced the negative spacing so letters don't crush each other at smaller sizes */
   letter-spacing: -1px;
   font-family: "Helvetica Neue", sans-serif;
   margin: 0;
-  line-height: 1; /* Ensures the height of the h1 doesn't mess with vertical centering */
+  line-height: 1; 
 }
 
 .stuudo-logo span {
   color: #3b82f6;
 }
 
-/* --- CENTER NAVIGATION (Absolute Centering) --- */
+/* --- CENTER NAVIGATION  --- */
 .header-center {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 40px;
 }
 
 .icon-hub {
@@ -62,8 +63,125 @@
   align-items: center;
   pointer-events: auto;
 }
+/* --- NAV SEARCH BAR STYLES --- */
+.header-search-bar {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  width: 360px;
+  border: 1.5px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto; 
+  position: relative;
+}
 
-/* --- NAV ICON LINKS (No Borders, Scale + Color Only) --- */
+.header-search-bar:focus-within {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  width: 380px; 
+}
+
+.header-search-bar .search-icon {
+  color: #94a3b8;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.header-search-bar input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  width: 100%;
+  font-size: 0.85rem;
+  color: #1a202c;
+  padding: 0 !important;
+}
+
+.header-search-bar input::placeholder {
+  color: #94a3b8;
+}
+
+/* --- SEARCH DROPDOWN BOX STYLES --- */
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  max-height: 280px;
+  overflow-y: auto; 
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  z-index: 2000; 
+}
+.search-results-dropdown::-webkit-scrollbar {
+  width: 5px;
+}
+.search-results-dropdown::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* Individual Search Match Rows */
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.search-result-item:hover {
+  background: #f8fafc;
+}
+
+.result-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.result-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.result-meta {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fallback state layout rule */
+.search-no-results {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+/* --- NAV ICON LINKS  --- */
 .nav-link {
   color: #a0aec0;
   padding: 8px 12px;

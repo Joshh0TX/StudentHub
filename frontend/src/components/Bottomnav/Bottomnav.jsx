@@ -19,7 +19,6 @@ const UserProfile = ({ name, avatarUrl }) => {
   
   return (
     <div className="user-profile-group">
-      {/* Profile Image first (Left), then Name */}
       <img 
         src={avatarUrl || fallback} 
         alt="Profile" 
@@ -34,6 +33,22 @@ const UserProfile = ({ name, avatarUrl }) => {
 
 
 export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred Henry" } }) {
+
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  // Simple mock data array to simulate live UI filtering
+  const mockStudents = [
+    { name: "David Collins", meta: "Information Technology • 400L", bg: "DBEAFE", co: "3B82F6" },
+    { name: "Daniel Okoro", meta: "Computer Science • 200L", bg: "FEE2E2", co: "EF4444" },
+    { name: "Deborah Aminu", meta: "Cyber Security • 300L", bg: "D1FAE5", co: "10B981" }
+  ];
+
+  // Filters results to only show names that match what is typed (case-insensitive)
+  const filteredResults = mockStudents.filter(student =>
+    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <header className="site-header">
       {/* 1. Left Section */}
@@ -44,7 +59,7 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
         
       </div>
 
-      {/* 2. Center Section (Absolute Centering) */}
+      {/* 2. Center Section */}
       <div className="header-center">
         <nav className="icon-hub">
           <NavIcon to="/newsroom" Icon={Home} />
@@ -52,6 +67,41 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
           <NavIcon to="/academy" Icon={BookOpen} />
           <NavIcon to="/notifications" Icon={Bell} />
         </nav>
+
+        {/*  search container  */}
+        <div className="header-search-bar">
+          <input 
+            type="text" 
+            placeholder="Search for people..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} // Tracks typed letters
+            onFocus={() => setIsFocused(true)}               // Detects click/focus
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hides dropdown on blur (delay allows click to register)
+          />
+
+          {/*  DROPDOWN DISPLAY LOGIC: Only shows if focused AND there is text typed */}
+          {isFocused && searchQuery.length > 0 && (
+            <div className="search-results-dropdown">
+              {filteredResults.length > 0 ? (
+                filteredResults.map((student, idx) => (
+                  <div key={idx} className="search-result-item">
+                    <img 
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=${student.bg}&color=${student.co}&bold=true`} 
+                      alt="Avatar" 
+                      className="result-avatar" 
+                    />
+                    <div className="result-info">
+                      <span className="result-name">{student.name}</span>
+                      <span className="result-meta">{student.meta}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="search-no-results">No students match "{searchQuery}"</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 3. Right Section */}
