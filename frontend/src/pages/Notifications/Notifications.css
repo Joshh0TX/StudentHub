@@ -90,3 +90,50 @@ button {
     font-size: 16px;
     margin-left: auto;
 }
+
+/* --- EMPTY STATE POSITIONING ENGINE (FORCE ABSOLUTE CENTERING) --- */
+.notif-page {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  width: 100%;
+  min-height: calc(100vh - 100px); /* Subtracts top nav offset to avoid layout push */
+  box-sizing: border-box;
+  
+  /* 🛠️ ADDED THESE: Turns the page container into a flex engine to force center the child */
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-page .notif-title {
+  /* Keeps your title at the top left of the track flow */
+  margin: 0 0 20px 0;
+}
+
+.notif-page .profile-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+  
+  /* 🛠️ ADDED THESE: Forces the block to take up the rest of the layout space and centers perfectly */
+  flex: 1;
+  margin: auto 0;
+  width: 100%;
+}
+
+.notif-page .profile-empty-state p {
+  color: #64748b;
+  /* 🎨 Increased size and weight so "No new notifications" feels bold and polished */
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
