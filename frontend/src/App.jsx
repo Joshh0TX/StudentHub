@@ -14,7 +14,7 @@ import ProductReviews from "./pages/Marketplace/ProductReviews.jsx";
 import StoreView from "./pages/Marketplace/StoreView.jsx";
 import SearchPage from "./pages/Marketplace/SearchPage.jsx";
 import MyOrders from "./pages/Marketplace/MyOrders.jsx";
-import Profile from "./pages/profile/Profile.jsx";
+import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
 import Timetable from "./pages/Academic/Timetable.jsx";
 import Landing from "./pages/Landing/Landing.jsx";
