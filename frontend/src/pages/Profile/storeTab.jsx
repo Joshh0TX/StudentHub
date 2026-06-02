@@ -1,19 +1,42 @@
 import React from 'react';
-import { ShoppingBag, Settings2, ArrowUpRight } from 'lucide-react';
+import { ShoppingBag, Settings2, ArrowUpRight, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './storeTab.css';
 
-const MyShopTab = ({ isOwner, shopProductsData }) => {
-  
+const MyShopTab = ({ isOwner, shopProductsData, storeData, isLoading }) => {
+  const navigate = useNavigate();
+
   // Strict UI Filter Constraint Layout Layer Rule: Limit storefront preview output to 4 items max
   const limitedProductsList = shopProductsData ? shopProductsData.slice(0, 4) : [];
 
   const handleStoreRedirect = () => {
     if (isOwner) {
-      console.log("Navigating profile owner to their central Marketplace Shop Dashboard panel...");
+      // Owner goes to their storefront management page
+      navigate('/storefront');
+    } else if (storeData?.id) {
+      // Visitor goes to the public store view
+      navigate(`/store/${storeData.id}`);
     } else {
-      console.log("Redirecting profile visitor to this student's public marketplace storefront track...");
+      navigate('/marketplace');
     }
   };
+
+  const handleProductEdit = (productId) => {
+    navigate('/storefront');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="my-shop-tab-wrapper">
+        <div className="my-shop-tab-master-header">
+          <h2>My Shop</h2>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0', color: 'var(--text-muted, #888)' }}>
+          <Loader2 size={24} className="spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-shop-tab-wrapper">
@@ -32,6 +55,11 @@ const MyShopTab = ({ isOwner, shopProductsData }) => {
           <ArrowUpRight className="redirect-btn-svg" />
         </button>
       </div>
+
+      {/* Store name badge when data is available */}
+      {storeData?.name && (
+        <p className="shop-store-name-badge">{storeData.name}</p>
+      )}
 
       {/* 2. DYNAMIC GRID CANVAS DISPLAY */}
       <div className="shop-products-preview-grid">
@@ -53,7 +81,7 @@ const MyShopTab = ({ isOwner, shopProductsData }) => {
                     <button 
                       type="button" 
                       className="product-inline-naked-btn" 
-                      onClick={() => console.log(`Trigger Item Editing for Product ID: ${product.id}`)}
+                      onClick={() => handleProductEdit(product.id)}
                       aria-label="Manage item details"
                     >
                       <Settings2 size={13} />
@@ -72,7 +100,10 @@ const MyShopTab = ({ isOwner, shopProductsData }) => {
           ))
         ) : (
           <div className="placeholder-panel-text" style={{ gridColumn: '1 / -1', padding: '32px 0', textAlign: 'center' }}>
-            <p>No inventory profiles uploaded on this user storefront account space yet.</p>
+            {isOwner
+              ? <p>You haven't listed any products yet. <button type="button" onClick={handleStoreRedirect} style={{ background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}>Go to your storefront</button> to add some.</p>
+              : <p>No products listed on this storefront yet.</p>
+            }
           </div>
         )}
       </div>

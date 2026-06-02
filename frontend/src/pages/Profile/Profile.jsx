@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Edit } from 'lucide-react'; 
 import {
   FaLinkedin,
@@ -16,6 +16,8 @@ import ProjectModal from './projectModel';
 import AchievementsTab from './achievementsTab';
 import AchievementModal from './achievementsModel';
 import MyShopTab from './storeTab';
+import { useAuth } from '../../context/AuthContext';
+import { fetchStore } from '../Marketplace/marketplaceApi';
 
 import './profile.css';
 
@@ -328,14 +330,33 @@ const handleSaveAchieveCard = (itemData) => {
 const handleDeleteAchieveCard = (id) => {
   setAchievementsList((prevList) => prevList.filter((item) => item.id !== id));
 };
-// Marketplace store products default preview data collection
-const [shopProductsList, setShopProductsList] = useState([
-  { id: 1, title: "IFT 400L Comprehensive Exam Coursepack", price: "₦3,500.00", image: null },
-  { id: 2, title: "Wireless Smart IoT Node Breadboard Kit", price: "₦18,500.00", image: null },
-  { id: 3, title: "Premium Tailored Dark Hoodie (FUTO IFT Edition)", price: "₦12,000.00", image: null },
-  { id: 4, title: "V5 Network Infrastructure Lab Reference Log", price: "₦4,000.00", image: null },
-  { id: 5, title: "Bonus Unrendered Item (Filtered Out Over Capacity)", price: "₦5,000.00", image: null } // This item stays hidden automatically
-]);
+// Marketplace store & products state
+const [shopProductsList, setShopProductsList] = useState([]);
+const [storeData, setStoreData] = useState(null);
+const [shopLoading, setShopLoading] = useState(false);
+
+// Auth
+const { user } = useAuth();
+
+// Fetch the current user's store and products
+useEffect(() => {
+  if (!user?.id) return;
+  setShopLoading(true);
+  fetchStore(user.id)
+    .then((store) => {
+      if (!store || store.error) return;
+      setStoreData(store);
+      const mapped = (store.products || []).map((p) => ({
+        id: p.id,
+        title: p.name,
+        price: `₦${Number(p.price).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`,
+        image: (p.images && p.images.length > 0) ? p.images[0] : (p.image || null),
+      }));
+      setShopProductsList(mapped);
+    })
+    .catch(() => {})
+    .finally(() => setShopLoading(false));
+}, [user?.id]);
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
@@ -399,6 +420,8 @@ const [shopProductsList, setShopProductsList] = useState([
     <MyShopTab 
       isOwner={isOwner}
       shopProductsData={shopProductsList}
+      storeData={storeData}
+      isLoading={shopLoading}
     />
   );
       default:
