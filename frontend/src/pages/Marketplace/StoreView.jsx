@@ -45,6 +45,9 @@ export default function StoreView() {
     }
   };
 
+      const isSoldOut = (item) =>
+    item?.isSoldOut === true || String(item?.availability || "").toLowerCase() === "sold_out";
+
   const getImgSrc = (images) => {
     const img = Array.isArray(images) ? images[0] : images;
     if (!img) return DEFAULT_PRODUCT_IMG;
@@ -120,7 +123,10 @@ export default function StoreView() {
         <div className="storeViewGrid">
           {topSelling.map((item) => (
             <Link to={`/marketplace/${item.id}`} className="storeProductCard storeProductCardLink" key={item.id}>
-              <img src={getImgSrc(item.images)} alt={item.name} />
+              <div className="storeProductImgWrap">
+                <img src={getImgSrc(item.images)} alt={item.name} />
+                {isSoldOut(item) && <span className="soldOutBadge">Sold Out</span>}
+              </div>
               <div className="storeProductInfo">
                 <div className="storeProductTitle">{item.name}</div>
                 <div className="storeProductMeta">₦{item.price}</div>
@@ -148,7 +154,10 @@ export default function StoreView() {
         <div className="storeViewGrid">
           {filteredItems.map((item) => (
             <Link to={`/marketplace/${item.id}`} className="storeProductCard storeProductCardLink" key={`all-${item.id}`}>
-              <img src={getImgSrc(item.images)} alt={item.name} />
+              <div className="storeProductImgWrap">
+                <img src={getImgSrc(item.images)} alt={item.name} />
+                {isSoldOut(item) && <span className="soldOutBadge">Sold Out</span>}
+              </div>
               <div className="storeProductInfo">
                 <div className="storeProductTitle">{item.name}</div>
                 <div className="storeProductMeta">₦{item.price} · {item.category}</div>

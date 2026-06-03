@@ -313,12 +313,17 @@ export default function MarketHome() {
             </div>
           ))}
           {filteredItems.map((item) => (
-            <div className="marketCard" key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
-              <img
-                src={item.images?.[0] ? (typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]) : DEFAULT_PRODUCT_IMG}
-                alt={item.name}
-                className="marketImage"
-              />
+            <div className={`marketCard${item.isSoldOut || String(item.availability || "").toLowerCase() === "sold_out" ? " marketCardSoldOut" : ""}`} key={item.id} style={{ cursor: "pointer" }} onClick={(e) => { if (!e.target.closest("button") && !e.target.closest("a")) navigate(`/marketplace/${item.id}`); }}>
+              <div className="marketImageWrap">
+                <img
+                  src={item.images?.[0] ? (typeof item.images[0] === "string" && item.images[0].startsWith("/uploads") ? `${API_BASE}${item.images[0]}` : item.images[0]) : DEFAULT_PRODUCT_IMG}
+                  alt={item.name}
+                  className="marketImage"
+                />
+                {(item.isSoldOut || String(item.availability || "").toLowerCase() === "sold_out") && (
+                  <span className="soldOutBadge">Sold Out</span>
+                )}
+              </div>
               <div className="marketMeta">
                 <span className="marketTag">{item.type}</span>
                 <span className="marketTag muted">{item.category}</span>

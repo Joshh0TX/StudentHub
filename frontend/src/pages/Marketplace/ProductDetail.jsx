@@ -176,9 +176,7 @@ export default function ProductDetail() {
           </div>
           <h1>{item.name}</h1>
           {isSoldOut && (
-            <p style={{ margin: "2px 0 6px", color: "#b91c1c", fontWeight: 700, fontSize: "0.86rem" }}>
-              Sold out
-            </p>
+            <span className="soldOutBadge">Sold out</span>
           )}
           <p className="productDetailPrice">₦{item.price}</p>
           <p className="productDetailDesc">{item.description}</p>
