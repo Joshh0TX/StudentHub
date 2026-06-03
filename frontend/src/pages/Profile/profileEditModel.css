@@ -76,6 +76,14 @@
   font-family: inherit;
   position: relative;
 }
+.modal-tab-btn:hover {
+  color: var(--text-primary) !important;
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
 
 .modal-tab-btn.is-active {
   color: var(--text-primary);
@@ -271,4 +279,22 @@
 @keyframes modalPopUp {
   from { opacity: 0; transform: scale(0.98) translateY(6px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* 🛠️ APPEND TO THE VERY END OF YOUR FILE */
+.modal-datepicker-field .react-datepicker-wrapper {
+  width: 100%; /* Fixes the library's default shrinking inline behavior */
+}
+
+.modal-datepicker-field .react-datepicker__input-container input {
+  width: 100%;
+  background-color: var(--btn-toggle-bg);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  box-sizing: border-box;
 }
