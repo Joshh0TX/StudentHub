@@ -60,6 +60,12 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
   const [profileImage, setProfileImage] = useState(profileData?.profileImage || null);
   const profileInputRef = useRef(null);
 
+  useEffect(() => {
+    if (profileData?.profileImage) {
+      setProfileImage(profileData.profileImage);
+    }
+  }, [profileData?.profileImage]);
+
   const handleProfileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -309,6 +315,7 @@ useEffect(() => {
         linkedin: data.socials?.linkedin ?? '#',
         instagram: data.socials?.instagram ?? '#',
         certifications: data.certifications ?? [],
+        profileImage: data.profileImage ?? null,
         education: (data.courseMemberships ?? []).map((m) => ({
           id: m.id,
           degree: m.course?.name,
