@@ -9,6 +9,7 @@ import {
   FaSun,
   FaMoon
 } from 'react-icons/fa'; 
+import { fetchMyProfile, updateMyProfile, uploadProfileImage, uploadCoverImage } from './profileApi';
 import AboutTab from './aboutTab';
 import ProfileEditModal from './profileEditModel';
 import ProjectsTab from './projectsTab';
@@ -56,7 +57,7 @@ const ProfileCover = ({ coverImage, onCoverChange,isOwner }) => {
 // 2. SUB-COMPONENT: STUDENT INFO SIDEBAR CARD (With theme toggle & profile upload)
 // =========================================================================
 const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileData }) => {
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(profileData?.profileImage || null);
   const profileInputRef = useRef(null);
 
   const handleProfileChange = (e) => {
@@ -68,24 +69,31 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
 
   return (
     <div className="profile-info-card">
-      {/* Circle Profile Image Layout Block */}
-      <div className="profile-avatar-wrapper">
-        <div className="profile-avatar-placeholder">
-          {profileImage ? (
-            <img src={profileImage} alt="Avatar" className="avatar-image-render" />
-          ) : (
-            <span>ST</span>
-          )}
-        </div>
-        
-        {/* CONDITIONAL: Hide avatar camera trigger from public visitors */}
-        {isOwner && (
-          <button onClick={() => profileInputRef.current.click()} className="avatar-camera-trigger" aria-label="Change profile picture">
-            <FaCamera className="camera-icon-internal" />
-          </button>
-        )}
-        <input type="file" ref={profileInputRef} onChange={handleProfileChange} accept="image/*" className="hidden-input" />
-      </div>
+      <div className="profile-avatar-placeholder">
+  <img
+    src={
+      profileImage ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        `${profileData?.f_name || ''} ${profileData?.l_name || ''}`
+      )}&background=random`
+    }
+    alt="Avatar"
+    className="avatar-image-render"
+    onError={(e) => {
+      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        `${profileData?.f_name || ''} ${profileData?.l_name || ''}`
+      )}&background=random`;
+    }}
+  />
+</div>
+
+      {/* CONDITIONAL: Hide avatar camera trigger from public visitors */}
+      {isOwner && (
+        <button onClick={() => profileInputRef.current.click()} className="avatar-camera-trigger" aria-label="Change profile picture">
+          <FaCamera className="camera-icon-internal" />
+        </button>
+      )}
+      <input type="file" ref={profileInputRef} onChange={handleProfileChange} accept="image/*" className="hidden-input" />
 
       {/* Student Details */}
       <div className="profile-details-content">
@@ -199,52 +207,11 @@ const StudentProfile = () => {
   const [isOwner, setIsOwner] = useState(true); 
   // Inside the StudentProfile component body, add this state bucket:
 const [isModalOpen, setIsModalOpen] = useState(false);
-const [profileData, setProfileData] = useState({
-  name: "Anyanwuocha-Collins David",
-  email: "david.collins@student.futo.edu.ng",
-  dob: "October 24, 2003",
-  location: "Owerri, Nigeria",
-  linkedin: "#linkedin",
-  instagram: "#instagram",
-  overview: "Undergraduate Information Technology student at the Federal University of Technology, Owerri (FUTO)...",
-  skills: ["Full-Stack Dev", "UI/UX Design", "React", "Tailwind CSS", "JavaScript", "Network Defense", "IoT Architecture"],
-  
-  // CHANGED: Restructured into dynamic arrays of objects
-  education: [
-    {
-      id: 1,
-      degree: "Information Technology (IFT)",
-      school: "Federal University of Technology, Owerri",
-      meta: "400 Level • Undergraduate Degree Course"
-    }
-  ],
-  certifications: [
-    {
-      id: 1,
-      title: "Cisco Certified Network Defense",
-      authority: "Cisco Networking Academy Credential",
-      meta: "Security Architecture & Infrastructure Defense"
-    }
-  ]
-});
+const [profileData, setProfileData] = useState(null);
+const [profileLoading, setProfileLoading] = useState(true);
 
 // Project list array configuration states
-const [projectsList, setProjectsList] = useState([
-  {
-    id: 1,
-    title: "Stuudo Platform Canvas Hub",
-    description: "Centralized university structural framework engine mapped out to synchronize and process campus hub digital service parameters across institutional records tracking spaces.",
-    link: "https://stuudo.io",
-    image: null
-  },
-  {
-    id: 2,
-    title: "VaultTrack Asset System Tracker",
-    description: "Multi-asset automated checking system engineered to index and graph transactional market metrics, valuations, and positions across active network platforms safely.",
-    link: "https://vaulttrack.io",
-    image: null
-  }
-]);
+const [projectsList, setProjectsList] = useState([]);
 
 
 
@@ -263,42 +230,24 @@ const handleOpenEditProject = (project) => {
   setIsProjectModalOpen(true);
 };
 
-const handleSaveProjectCard = (projectData) => {
-  setProjectsList((prevList) => {
-    const existingIndex = prevList.findIndex((item) => item.id === projectData.id);
-    if (existingIndex > -1) {
-      // Update item logic execution
-      const updatedList = [...prevList];
-      updatedList[existingIndex] = projectData;
-      return updatedList;
-    } else {
-      // Add item logic execution
-      return [...prevList, projectData];
-    }
-  });
+const handleSaveProjectCard = async (projectData) => {
+  const isEdit = projectsList.some((p) => p.id === projectData.id);
+  const updatedList = isEdit
+    ? projectsList.map((p) => (p.id === projectData.id ? projectData : p))
+    : [...projectsList, projectData];
+
+  setProjectsList(updatedList); // optimistic
+  await updateMyProfile({ projects: updatedList });
 };
 
-const handleDeleteProjectCard = (id) => {
-  setProjectsList((prevList) => prevList.filter((item) => item.id !== id));
+const handleDeleteProjectCard = async (id) => {
+  const updatedList = projectsList.filter((p) => p.id !== id);
+  setProjectsList(updatedList); // optimistic
+  await updateMyProfile({ projects: updatedList });
 };
 
 // Achievements tracker list states
-const [achievementsList, setAchievementsList] = useState([
-  {
-    id: 1,
-    title: "Appointed Chair of IEEE SIGHT Chapter",
-    issuer: "IEEE Special Interest Group on Humanitarian Technology",
-    meta: "Institutional Chapter Leadership Execution • 2026",
-    badgeType: "trophy"
-  },
-  {
-    id: 2,
-    title: "Cisco Certified Security Practitioner",
-    issuer: "Cisco Networking Academy Defense Program",
-    meta: "Infrastructure Security & Perimeter Defense Operations",
-    badgeType: "security"
-  }
-]);
+const [achievementsList, setAchievementsList] = useState([]);
 
 const [isAchieveModalOpen, setIsAchieveModalOpen] = useState(false);
 const [selectedAchieveToEdit, setSelectedAchieveToEdit] = useState(null);
@@ -314,22 +263,26 @@ const handleOpenEditAchieve = (item) => {
   setIsAchieveModalOpen(true);
 };
 
-const handleSaveAchieveCard = (itemData) => {
-  setAchievementsList((prevList) => {
-    const existingIndex = prevList.findIndex((item) => item.id === itemData.id);
-    if (existingIndex > -1) {
-      const updatedList = [...prevList];
-      updatedList[existingIndex] = itemData;
-      return updatedList;
-    } else {
-      return [...prevList, itemData];
-    }
-  });
+const handleSaveAchieveCard = async (itemData) => {
+  const isEdit = achievementsList.some((a) => a.id === itemData.id);
+
+  const itemWithId = isEdit ? itemData : { ...itemData, id: Date.now() };
+
+  const updatedList = isEdit
+    ? achievementsList.map((a) => (a.id === itemData.id ? itemData : a))
+    : [...achievementsList, itemData];
+
+  setAchievementsList(updatedList); // optimistic
+  await updateMyProfile({ achievements: updatedList });
 };
 
-const handleDeleteAchieveCard = (id) => {
-  setAchievementsList((prevList) => prevList.filter((item) => item.id !== id));
+const handleDeleteAchieveCard = async (id) => {
+  const updatedList = achievementsList.filter((a) => a.id !== id);
+  setAchievementsList(updatedList); // optimistic
+  await updateMyProfile({ achievements: updatedList });
 };
+
+
 // Marketplace store & products state
 const [shopProductsList, setShopProductsList] = useState([]);
 const [storeData, setStoreData] = useState(null);
@@ -341,25 +294,40 @@ const { user } = useAuth();
 // Fetch the current user's store and products
 useEffect(() => {
   if (!user?.id) return;
-  setShopLoading(true);
-  fetchStore(user.id)
-    .then((store) => {
-      if (!store || store.error) return;
-      setStoreData(store);
-      const mapped = (store.products || []).map((p) => ({
-        id: p.id,
-        title: p.name,
-        price: `₦${Number(p.price).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`,
-        image: (p.images && p.images.length > 0) ? p.images[0] : (p.image || null),
-      }));
-      setShopProductsList(mapped);
+  setProfileLoading(true);
+  fetchMyProfile()
+    .then((data) => {
+      setProfileData({
+        name: `${data.f_name} ${data.l_name}`,
+        f_name: data.f_name,   // ← add this
+        l_name: data.l_name, 
+        email: data.email,
+        dob: data.dob ?? '',
+        location: data.location ?? '',
+        overview: data.bio ?? '',
+        skills: data.skills ?? [],
+        linkedin: data.socials?.linkedin ?? '#',
+        instagram: data.socials?.instagram ?? '#',
+        certifications: data.certifications ?? [],
+        education: (data.courseMemberships ?? []).map((m) => ({
+          id: m.id,
+          degree: m.course?.name,
+          school: m.course?.institution,
+          meta: m.level ?? '',
+        })),
+      });
+      setProjectsList(data.projects ?? []);
+      setAchievementsList(data.achievements ?? []);
+      if (data.coverImage) setCoverImage(data.coverImage);
     })
     .catch(() => {})
-    .finally(() => setShopLoading(false));
+    .finally(() => setProfileLoading(false));
 }, [user?.id]);
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
+
+  if (profileLoading || !profileData) return <div>Loading...</div>;
 
   return (
     <div className="profile-page-container" data-theme={theme}>
@@ -436,7 +404,18 @@ useEffect(() => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={profileData}
-        onSave={(updatedData) => setProfileData(updatedData)}
+        onSave={async (updatedData) => {
+  setProfileData(updatedData); // optimistic
+  await updateMyProfile({
+    bio: updatedData.overview,
+    location: updatedData.location,
+    skills: updatedData.skills,
+    socials: {
+      linkedin: updatedData.linkedin,
+      instagram: updatedData.instagram,
+    },
+  });
+}}
       />
       <ProjectModal 
         isOpen={isProjectModalOpen}

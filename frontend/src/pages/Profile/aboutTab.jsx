@@ -3,7 +3,6 @@ import { PenTool, Award, Compass, Cpu } from 'lucide-react';
 import './aboutTab.css';
 
 const AboutTab = ({ isOwner, profileData, onOpenEdit }) => {
-  const skills = ["Full-Stack Dev", "UI/UX Design", "React", "Tailwind CSS", "JavaScript", "Network Defense", "IoT Architecture"];
 
   return (
     <div className="about-tab-wrapper">
@@ -37,11 +36,10 @@ const AboutTab = ({ isOwner, profileData, onOpenEdit }) => {
           <h3>Skills & Technologies</h3>
         </div>
         <div className="skills-tags-grid">
-  {profileData.skills && profileData.skills.map((skill, index) => (
-    <span key={index} className="profile-skill-badge">
-      {skill}
-    </span>
-  ))}
+
+  {profileData.skills.map((skill) => (
+  <span key={skill}>{skill}</span>
+))}
 </div>
       </div>
 
@@ -54,8 +52,8 @@ const AboutTab = ({ isOwner, profileData, onOpenEdit }) => {
   <div className="credentials-timeline-track">
     
     {/* Map through Education History list */}
-    {profileData.education && profileData.education.map((edu) => (
-      <div key={edu.id} className="timeline-milestone-node">
+    {profileData.education && profileData.education.map((edu, index) => (
+  <div key={edu.id ?? index} className="timeline-milestone-node">
         <div className="timeline-node-indicator" />
         <div className="timeline-node-details">
           <h4>{edu.degree}</h4>
@@ -66,8 +64,8 @@ const AboutTab = ({ isOwner, profileData, onOpenEdit }) => {
     ))}
 
     {/* Map through Certifications list */}
-    {profileData.certifications && profileData.certifications.map((cert) => (
-      <div key={cert.id} className="timeline-milestone-node">
+    {profileData.certifications && profileData.certifications.map((cert, index) => (
+  <div key={cert.id ?? index} className="timeline-milestone-node">
         <div className="timeline-node-indicator" />
         <div className="timeline-node-details">
           <h4>{cert.title}</h4>

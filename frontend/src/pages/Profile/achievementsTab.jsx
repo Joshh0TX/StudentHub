@@ -30,8 +30,8 @@ const AchievementsTab = ({ isOwner, achievementsData, onOpenAddModal, onOpenEdit
       {/* Stacked Showcase Canvas List */}
       <div className="achievements-timeline-track">
         {achievementsData && achievementsData.length > 0 ? (
-          achievementsData.map((item) => (
-            <div key={item.id} className="achievement-showcase-row">
+          achievementsData.map((item, index) => (
+  <div key={item.id ?? index} className="achievement-showcase-row">
               
               <div className="achievement-left-content-core">
                 {/* Render corresponding visual portfolio badge */}
