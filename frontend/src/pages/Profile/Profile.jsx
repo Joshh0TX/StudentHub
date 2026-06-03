@@ -75,51 +75,42 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
 
   return (
     <div className="profile-info-card">
-      <div className="profile-avatar-placeholder">
-  <img
-    src={
-      profileImage ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        `${profileData?.f_name || ''} ${profileData?.l_name || ''}`
-      )}&background=random`
-    }
-    alt="Avatar"
-    className="avatar-image-render"
-    onError={(e) => {
-      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        `${profileData?.f_name || ''} ${profileData?.l_name || ''}`
-      )}&background=random`;
-    }}
-  />
-</div>
+      <div className="profile-avatar-wrapper">
+        <div className="profile-avatar-placeholder">
+          <img src={profileImage ||`https://ui-avatars.com/api/?name=${encodeURIComponent(  `${profileData?.f_name || ''} ${profileData?.l_name || ''}`)}&background=random`}
+            alt="Avatar"
+            className="avatar-image-render"
+            onError={(e) => {
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                `${profileData?.f_name || ''} ${profileData?.l_name || ''}`
+              )}&background=random`;
+            }}
+          />
+        </div>
 
-      {/* CONDITIONAL: Hide avatar camera trigger from public visitors */}
-      {isOwner && (
-        <button onClick={() => profileInputRef.current.click()} className="avatar-camera-trigger" aria-label="Change profile picture">
-          <FaCamera className="camera-icon-internal" />
-        </button>
-      )}
+        {/* CONDITIONAL: Hide avatar camera trigger from public visitors */}
+        {isOwner && (
+          <button onClick={() => profileInputRef.current.click()} className="avatar-camera-trigger" aria-label="Change profile picture">
+            <FaCamera className="camera-icon-internal" />
+          </button>
+        )}
+      </div>
       <input type="file" ref={profileInputRef} onChange={handleProfileChange} accept="image/*" className="hidden-input" />
-
       {/* Student Details */}
       <div className="profile-details-content">
         <h2 className="student-name">{profileData.name}</h2>
         <p className="student-email">{profileData.email}</p>
-
         {/* Location Row */}
         <div className="info-row">
           <FaMapMarkerAlt className="info-icon" /> 
           <span className="info-text">{profileData.location}</span>
         </div>
-
         {/* Date of Birth Row */}
         <div className="info-row">
           <FaCalendarAlt className="info-icon" /> 
           <span className="info-text">Born: {profileData.dob}</span>
         </div>
-
         <hr className="card-divider" />
-
         {/* Social Connections */}
         <div className="profile-socials-stacked">
           <a href={profileData.linkedin} className="social-text-link" aria-label="LinkedIn">
@@ -212,24 +203,17 @@ const StudentProfile = () => {
   // --- NEW: Local Simulation Toggle State ---
   const [isOwner, setIsOwner] = useState(true); 
   // Inside the StudentProfile component body, add this state bucket:
-const [isModalOpen, setIsModalOpen] = useState(false);
-const [profileData, setProfileData] = useState(null);
-const [profileLoading, setProfileLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  // Project list array configuration states
+  const [projectsList, setProjectsList] = useState([]);
+  // Project modal visibility routing flags
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [selectedProjectToEdit, setSelectedProjectToEdit] = useState(null);
 
-// Project list array configuration states
-const [projectsList, setProjectsList] = useState([]);
-
-
-
-// Project modal visibility routing flags
-const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-const [selectedProjectToEdit, setSelectedProjectToEdit] = useState(null);
-
-// Project array processing mechanics
-const handleOpenAddProject = () => {
-  setSelectedProjectToEdit(null);
-  setIsProjectModalOpen(true);
-};
+  // Project array processing mechanics
+  const handleOpenAddProject = () => {setSelectedProjectToEdit(null);setIsProjectModalOpen(true);};
 
 const handleOpenEditProject = (project) => {
   setSelectedProjectToEdit(project);
@@ -436,6 +420,7 @@ useEffect(() => {
         onSave={handleSaveAchieveCard}
         achievementToEdit={selectedAchieveToEdit}
       />
+      
     </div>
   );
 };

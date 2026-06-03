@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, BookOpen, Plus, Trash2 } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import './profileEditModel.css';
 
 const ProfileEditModal = ({ isOpen, onClose, initialData, onSave }) => {
@@ -19,6 +21,13 @@ const ProfileEditModal = ({ isOpen, onClose, initialData, onSave }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleDateChange = (date) => {
+    setFormData((prev) => ({ 
+      ...prev, 
+      // Converts the Calendar Date Object back into a string ("YYYY-MM-DD") for your backend
+      dob: date ? date.toISOString().split('T')[0] : '' 
+    }));
   };
 
   const handleSkillsChange = (e) => {
@@ -95,9 +104,22 @@ const ProfileEditModal = ({ isOpen, onClose, initialData, onSave }) => {
                 <label>Email Address</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} />
               </div>
-              <div className="modal-input-field">
+             <div className="modal-input-field modal-datepicker-field">
                 <label>Date of Birth</label>
-                <input type="text" name="dob" value={formData.dob} onChange={handleChange} />
+                <DatePicker
+                  // 1. Translation: Converts your stored text back into a Date Object for the UI
+                  selected={formData.dob ? new Date(formData.dob) : null}
+                  
+                  // 2. Event Link: Fires our conversion logic when a student clicks a day
+                  onChange={handleDateChange}
+                  
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select your birth date"
+                  maxDate={new Date()} // Disallows future selections
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select" 
+                />
               </div>
               <div className="modal-input-field">
                 <label>Location</label>
