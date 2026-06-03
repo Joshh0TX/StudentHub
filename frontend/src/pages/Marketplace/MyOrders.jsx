@@ -44,6 +44,7 @@ export default function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [cancellingId, setCancellingId] = useState(null);
+  const [confirmCancelId, setConfirmCancelId] = useState(null);
 
   useEffect(() => {
     if (!user?.id) {
@@ -73,10 +74,19 @@ export default function MyOrders() {
       setOrders((prev) => prev.map((o) => (
         o.id === orderId ? { ...o, status: updated?.status || "Cancelled" } : o
       )));
+      setConfirmCancelId(null);
     } catch (err) {
       console.error(err);
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleCancelClick = (orderId) => {
+    if (confirmCancelId === orderId) {
+      handleCancelOrder(orderId);
+    } else {
+      setConfirmCancelId(orderId);
     }
   };
 
@@ -130,14 +140,36 @@ export default function MyOrders() {
                     <Link className="myOrderAgainLink" to={`/marketplace/${order.productId}`}>Order again</Link>
                   )}
                   {!["completed", "cancelled"].includes(normalizeStatus(order.status)) && (
-                    <button
-                      type="button"
-                      className="myOrderCancelBtn"
-                      onClick={() => handleCancelOrder(order.id)}
-                      disabled={cancellingId === order.id}
-                    >
-                      {cancellingId === order.id ? "Cancelling..." : "Cancel order"}
-                    </button>
+                    <div className="myOrderCancelWrap">
+                      {confirmCancelId === order.id ? (
+                        <>
+                          <span className="myOrderCancelPrompt">Sure?</span>
+                          <button
+                            type="button"
+                            className="myOrderCancelText myOrderCancelConfirm"
+                            onClick={() => handleCancelClick(order.id)}
+                            disabled={cancellingId === order.id}
+                          >
+                            {cancellingId === order.id ? "Cancelling..." : "Yes, cancel"}
+                          </button>
+                          <button
+                            type="button"
+                            className="myOrderCancelText myOrderCancelDismiss"
+                            onClick={() => setConfirmCancelId(null)}
+                          >
+                            Never mind
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="myOrderCancelText"
+                          onClick={() => handleCancelClick(order.id)}
+                        >
+                          Cancel order
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
