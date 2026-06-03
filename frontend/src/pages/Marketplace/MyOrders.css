@@ -44,11 +44,9 @@
 
 .myOrdersGrid {
   margin-top: 18px;
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(3, minmax(0, auto));
-  grid-auto-columns: minmax(270px, 330px);
   align-items: start;
 }
 
@@ -60,6 +58,8 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--card);
+  width: 300px;
+  flex-shrink: 0;
 }
 
 .myOrderImgWrap {
@@ -152,20 +152,46 @@
   transform: none;
 }
 
-.myOrderCancelBtn {
-  background: #fff;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  min-height: 32px;
-  padding: 0 12px;
-  line-height: 1;
-  display: inline-flex;
+.myOrderCancelWrap {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.myOrderCancelText {
+  background: none;
+  border: none;
+  padding: 0;
   margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #b91c1c;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  line-height: 1;
+}
+
+.myOrderCancelText:hover {
+  color: #7f1d1d;
+  box-shadow: none;
+  transform: none;
+}
+
+.myOrderCancelText:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.myOrderCancelPrompt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.myOrderCancelDismiss {
+  color: var(--muted-foreground);
 }
 
 .myOrderStatus.pending {
@@ -219,5 +245,9 @@
     grid-auto-flow: row;
     grid-template-rows: none;
     grid-auto-columns: 1fr;
+  }
+
+  .myOrderCard {
+    width: 100%;
   }
 }

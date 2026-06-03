@@ -271,6 +271,37 @@ input[type="button"]:focus-visible {
   margin-bottom: 10px;
 }
 
+/* Sold-out image wrapper and badge */
+.marketImageWrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.marketImageWrap .marketImage {
+  margin-bottom: 0;
+  display: block;
+}
+
+.soldOutBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+.marketCardSoldOut {
+  opacity: 0.65;
+}
+
 .cardTitle {
   font-size: 1.05rem;
   font-weight: 600;
