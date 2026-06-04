@@ -169,15 +169,13 @@
 }
 
 .comment-content {
-  flex: 1;
-  background: #f1f5f9;
-  border-radius: 14px;
-  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .comment-author {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 13px;
   color: #1e293b;
   display: block;
   margin-bottom: 2px;
@@ -233,4 +231,67 @@
 
 .hashtag-link:hover {
   text-decoration: underline;
+}
+
+/* In postItem.css */
+.comment-node {
+  margin-top: 8px;
+}
+
+.comment-replies {
+  margin-left: 36px;
+  border-left: 2px solid var(--border-color, #e5e7eb);
+  padding-left: 12px;
+}
+
+.comment-timestamp {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.comment-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  justify-content: flex-start;
+}
+
+.comment-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.comment-action-btn.liked { color: #ef4444; }
+.comment-action-btn.delete-type { color: #ef4444; }
+.comment-action-btn:hover { color: #111827; }
+
+.reply-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.reply-form input {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.comment-author-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
 }

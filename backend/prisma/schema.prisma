@@ -40,6 +40,7 @@ model User {
   // Social
   posts     Post[]
   comments  Comment[]
+  commentLikes CommentLike[]
   likes     Like[]
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
@@ -191,10 +192,26 @@ model Comment {
   content   String
   postId    String
   userId    String
+  parentId  String?
   createdAt DateTime @default(now())
 
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+  post     Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+  parent   Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[]     @relation("CommentReplies")
+  likes    CommentLike[]
+}
+
+model CommentLike {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
 }
 
 model Follow {

@@ -11,12 +11,20 @@ exports.getSuggested = async (req, res) => {
     });
 
     // Get IDs of people already sent requests to
-    const sentRequests = await prisma.friendRequest.findMany({
-      where: { senderId: userId },
-      select: { receiverId: true }
-    });
-    const excludeIds = [userId, ...sentRequests.map((r) => r.receiverId)];
+    const allRequests = await prisma.friendRequest.findMany({
+  where: {
+    OR: [
+      { senderId: userId },
+      { receiverId: userId }
+    ]
+  },
+  select: { senderId: true, receiverId: true, status: true }
+});
 
+const excludeIds = [
+  userId,
+  ...allRequests.map((r) => r.senderId === userId ? r.receiverId : r.senderId)
+];
     // 1. Same department or course (priority)
     const sameDept = await prisma.user.findMany({
       where: {

@@ -21,6 +21,158 @@ const renderContentWithHashtags = (content, navigate) => {
   );
 };
 
+// Add this above PostItem component:
+const CommentNode = ({ comment, postId, currentUserId, depth = 0 }) => {
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [replies, setReplies] = useState(comment.replies || []);
+  const [isLiked, setIsLiked] = useState(
+    comment.likes?.some(l => l.userId === currentUserId) || false
+  );
+  const [likeCount, setLikeCount] = useState(comment._count?.likes || 0);
+
+  const timeAgo = (dateStr) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
+  const handleLikeComment = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/posts/comments/${comment.id}/like`,
+      { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      setIsLiked(data.liked);
+      setLikeCount(prev => data.liked ? prev + 1 : prev - 1);
+    }
+  };
+
+  const handleReplySubmit = async (e) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    const token = localStorage.getItem('token');
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/posts/${postId}/comments`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ content: replyText, parentId: comment.id })
+      }
+    );
+    if (res.ok) {
+      const newReply = await res.json();
+      setReplies(prev => [...prev, newReply]);
+      setReplyText('');
+      setShowReplyInput(false);
+      setShowReplies(true);
+    }
+  };
+
+  const handleDeleteComment = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/posts/comments/${comment.id}`,
+      { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      // parent handles removal from list
+    }
+  };
+
+  return (
+    <div className={`comment-node depth-${Math.min(depth, 3)}`}>
+      <div className="comment-item">
+        <img
+          src={
+            comment.user?.profileImage ||
+            `https://ui-avatars.com/api/?name=${comment.user?.f_name}+${comment.user?.l_name}&background=random`
+          }
+          className="comment-avatar"
+          alt={comment.user?.f_name}
+        />
+        <div className="comment-content">
+          <div className="comment-author-row">
+  <span className="comment-author">{comment.user?.f_name} {comment.user?.l_name}</span>
+  <span className="comment-timestamp">{timeAgo(comment.createdAt)}</span>
+</div>
+<p className="comment-text">{comment.content}</p>
+
+          {/* Actions row */}
+          <div className="comment-actions-row">
+            <button
+              className={`comment-action-btn ${isLiked ? 'liked' : ''}`}
+              onClick={handleLikeComment}
+            >
+              <Heart size={12} fill={isLiked ? '#ef4444' : 'none'} color={isLiked ? '#ef4444' : 'currentColor'} />
+              <span>{likeCount > 0 ? likeCount : ''}</span>
+            </button>
+
+            <button
+              className="comment-action-btn"
+              onClick={() => setShowReplyInput(!showReplyInput)}
+            >
+              Reply
+            </button>
+
+            {replies.length > 0 && (
+              <button
+                className="comment-action-btn"
+                onClick={() => setShowReplies(!showReplies)}
+              >
+                {showReplies ? 'Hide' : `View ${replies.length} repl${replies.length > 1 ? 'ies' : 'y'}`}
+              </button>
+            )}
+
+            {comment.userId === currentUserId && (
+              <button className="comment-action-btn delete-type" onClick={handleDeleteComment}>
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Reply input */}
+          {showReplyInput && (
+            <form className="reply-form" onSubmit={handleReplySubmit}>
+              <input
+                type="text"
+                placeholder={`Reply to ${comment.user?.f_name}...`}
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+              />
+              {replyText.trim() && (
+                <button type="submit"><Send size={12} /></button>
+              )}
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Nested replies */}
+      {showReplies && replies.length > 0 && (
+        <div className="comment-replies">
+          {replies.map(reply => (
+            <CommentNode
+              key={reply.id}
+              comment={reply}
+              postId={postId}
+              currentUserId={currentUserId}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PostItem = ({ post, currentUser }) => {
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [comment, setComment] = useState("");
@@ -105,17 +257,6 @@ const PostItem = ({ post, currentUser }) => {
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/comments/${commentId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
-    }
-  };
-
   return (
     <div className="amebo-post-item">
   {/* Header */}
@@ -178,33 +319,18 @@ const PostItem = ({ post, currentUser }) => {
       </div>
 
       {/* Comments Section */}
-      {showComments && (
-        <div className="comments-list">
-          {comments.map((c) => (
-            <div key={c.id} className="comment-item">
-              <img
-                src={
-                  c.user?.profile_pic ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(`${c.user?.f_name || ''} ${c.user?.l_name || ''}`)}&background=random`
-                }
-                className="comment-avatar"
-                alt={c.user?.f_name}
-              />
-              <div className="comment-content">
-                <span className="comment-author">{c.user?.f_name} {c.user?.l_name}</span>
-                <p className="comment-text">{c.content}</p>
-              </div>
-              {c.userId === storedUser?.id && (
-                <button
-                  className="delete-comment-btn"
-                  onClick={() => handleDeleteComment(c.id)}
-                >
-                  <Trash2 size={14} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+        {showComments && (
+  <div className="comments-list">
+    {comments.map((c) => (
+      <CommentNode
+        key={c.id}
+        comment={c}
+        postId={post.id}
+        currentUserId={storedUser?.id}
+        depth={0}
+      />
+    ))}
+  </div>
       )}
 
       {/* Comment Input */}

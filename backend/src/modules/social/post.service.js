@@ -48,7 +48,7 @@ exports.getPosts = async (userId) => {
       likes: {
         select: { userId: true } // ← fix this
       },
-      _count: { select: { likes: true } }
+      _count: { select: { likes: true, comments: true } }
     }
   });
 };

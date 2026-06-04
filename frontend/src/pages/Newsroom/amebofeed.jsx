@@ -220,7 +220,7 @@ export default function AmeboFeed({ user }) {
           postVideo: p.video,
           likes: p._count.likes || 0,
           isLiked: p.likes.some((l) => l.userId === storedUser?.id) || false,
-          comments: 0,
+          comments: p._count.comments || 0,
         }} currentUser={user} />
       ))}
         <div className="feed-status">No more Gist for now.</div>
