@@ -16,6 +16,8 @@
   overflow: hidden;
   height: calc(50% - 10px); /* Makes both cards fit perfectly in the view */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  height: max-content;       /* Shrinks to exactly wrap the rows loaded */
+  max-height: 400px;
 }
 
 .rail-card-header {
@@ -35,9 +37,16 @@
   color: #1a202c;
 }
 
+
 .rail-card-content {
   flex: 1;
   padding: 8px 0;
+  overflow-y: auto; 
+  scrollbar-width: none; 
+}
+
+.rail-card-content::-webkit-scrollbar {
+  display: none; /* Hides scrollbar on Chrome/Safari */
 }
 
 /* --- TRENDING ROWS --- */
@@ -171,4 +180,12 @@
   background: #dcfce7;
   color: #16a34a;
   border-color: #16a34a;
+}
+/* --- RESPONSIVE LAPTOP ADJUSTMENT --- */
+@media (max-height: 850px) and (min-width: 1024px) {
+
+  .right-rail-card {
+    height: calc(50% - 10px);
+    max-height: none;        
+  }
 }

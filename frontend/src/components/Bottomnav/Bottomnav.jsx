@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useRef, useEffect} from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Home, ShoppingBag, BookOpen, Bell, LogOut } from 'lucide-react';
+import { Home, ShoppingBag, BookOpen, Bell, LogOut, Search } from 'lucide-react';
 import './Bottomnav.css';
 
 const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -32,10 +32,29 @@ const UserProfile = ({ name, avatarUrl }) => {
 
 
 
-export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred Henry" } }) {
+export default function TopNav({ isDarkMode, toggleTheme}) {
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isFocused, setIsFocused] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+  function handleClickOutside(event) {
+    // If the click happened outside the search bar wrapper
+    if (searchRef.current && !searchRef.current.contains(event.target)) {
+      setIsExpanded(false);
+      setIsFocused(false);
+    }
+  }
+
+  // Attach listener to the document
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    // Clean up listener when component unmounts
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   // Simple mock data array to simulate live UI filtering
   const mockStudents = [
@@ -69,14 +88,19 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
         </nav>
 
         {/*  search container  */}
-        <div className="header-search-bar">
+        <div ref={searchRef} className={`header-search-bar ${isExpanded ? 'expanded' : ''}`}>
+          <Search 
+             className="search-icon" 
+             size={18} 
+             onClick={() => setIsExpanded(true)} 
+           />
           <input 
             type="text" 
             placeholder="Search for people..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)} // Tracks typed letters
-            onFocus={() => setIsFocused(true)}               // Detects click/focus
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hides dropdown on blur (delay allows click to register)
+            onFocus={() => { setIsExpanded(true); setIsFocused(true); }} // Detects click/focus
+            
           />
 
           {/*  DROPDOWN DISPLAY LOGIC: Only shows if focused AND there is text typed */}
@@ -111,7 +135,7 @@ export default function TopNav({ isDarkMode, toggleTheme, user = { name: "Fred H
             storedUser?.profile_pic ||
               `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`
           }
-          className="comment-avatar"
+          className="user-avatar"
           alt="User"
           onError={(e) => {
             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`;

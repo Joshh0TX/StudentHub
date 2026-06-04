@@ -125,28 +125,7 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
 
         <hr className="card-divider" />
 
-        {/* Dynamic Light/Dark Theme Switch Controller Button */}
-        <button onClick={onToggleTheme} className="theme-toggle-control-btn">
-          {theme === 'light' ? (
-            <>
-              <FaMoon className="toggle-btn-icon" />
-              <span>Dark Mode</span>
-            </>
-          ) : (
-            <>
-              <FaSun className="toggle-btn-icon" />
-              <span>Light Mode</span>
-            </>
-          )}
-        </button>
-        {/* NEW SIMULATION SWITCH: Placed directly below your theme toggle */}
-        <button 
-          onClick={() => setIsOwner(!isOwner)} 
-          className="theme-toggle-control-btn" 
-          style={{ marginTop: '10px', borderColor: isOwner ? '#22c55e' : '#f97316' }}
-        >
-          <span>View As: <strong>{isOwner ? "Profile Owner" : "Visitor"}</strong></span>
-        </button>
+        
       </div>
     </div>
   );
@@ -318,7 +297,17 @@ useEffect(() => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  if (profileLoading || !profileData) return <div>Loading...</div>;
+  if (profileLoading || !profileData) {
+  return (
+    <div className="profile-page-container fallback-loading-wrapper" data-theme={theme}>
+      <div className="profile-loading-minimal">
+        <div className="spinner-element" />
+        <h3>Loading Profile...</h3>
+        <p>Fetching your Stuudo dashboard layout records.</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="profile-page-container" data-theme={theme}>

@@ -12,9 +12,9 @@
   display: flex;
   width: 100%;
   max-width: 1550px;
-  gap: 20px;
-  padding: 0 15px 24px 15px; /* Added side and bottom padding only */
-  align-items: flex-start; 
+  gap: 16px;
+  padding: 16px 15px 24px 15px; /* Added side and bottom padding only */
+   
 }
 
 /* --- COLUMN 1: LEFT --- */
@@ -22,11 +22,8 @@
   width: 300px;
   flex-shrink: 0;
   position: sticky;
-  /* 64px is the Nav height. We add 20px for a gap = 84px */
-  /* But since .content-area already shifted the whole page down, 
-     we only need enough top to stay visible. */
-  top: 84px; 
-  height: calc(100vh - 84px); 
+  top: 75px; 
+  height: calc(100vh - 95px); 
   z-index: 10;
   overflow-y: auto;
 }
@@ -35,6 +32,11 @@
 .column-center {
   flex: 1;
   min-width: 0;
+  position: sticky;
+  top: 75px;
+  height: calc(100vh - 95px);
+  overflow-y: auto;
+  
 }
 
 /* --- COLUMN 3: RIGHT --- */
@@ -42,13 +44,13 @@
   width: 230px;
   flex-shrink: 0;
   position: sticky;
-  top: 84px;
-  height: calc(100vh - 84px);
+  top: 75px;
+  height: calc(100vh - 95px);
   overflow-y: auto;
 }
 
-/* Optional: Clean scrollbars for sidebars */
 .column-left::-webkit-scrollbar,
+.column-center::-webkit-scrollbar, /* Added center here */
 .column-right::-webkit-scrollbar {
   display: none;
 }

@@ -41,6 +41,51 @@
 .more-options:hover {
   background-color: #f1f5f9;
 }
+.post-menu-wrapper {
+  position: relative; /* Keeps dropdown bound to the top-right button */
+  margin-left: auto;  /* Pushes the container to the far right side of header */
+}
+
+/* This overrides the absolute spacing layout */
+.post-header .more-options {
+  margin-left: 0; 
+}
+
+.post-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  z-index: 100;
+  min-width: 140px;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none !important;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.dropdown-item.delete-item {
+  color: #ef4444 !important;
+}
+
+.dropdown-item.delete-item:hover {
+  background-color: #fef2f2 !important;
+}
 
 /* Body */
 .post-text {
@@ -61,13 +106,23 @@
 }
 
 /* Interaction Bar */
+/* --- UPDATE THIS BLOCK --- */
 .post-interactions {
-  display: flex;
-  gap: 20px;
+  display: flex !important;
+  justify-content: flex-start !important; /* Force items to start on the left */
+  align-items: center !important;
+  gap: 12px !important;                   /* Sneak them close together */
   border-top: 1px solid #f1f5f9;
   padding-top: 12px;
+  width: 100%;
 }
 
+/* --- ADD THIS NEW TARGETING RULE DIRECTLY BELOW IT --- */
+.post-interactions .interact-btn {
+  flex: unset !important;       /* Prevents buttons from growing to fill the width */
+  width: max-content !important; /* Ensures the button box matches the text size only */
+  margin: 0 !important;          /* Kills any invisible side margins pushing buttons apart */
+}
 .interact-btn {
   background: none;
   border: none !important;      /* Removes any explicit borders */
@@ -249,29 +304,55 @@
   color: #9ca3af;
 }
 
+/* --- UPDATE THIS BLOCK --- */
 .comment-actions-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 6px;
-  justify-content: flex-start;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important; /* Forces layout to pack from the left */
+  gap: 8px !important;                    /* Keeps buttons snugly close to each other */
+  margin-top: 4px;
+  width: 100%;
 }
 
+/* --- UPDATE THIS BLOCK TO OVERRIDE SPACING HACKS --- */
 .comment-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
   background: none;
-  border: none;
-  font-size: 12px;
-  color: #6b7280;
+  border: none !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+
+  /* NEW: Prevents the comment buttons from stretching or pushing apart */
+  flex: unset !important;       
+  width: max-content !important; 
+  margin: 0 !important;          
+}
+.comment-action-btn:hover {
+  background-color: #f1f5f9 !important;
+
+  color: #1e293b;
 }
 
-.comment-action-btn.liked { color: #ef4444; }
-.comment-action-btn.delete-type { color: #ef4444; }
-.comment-action-btn:hover { color: #111827; }
+.comment-action-btn.liked {
+  color: #ef4444;
+}
+
+.comment-action-btn.delete-type {
+  color: #94a3b8;
+  margin-left: 4px;            /* Slight isolation gap for safety delete button click */
+}
+
+.comment-action-btn.delete-type:hover {
+  color: #ef4444;
+  background-color: #fef2f2 !important;
+}
 
 .reply-form {
   display: flex;

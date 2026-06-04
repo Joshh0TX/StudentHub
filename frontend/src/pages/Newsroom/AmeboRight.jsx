@@ -31,7 +31,7 @@ const TrendingCard = () => {
     <div className="right-rail-card">
       <div className="rail-card-header">
         <div className="header-title">
-          <Flame size={18} className="text-orange" />
+         
           <span>Top Trending</span>
         </div>
         <div className="period-toggle">

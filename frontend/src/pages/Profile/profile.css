@@ -555,3 +555,61 @@ html, body {
   font-size: 14px;
   line-height: 1.5;
 }
+
+/* --- FULL SCREEN BACKGROUND CONTAINER --- */
+.fallback-loading-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-main) !important; /* Locks background to light/dark theme color */
+  margin: 0;
+  padding: 0;
+}
+
+/* --- THE INVISIBLE CONTENT WRAPPER --- */
+.profile-loading-minimal {
+  background: transparent !important; /* Erases the card background box completely */
+  border: none !important;            /* Erases the borders */
+  box-shadow: none !important;        /* Erases the box shadow */
+  padding: 0;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Typography styles that match your Light/Dark tokens */
+.profile-loading-minimal h3 {
+  color: var(--text-primary) !important;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-loading-minimal p {
+  color: var(--text-secondary) !important;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- THE CLEAN SPINNER --- */
+.spinner-element {
+  width: 36px;
+  height: 36px;
+  border: 3.5px solid var(--divider-color);
+  border-top-color: var(--accent-color) !important; /* Uses your exact brand indigo/blue token */
+  border-radius: 50%;
+  animation: spinnerRotate 0.7s linear infinite;
+}
+
+@keyframes spinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}

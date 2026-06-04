@@ -46,49 +46,82 @@
   color: #3b82f6;
 }
 
+/*to insure the left and right sections take up equal space and the center section is perfectly centered*/
+.header-left, 
+.header-right {
+  flex: 1; 
+}
+
+.header-left {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.header-right {
+  display: flex;
+  justify-content: flex-end; 
+}
+
 /* --- CENTER NAVIGATION  --- */
 .header-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
+
   display: flex;
   align-items: center;
   gap: 40px;
+  transition: gap 0.3s ease-in-out;
 }
 
 .icon-hub {
   display: flex;
   gap: 35px;
   align-items: center;
-  pointer-events: auto;
+
 }
 /* --- NAV SEARCH BAR STYLES --- */
 .header-search-bar {
   display: flex;
   align-items: center;
-  background: #f1f5f9;
+  justify-content: center;
+  background: #ffffff;
   padding: 6px 14px;
-  border-radius: 20px;
-  width: 360px;
+  border-radius: 50%;
+  width: 36px; 
+  height: 36px;
+  box-sizing: border-box;
+  
   border: 1.5px solid transparent;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: auto; 
   position: relative;
 }
 
-.header-search-bar:focus-within {
+.header-search-bar.expanded {
+  width: 360px; /* Slides open smoothly to full size */
+  border-radius: 20px; /* Morph from circle to rounded input bar */
   background: #ffffff;
   border-color: #3b82f6;
+  padding: 6px 14px;
+  justify-content: flex-start; /* Aligns items to the left once open */
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
-  width: 380px; 
+  cursor: default;
 }
+
 
 .header-search-bar .search-icon {
   color: #94a3b8;
-  margin-right: 8px;
+  margin-right: 0;
   flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease, margin-right 0.25s ease;
 }
+.header-search-bar.expanded .search-icon {
+  margin-right: 8px;
+}
+/* Target the icon hover strictly when NOT expanded */
+.header-search-bar:not(.expanded):hover .search-icon {
+  color: #3b82f6;          /* Changes the icon color to your brand blue */
+  transform: scale(1.2);   /* Smoothly grows the icon size by 20% */
+}
+
+
 
 .header-search-bar input {
   border: none !important;
@@ -98,6 +131,15 @@
   font-size: 0.85rem;
   color: #1a202c;
   padding: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.header-search-bar.expanded input {
+  opacity: 1;
+  pointer-events: auto;
+  /* Optional delay: waits slightly for the bar to slide open before revealing text */
+  transition-delay: 0.15s; 
 }
 
 .header-search-bar input::placeholder {

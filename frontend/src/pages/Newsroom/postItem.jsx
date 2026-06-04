@@ -100,10 +100,10 @@ const CommentNode = ({ comment, postId, currentUserId, depth = 0 }) => {
         />
         <div className="comment-content">
           <div className="comment-author-row">
-  <span className="comment-author">{comment.user?.f_name} {comment.user?.l_name}</span>
-  <span className="comment-timestamp">{timeAgo(comment.createdAt)}</span>
-</div>
-<p className="comment-text">{comment.content}</p>
+            <span className="comment-author">{comment.user?.f_name} {comment.user?.l_name}</span>
+            <span className="comment-timestamp">{timeAgo(comment.createdAt)}</span>
+          </div>
+          <p className="comment-text">{comment.content}</p>
 
           {/* Actions row */}
           <div className="comment-actions-row">
@@ -177,6 +177,7 @@ const PostItem = ({ post, currentUser }) => {
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [showMenu, setShowMenu] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(Number(post.likes) || 0);
@@ -261,26 +262,45 @@ const PostItem = ({ post, currentUser }) => {
     <div className="amebo-post-item">
   {/* Header */}
   <div className="post-header">
-    <img
-      src={post.userImg}
-      alt={post.userName}
-      className="mini-avatar"
-      onClick={handleProfileClick}
-      style={{ cursor: 'pointer' }}
-    />
-    <div className="user-meta">
-      <h4 className="user-name" onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
-        {post.userName}
-      </h4>
-      <span className="post-time">{post.timestamp}</span>
-    </div>
-    {post.userId === storedUser?.id && (
-      <button className="delete-post-btn" onClick={handleDeletePost}>
-        <Trash2 size={16} />
-      </button>
-    )}
-    <button className="more-options"><MoreHorizontal size={18} /></button>
+  <img
+    src={post.userImg}
+    alt={post.userName}
+    className="mini-avatar"
+    onClick={handleProfileClick}
+    style={{ cursor: 'pointer' }}
+  />
+  <div className="user-meta">
+    <h4 className="user-name" onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
+      {post.userName}
+    </h4>
+    <span className="post-time">{post.timestamp}</span>
   </div>
+
+  {/* NEW WRAPPER BLOCK FOR THE OPTIONS AND DROPDOWN */}
+  <div className="post-menu-wrapper">
+    <button className="more-options" onClick={() => setShowMenu(!showMenu)}>
+      <MoreHorizontal size={18} />
+    </button>
+    
+    {showMenu && (
+      <div className="post-dropdown-menu">
+        {post.userId === storedUser?.id && (
+          <button 
+            className="dropdown-item delete-item" 
+            onClick={() => {
+              handleDeletePost();
+              setShowMenu(false);
+            }}
+          >
+            <Trash2 size={14} />
+            <span>Delete Post</span>
+          </button>
+        )}
+        {/* You can easily drop more options here in the future like Edit or Report */}
+      </div>
+    )}
+  </div>
+</div>
 
       {/* Body */}
       <div className="post-body">

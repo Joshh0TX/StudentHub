@@ -33,6 +33,56 @@
   min-height: 40px; /* Reduced height from 60px to 40px */
   color: #1e293b;
 }
+/* --- UNIVERSAL MEDIA PREVIEW CONTAINER --- */
+.media-preview-wrapper {
+  position: relative; /* Crucial: Allows the trash button to pin itself relative to this box */
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 14px;
+  overflow: hidden; /* Clips the image corners perfectly to match the container curves */
+  border: 1px solid #edf2f7;
+}
+
+/* --- THE SQUARE CONTENT FOR BOTH IMAGE AND VIDEO --- */
+.media-preview-square {
+  width: 100%;
+  
+  /* Forces the layout to stay a perfect 1:1 aspect ratio square */
+  aspect-ratio: 16/9 ; 
+  
+  /* The secret sauce: fills the square completely without stretching or squishing the media */
+  object-fit: cover; 
+  display: block;
+}
+
+/* --- THE FLOATING TRASH BUTTON --- */
+.media-delete-icon-btn {
+  position: absolute;
+  bottom: 12px; /* Pulls it up slightly from the bottom edge */
+  right: 12px;  /* Pulls it left from the right edge */
+  
+  /* Making it a clean, blurred glass circle */
+  background: rgba(239, 68, 68, 0.9) !important; /* Tailwind-like red with high opacity */
+  color: white !important;
+  border: none !important;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+/* Hover effect for the trash circle */
+.media-delete-icon-btn:hover {
+  background: #dc2626 !important; /* Deepens red on hover */
+  transform: scale(1.08); /* Tiny grow effect */
+}
 
 /* --- TIGHTER ACTIONS ROW --- */
 .post-actions-row {
@@ -50,8 +100,10 @@
 }
 
 .action-icons button {
-  background: none;
-  border: none;
+  background: transparent !important; /* Ensures no background colors appear */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -61,14 +113,16 @@
   font-size: 0.8rem; /* Smaller font for icons */
   transition: 0.2s;
   padding: 6px 10px;
-  border-radius: 8px;
+  
 }
+
 
 .action-icons button:hover {
-  background-color: #f8fafc;
-  color: #3b82f6;
+  background: transparent !important; 
+  border: none !important;            
+  box-shadow: none !important;
+  color: #3b82f6;                     
 }
-
 /* --- REDUCED POST BUTTON --- */
 .post-submit-btn {
   background: #3b82f6;
@@ -100,4 +154,4 @@
 }
 
 
-/*For Post*/
+

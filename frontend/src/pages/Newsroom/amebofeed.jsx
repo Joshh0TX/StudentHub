@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send } from 'lucide-react';
+import { Image, Video, BarChart2, Heart, MessageCircle, Share2, Send, Trash2 } from 'lucide-react';
 import './amebofeed.css';
 import PostItem from './postItem';
 
@@ -135,22 +135,22 @@ return (
     </div>
 
     {imagePreview && (
-      <div className="image-preview">
-        <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
-        <button type="button" onClick={handleRemoveImage} style={{ marginTop: '4px', color: 'red' }}>
-          Remove
-        </button>
-      </div>
-    )}
+  <div className="media-preview-wrapper">
+    <img src={imagePreview} alt="Preview" className="media-preview-square" />
+    <button type="button" className="media-delete-icon-btn" onClick={handleRemoveImage} title="Remove image">
+      <Trash2 size={16} />
+    </button>
+  </div>
+)}
 
-     {videoPreview && (
-        <div className="video-preview">
-          <video src={videoPreview} controls style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
-          <button type="button" onClick={handleRemoveVideo} style={{ marginTop: '4px', color: 'red' }}>
-            Remove
-          </button>
-        </div>
-      )}
+{videoPreview && (
+  <div className="media-preview-wrapper">
+    <video src={videoPreview} controls className="media-preview-square" />
+    <button type="button" className="media-delete-icon-btn" onClick={handleRemoveVideo} title="Remove video">
+      <Trash2 size={16} />
+    </button>
+  </div>
+)}
 
     <div className="post-actions-row">
       <div className="action-icons">
