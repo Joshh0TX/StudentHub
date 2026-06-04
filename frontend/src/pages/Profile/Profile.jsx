@@ -396,11 +396,12 @@ useEffect(() => {
         onClose={() => setIsModalOpen(false)}
         initialData={profileData}
         onSave={async (updatedData) => {
-  setProfileData(updatedData); // optimistic
+  setProfileData(updatedData);
   await updateMyProfile({
     bio: updatedData.overview,
     location: updatedData.location,
     skills: updatedData.skills,
+    dob : updatedData.dob,
     socials: {
       linkedin: updatedData.linkedin,
       instagram: updatedData.instagram,

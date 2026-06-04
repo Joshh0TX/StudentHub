@@ -18,7 +18,7 @@ exports.getProfile = async (userId) => {
 };
 
 exports.updateProfile = async (userId, data) => {
-  const allowedFields = ['bio', 'course', 'location', 'email', 'skills', 'interests', 'badges', 'achievements', 'projects', 'socials', 'profileImage', 'coverImage'];
+  const allowedFields = ['bio', 'course', 'location', 'email', 'skills', 'interests', 'badges', 'achievements', 'projects', 'socials', 'profileImage', 'coverImage', 'dob'];
   
   const updateData = {};
   allowedFields.forEach(field => {

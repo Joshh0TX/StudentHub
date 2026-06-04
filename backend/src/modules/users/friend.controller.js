@@ -14,7 +14,11 @@ exports.sendFriendRequest = async (req, res) => {
         ]
       }
     });
-    if (existing) return res.status(400).json({ message: 'Request already exists' });
+    // In sendFriendRequest, after the existing check:
+if (existing) {
+  console.log('Existing request found:', existing); // ← ADD
+  return res.status(400).json({ message: 'Request already exists', existing });
+}
 
     await prisma.friendRequest.create({
       data: { senderId, receiverId }

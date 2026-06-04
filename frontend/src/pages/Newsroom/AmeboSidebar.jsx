@@ -28,29 +28,36 @@ export default function AmeboSidebar({ user }) {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  // ← DEFINE fetchAll HERE, outside useEffect
+  const fetchAll = async () => {
     const token = localStorage.getItem("token");
     const headers = { Authorization: `Bearer ${token}` };
 
-    const fetchAll = async () => {
-      const [inboundRes, connectionsRes, sentRes, profileRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/inbound`, { headers }),
-        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, { headers }),
-        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/sent`, { headers }),
-        fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, { headers }),
-      ]);
-      const [inboundData, connectionsData, sentData, profileRes2] = await Promise.all([
-        inboundRes.json(),
-        connectionsRes.json(),
-        sentRes.json(),
-        profileRes.json(),
-      ]);
-      setInbound(Array.isArray(inboundData) ? inboundData : []);
-      setConnections(Array.isArray(connectionsData) ? connectionsData : []);
-      setSent(Array.isArray(sentData) ? sentData : []);
-      setProfileData(profileRes2);
-    };
+    const [inboundRes, connectionsRes, sentRes, profileRes] = await Promise.all([
+      fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/inbound`, { headers }),
+      fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, { headers }),
+      fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/sent`, { headers }),
+      fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, { headers }),
+    ]);
+
+    const [inboundData, connectionsData, sentData, profileRes2] = await Promise.all([
+      inboundRes.json(),
+      connectionsRes.json(),
+      sentRes.json(),
+      profileRes.json(),
+    ]);
+
+    setInbound(Array.isArray(inboundData) ? inboundData : []);
+    setConnections(Array.isArray(connectionsData) ? connectionsData : []);
+    setSent(Array.isArray(sentData) ? sentData : []);
+    setProfileData(profileRes2);
+  };
+
+  // ← THEN useEffect just calls it
+  useEffect(() => {
     fetchAll();
+    const interval = setInterval(fetchAll, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleRespond = async (requestId, action) => {
@@ -61,17 +68,10 @@ export default function AmeboSidebar({ user }) {
       body: JSON.stringify({ action })
     });
     if (res.ok) {
-      setInbound((prev) => prev.filter((r) => r.id !== requestId));
-      if (action === 'accepted') {
-        const token = localStorage.getItem("token");
-        const connectionsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/connections`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await connectionsRes.json();
-        setConnections(Array.isArray(data) ? data : []);
-      }
+      await fetchAll(); //fetchAll is in scope
     }
   };
+
 
   const handleScroll = (e) => {
     setShowMiniNav(e.target.scrollTop > 80);

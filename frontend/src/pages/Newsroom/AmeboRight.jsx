@@ -75,29 +75,57 @@ const TrendingCard = () => {
 
 const SuggestedCard = () => {
   const [suggested, setSuggested] = useState([]);
-  const [sent, setSent] = useState({});
+  const [requestStatus, setRequestStatus] = useState({}); // tracks per-user status
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSuggested = async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/suggested`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setSuggested(Array.isArray(data) ? data : []);
+
+      // Fetch suggested users AND sent requests together
+      const [suggestedRes, sentRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/suggested`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/friends/sent`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+      ]);
+
+      const [suggestedData, sentData] = await Promise.all([
+        suggestedRes.json(),
+        sentRes.json(),
+      ]);
+
+      setSuggested(Array.isArray(suggestedData) ? suggestedData : []);
+
+      // Pre-mark anyone you've already sent a request to
+      const alreadySent = {};
+      if (Array.isArray(sentData)) {
+        sentData.forEach((req) => {
+          alreadySent[req.receiverId] = 'sent';
+        });
+      }
+      setRequestStatus(alreadySent);
     };
+
     fetchSuggested();
   }, []);
 
   const handleFollow = async (userId) => {
+    if (requestStatus[userId]) return; // already sent, don't re-send
+
     const token = localStorage.getItem("token");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/friend-request/${userId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` }
     });
+
     if (res.ok) {
-      setSent((prev) => ({ ...prev, [userId]: true }));
+      setRequestStatus((prev) => ({ ...prev, [userId]: 'sent' }));
+    } else {
+      const data = await res.json();
+      console.log('Friend request failed:', data.message);
     }
   };
 
@@ -129,11 +157,11 @@ const SuggestedCard = () => {
                 <span className="user-bio">{user.course || user.department || 'Student'}</span>
               </div>
               <button
-                className={`follow-action-btn ${sent[user.id] ? 'sent' : ''}`}
+                className={`follow-action-btn ${requestStatus[user.id] ? 'sent' : ''}`}
                 onClick={() => handleFollow(user.id)}
-                disabled={sent[user.id]}
+                disabled={!!requestStatus[user.id]}
               >
-                {sent[user.id] ? '✓' : <UserPlus size={14} />}
+                {requestStatus[user.id] ? '✓' : <UserPlus size={14} />}
               </button>
             </div>
           ))
