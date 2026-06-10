@@ -106,28 +106,50 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
           <span className="info-text">{profileData.location}</span>
         </div>  
         {/* Date of Birth Row */}
+        {/* Date of Birth Row */}
         <div className="info-row">
           <FaCalendarAlt className="info-icon" /> 
           <span className="info-text">Born: {profileData.dob}</span>
         </div>
-        <hr className="card-divider" />
-        {/* Social Connections */}
-        <div className="profile-socials-stacked">
-          <a href={profileData.linkedin} className="social-text-link" aria-label="LinkedIn">
-            <FaLinkedin className="social-link-icon linkedin-brand" />
-            <span>Connect on LinkedIn</span>
-          </a>
-          <a href={profileData.instagram} className="social-text-link" aria-label="Instagram">
-            <FaInstagram className="social-link-icon instagram-brand" />
-            <span>Follow on Instagram</span>
-          </a>
+
+        {/* 🛠️ REPLACE FROM HERE DOWN TO THE END OF THE DETAILS CONTENT DIV WITH THIS: */}
+        <div className="profile-stats-ribbon">
+          <div className="stat-pill">
+            <span className="stat-number">{profileData.education?.[0]?.meta || '400L'}</span>
+            <span className="stat-label">Level</span>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-number">{profileData.linkedin !== '#' ? '1' : '0'}</span>
+            <span className="stat-label">Network</span>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-number">Active</span>
+            <span className="stat-label">Status</span>
+          </div>
         </div>
 
+      
+
+        {/* Social Connections */}
+        <div className="profile-socials-stacked">
+          {profileData.linkedin && profileData.linkedin !== '#' && (
+            <a href={profileData.linkedin} target="_blank" rel="noreferrer" className="social-text-link" aria-label="LinkedIn">
+              <FaLinkedin className="social-link-icon linkedin-brand" />
+              <span>LinkedIn Network</span>
+            </a>
+          )}
+          {profileData.instagram && profileData.instagram !== '#' && (
+            <a href={profileData.instagram} target="_blank" rel="noreferrer" className="social-text-link" aria-label="Instagram">
+              <FaInstagram className="social-link-icon instagram-brand" />
+              <span>Instagram Feed</span>
+            </a>
+          )}
+        </div>
+      </div> {/* Closes profile-details-content */}
         <hr className="card-divider" />
 
         
       </div>
-    </div>
   );
 };
 

@@ -289,6 +289,9 @@ html, body {
   border-top: 1px solid var(--divider-color);
   margin: 20px 0;
 }
+.profile-details-content span{
+    color: var(--text-primary) !important;
+  }
 
 /* --- Social Links --- */
 .profile-socials-stacked {
@@ -612,4 +615,119 @@ html, body {
   to {
     transform: rotate(360deg);
   }
+}
+/* =========================================================================
+   🛠️ CLEAN ATTACHMENT: PREMIUM STATS RIBBON STYLES
+   ========================================================================= */
+.profile-stats-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--btn-toggle-bg);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 12px 6px;
+  margin: 18px 0 6px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-pill:not(:last-child) {
+  border-right: 1px solid var(--divider-color);
+}
+
+.stat-number {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* =========================================================================
+   🛠️ CLEAN ATTACHMENT: MOBILE ULTRA-PREMIUM BORDERLESS OVERRIDES
+   ========================================================================= */
+@media (max-width: 768px) {
+
+  .profile-page-container {
+    background-color: #ffffff !important;
+  }
+
+  /* Morph the cover image into a tight, slick header band */
+  .profile-cover-wrapper {
+    height: 200px !important;
+  }
+
+  /* Structural adjustment to cleanly pull the card flat into the mobile layout flow */
+  .profile-info-card {
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: -60px !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 20px 20px 20px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+
+  /* Make avatar context pop cleanly over mobile viewport cover bands */
+  .profile-avatar-wrapper {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  /* Push workspace columns down cleanly on phone touch grids */
+  .profile-info-card {
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: -60px !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    
+    /* 🛠️ FORCE SPACING LOCKDOWN: Clears any inner padding leaks at the card baseline */
+    padding: 0 20px 0px 20px !important; 
+    border-bottom: 1px solid #f1f5f9 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* 2. Kill the massive spacing leak right before the tabs container */
+  .profile-main-display-area {
+    margin-top: 0 !important; 
+    padding-top: 0 !important;
+  }
+
+  /* 3. Strip any residual desktop bottom line padding off the tab menu engine itself */
+  .profile-mini-nav-container {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important;
+  }
+
+  /* Flatten the core tab content display panel entirely edge-to-edge */
+  .profile-content-display-box {
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 16px 0 !important;
+  }
+  
 }
