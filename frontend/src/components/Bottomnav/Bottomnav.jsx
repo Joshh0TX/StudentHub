@@ -1,6 +1,6 @@
 import React, {useRef, useEffect} from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Home, ShoppingBag, BookOpen, Bell, LogOut, Search } from 'lucide-react';
+import { Home, ShoppingBag, BookOpen, Bell, LogOut, Search, User } from 'lucide-react';
 import './Bottomnav.css';
 
 const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -69,6 +69,7 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
   );
 
   return (
+  <>
     <header className="site-header">
       {/* 1. Left Section */}
       <div className="header-left">
@@ -145,8 +146,18 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
         
         <Link to="/" className="logout-btn">
          <LogOut size={20} />
-        </Link>
+        </Link> 
       </div>
     </header>
+    <nav className="mobile-pill-bottom-nav">
+        <div className="mobile-pill-items-wrapper">
+          <NavIcon to="/newsroom" Icon={Home} />
+          <NavIcon to="/marketplace" Icon={ShoppingBag} />
+          <NavIcon to="/academy" Icon={BookOpen} />
+          <NavIcon to="/notifications" Icon={Bell} />
+          <NavIcon to="/profile" Icon={User} /> {/* Profile tab added directly to the mobile track */}
+        </div>
+      </nav>
+    </>
   );
 }

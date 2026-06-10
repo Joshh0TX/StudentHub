@@ -54,3 +54,34 @@
 .column-right::-webkit-scrollbar {
   display: none;
 }
+
+/* ============================================================================
+   MOBILE FEED RESPONSIVE BREAKPOINT
+   ============================================================================ */
+@media (max-width: 768px) {
+  
+  /* 1. Reduce side padding on the main grid container to maximize text space */
+  .amebo-content-grid {
+    padding: 12px 8px;
+    gap: 0; /* Clear out any column gap spaces */
+  }
+
+  /* 2. Vaporize the left amebo sidebar container completely */
+  .column-left {
+    display: none !important;
+  }
+
+  /* 3. Vaporize the right trending widgets panel completely */
+  .column-right {
+    display: none !important;
+  }
+
+  /* 4. Force the center column to span 100% width and handle mobile viewing heights */
+  .column-center {
+    width: 100%;
+    flex: 1;
+    position: relative; /* Reverts sticky bounds so mobile feeds scroll natively */
+    top: 0;
+    height: auto;
+  }
+}

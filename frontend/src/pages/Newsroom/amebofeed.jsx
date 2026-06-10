@@ -181,7 +181,12 @@ return (
   <button type="button"><BarChart2 size={18} /> <span>Poll</span></button>
 </div>
       <button className="post-submit-btn" onClick={handlePost}>
-        {uploading ? 'Uploading...' : 'Post'}
+        {uploading ? ('Uploading...' ): (
+          <>
+            <span className="submit-btn-text">Post</span>
+            <Send size={15} className="submit-btn-icon" />
+          </>
+        )}
       </button>
     </div>
   </div>

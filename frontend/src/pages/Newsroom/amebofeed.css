@@ -152,6 +152,64 @@
   border-radius: 20px;
   border: 1px solid #edf2f7;
 }
+/* ============================================================================
+   MOBILE COMPACT POST BOX RULES
+   ============================================================================ */
+@media (max-width: 768px) {
+  .amebo-post-card {
+    background: #f9fafb !important;   /* Enforces full white canvas backdrop */
+    padding: 12px 4px !important;    /* Pulls layout flush toward the screen edges */
+    
+    /* 🛠️ THE CRUCIAL KILLS: Nukes all remaining desktop card structures */
+    border: none !important;         
+    box-shadow: none !important;     
+    border-radius: 0 !important;     
+    
+    /* 🎨 OPTIONAL: Adds a subtle, sleek bottom line divider to separate posts */
+    border-bottom: 1px solid #f1f5f9 !important; 
+    margin-bottom: 12px !important;
+  }
+  .post-input-row textarea{
+    background: transparent !important; /* Strips the white box background for a more native mobile feel */
+  }
+  /* 1. Vaporize the structural text labels for Image, Video, and Poll fields */
+  .action-icons button span {
+    display: none !important;
+  }
+  
 
+  /* 2. Make action buttons tighter circles/squares on touch interfaces */
+  .action-icons button {
+    padding: 8px !important;
+    border-radius: 50%;
+  }
 
+  /* 3. Hide the literal string 'Post' from the main execution button */
+  .post-submit-btn .submit-btn-text {
+    display: none !important;
+  }
 
+  /* 4. Morph the button wrapper into an aggressive circular action arrow badge */
+  .post-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0 !important; /* Strips padding bounds to ensure true circle measurements */
+    border-radius: 50% !important;
+  }
+
+  /* 5. Force reveal and center the clean Lucide Send icon element */
+  .post-submit-btn .submit-btn-icon {
+    display: block !important;
+    margin: 0;
+    transform: translateX(-1px); /* Perfect mathematical centering correction for arrow glyphs */
+  }
+}
+
+/* --- DESKTOP PROTECTION CONFIGS --- */
+/* Ensures the send arrow icon stays hidden by default on desktop monitors */
+.post-submit-btn .submit-btn-icon {
+  display: none;
+}

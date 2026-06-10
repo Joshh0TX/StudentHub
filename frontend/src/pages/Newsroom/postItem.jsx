@@ -31,6 +31,7 @@ const CommentNode = ({ comment, postId, currentUserId, depth = 0 }) => {
     comment.likes?.some(l => l.userId === currentUserId) || false
   );
   const [likeCount, setLikeCount] = useState(comment._count?.likes || 0);
+  
 
   const timeAgo = (dateStr) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -181,7 +182,18 @@ const PostItem = ({ post, currentUser }) => {
   const [showComments, setShowComments] = useState(false);
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(Number(post.likes) || 0);
+  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
+  // 🛠️ PASTE THIS inside the start of PostItem component:
+  
+  const CHARACTER_LIMIT = 180;
+  const isLongPost = post.content?.length > CHARACTER_LIMIT;
+
+  const getRenderedContent = () => {
+    if (!post.content) return "";
+    if (!isLongPost || isExpanded) return post.content;
+    return `${post.content.substring(0, CHARACTER_LIMIT)}...`;
+  };
 
   // Fetch comments when expanded
   useEffect(() => {
@@ -304,7 +316,20 @@ const PostItem = ({ post, currentUser }) => {
 
       {/* Body */}
       <div className="post-body">
-        <p className="post-text">{renderContentWithHashtags(post.content, navigate) || ""}</p>
+        {/* 🛠️ REPLACE YOUR ENTIRE EXISTING <p className="post-text"> CODE WITH THIS: */}
+        <p className="post-text">
+          {renderContentWithHashtags(getRenderedContent(), navigate) || ""}
+          
+          {isLongPost && (
+            <button 
+              type="button" 
+              className="text-expand-toggle-link"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? " Show Less" : " Read More"}
+            </button>
+          )}
+        </p>
         {post.postImage && (
           <div className="post-media">
             <img src={post.postImage} alt="Post content" loading="lazy" />

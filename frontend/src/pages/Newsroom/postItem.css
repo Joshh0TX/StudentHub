@@ -376,3 +376,37 @@
   gap: 8px;
   margin-bottom: 2px;
 }
+
+/* 🛠️ APPEND TO THE VERY END OF POSTITEM.CSS */
+
+/* Style the inline link text button */
+.text-expand-toggle-link {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin-left: 6px;
+  color: #3b82f6; 
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline;
+}
+
+.text-expand-toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile adjustments to strip borders, shadows, and cards */
+@media (max-width: 768px) {
+  .amebo-post-item {
+    background: #f9fafb !important;
+    padding: 16px 4px !important;    
+    border: none !important;         
+    box-shadow: none !important;     
+    border-radius: 0 !important;     
+    border-bottom: 1px solid #f1f5f9 !important;
+    margin-bottom: 0 !important; 
+  }
+}

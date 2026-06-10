@@ -104,7 +104,7 @@ const ProfileInfoCard = ({ theme, onToggleTheme, isOwner, setIsOwner, profileDat
         <div className="info-row">
           <FaMapMarkerAlt className="info-icon" /> 
           <span className="info-text">{profileData.location}</span>
-        </div>
+        </div>  
         {/* Date of Birth Row */}
         <div className="info-row">
           <FaCalendarAlt className="info-icon" /> 
