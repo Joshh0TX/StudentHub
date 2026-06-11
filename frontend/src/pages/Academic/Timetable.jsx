@@ -525,10 +525,10 @@ const TimetableGrid = ({
                 style={
                   confirmDelete
                     ? {
-                        background: "#fee2e2",
-                        borderColor: "#dc2626",
-                        color: "#dc2626",
-                      }
+                      background: "#fee2e2",
+                      borderColor: "#dc2626",
+                      color: "#dc2626",
+                    }
                     : {}
                 }
               >
@@ -805,13 +805,13 @@ const Timetable = () => {
         prev.map((t) =>
           t.id === saved.id
             ? {
-                ...saved,
-                classes: (saved.classes || []).map((c) => ({
-                  ...c,
-                  startTime: normaliseTime(c.startTime ?? c.start_time),
-                  endTime: normaliseTime(c.endTime ?? c.end_time),
-                })),
-              }
+              ...saved,
+              classes: (saved.classes || []).map((c) => ({
+                ...c,
+                startTime: normaliseTime(c.startTime ?? c.start_time),
+                endTime: normaliseTime(c.endTime ?? c.end_time),
+              })),
+            }
             : t,
         ),
       );
@@ -903,8 +903,10 @@ const Timetable = () => {
 
       {timetables.length === 0 ? (
         <div className="timetable-empty">
-          <Clock size={40} color="#d1d5db" />
-          <p>No timetables yet.</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:'10px'}}>
+            <Clock size={40} color="#d1d5db" />
+            <p>No timetables yet.</p>
+          </div>
           <button className="btn-create" onClick={() => setShowModal(true)}>
             <Plus size={16} /> Create your first timetable
           </button>
