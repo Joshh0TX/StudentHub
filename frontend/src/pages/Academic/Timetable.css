@@ -41,8 +41,6 @@
   border-radius: 9px;
   cursor: pointer;
   transition: background 0.15s ease;
-  margin-left: auto;
-  margin-right: auto;
   width: fit-content;
 }
 
@@ -98,9 +96,7 @@
   gap: 20px;
 }
 
-/* ── Timetable Card ──
-   overflow:visible is critical — it lets the compact-block tooltip
-   escape the card boundary instead of being clipped.               */
+/* ── Timetable Card ── */
 .timetable-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -280,11 +276,7 @@
   color: #111827;
 }
 
-/* ── Grid Wrapper ──
-   overflow-x:auto for horizontal scroll on small screens.
-   overflow-y:visible so the tooltip (position:absolute on the block)
-   is never clipped vertically. isolation is intentionally omitted —
-   it creates a stacking context that clips the tooltip.              */
+/* ── Grid Wrapper ── */
 .timetable-grid-wrapper {
   overflow-x: auto;
   overflow-y: visible;
@@ -444,10 +436,7 @@
   padding: 3px 6px;
 }
 
-/* ── Hover Tooltip ──
-   Renders ABOVE the block by default.
-   z-index:9999 ensures it sits above the card and surrounding layout.
-   The --top-row modifier flips it below when on the first grid row.  */
+/* ── Hover Tooltip ── */
 .block-tooltip {
   display: none;
   position: absolute;
@@ -506,7 +495,6 @@
   display: flex;
 }
 
-/* Arrow pointing down (toward the block) */
 .block-tooltip::before {
   content: "";
   position: absolute;
@@ -586,7 +574,6 @@
   justify-content: center;
   z-index: 200;
   padding: 16px;
-  padding-top: 64px;
 }
 
 /* ── Modal ── */
@@ -921,7 +908,7 @@
   cursor: not-allowed;
 }
 
-/* ── Checkbox (inside modal-body) ── */
+/* ── Checkbox ── */
 .checkbox-label {
   display: flex !important;
   align-items: center;
@@ -941,7 +928,7 @@
   .timetable-card-header {
     padding: 12px 14px;
   }
-  
+
   .btn-edit span,
   .btn-delete span {
     display: none;
@@ -982,15 +969,19 @@
 /* ── Mobile (≤ 520px) ── */
 @media (max-width: 520px) {
   .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
+    align-items: center;
+    padding: 16px;
   }
 
   .modal,
   .modal--large {
     max-width: 100%;
-    max-height: 90dvh;
-    border-radius: 16px 16px 0 0;
+    max-height: 82dvh;
+    border-radius: 14px;
+  }
+
+  .modal-body--scroll {
+    max-height: none;
   }
 
   .timetable-header {
