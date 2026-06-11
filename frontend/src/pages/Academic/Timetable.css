@@ -1,7 +1,7 @@
 /* ── Page ── */
 .timetable-page {
   width: 100%;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
 }
 
 /* ── Page Header ── */
@@ -9,20 +9,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .timetable-header h1 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .timetable-header p {
-  font-size: 14px;
+  font-size: 13px;
   color: #6b7280;
 }
 
@@ -30,14 +30,14 @@
 .btn-create {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  font-size: 14px;
+  gap: 7px;
+  padding: 9px 18px;
+  font-size: 13px;
   font-weight: 600;
   color: #ffffff;
   background: #1a3a6b;
   border: none;
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
   transition: background 0.15s ease;
   white-space: nowrap;
@@ -51,10 +51,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
   height: 36px;
-  background: #f3f4f6;
-  border: none;
+  padding: 0 12px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
   color: #6b7280;
@@ -62,13 +62,9 @@
 }
 
 .btn-icon:hover {
-  background: #e5e7eb;
+  background: #f3f4f6;
+  border-color: #9ca3af;
   color: #111827;
-}
-
-.btn-icon--danger:hover {
-  background: #fee2e2;
-  color: #dc2626;
 }
 
 /* ── Empty State ── */
@@ -76,35 +72,36 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 64px 24px;
+  gap: 14px;
+  padding: 56px 24px;
   background: #ffffff;
   border: 1px dashed #d1d5db;
   border-radius: 12px;
   color: #9ca3af;
+  text-align: center;
 }
 
 .timetable-empty p {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 /* ── Timetable List ── */
 .timetable-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 /* ── Timetable Card ──
-   FIX: overflow changed from hidden → visible so that the compact-block
-   tooltip (absolutely positioned) is not clipped on the top row.
-   The card border-radius is preserved via the header's border-bottom. */
+   overflow:visible is critical — it lets the compact-block tooltip
+   escape the card boundary instead of being clipped.               */
 .timetable-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: visible;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 /* ── Card Header ── */
@@ -112,12 +109,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-bottom: 1px solid #e5e7eb;
-  gap: 12px;
-  /* Keep header corners rounded now that the card is overflow:visible */
+  gap: 10px;
   border-radius: 12px 12px 0 0;
   background: #ffffff;
+  flex-wrap: wrap;
 }
 
 .timetable-card-title {
@@ -125,10 +122,11 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  flex: 1;
 }
 
 .timetable-card-title h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #111827;
   margin: 0;
@@ -140,12 +138,12 @@
 .timetable-meta-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .timetable-meta {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
   background: #f3f4f6;
   padding: 2px 8px;
@@ -161,7 +159,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   padding: 2px 9px;
   border-radius: 20px;
@@ -208,6 +206,7 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 /* ── Edit button ── */
@@ -215,7 +214,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 6px 11px;
   font-size: 12px;
   font-weight: 600;
   color: #1a3a6b;
@@ -237,7 +236,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 6px 11px;
   font-size: 12px;
   font-weight: 600;
   color: #dc2626;
@@ -259,7 +258,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  padding: 0 12px;
   height: 32px;
   background: #f3f4f6;
   border: none;
@@ -275,21 +274,24 @@
   color: #111827;
 }
 
-/* ── Grid Wrapper ──*/
+/* ── Grid Wrapper ──
+   overflow-x:auto for horizontal scroll on small screens.
+   overflow-y:visible so the tooltip (position:absolute on the block)
+   is never clipped vertically. isolation is intentionally omitted —
+   it creates a stacking context that clips the tooltip.              */
 .timetable-grid-wrapper {
   overflow-x: auto;
   overflow-y: visible;
   padding: 16px;
-  padding-bottom: 32px;
+  padding-bottom: 28px;
   position: relative;
   border-radius: 0 0 12px 12px;
-  isolation: isolate;
 }
 
 /* ── Grid ── */
 .timetable-grid {
   display: grid;
-  min-width: 500px;
+  min-width: 480px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   overflow: visible;
@@ -316,8 +318,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 8px;
-  font-size: 13px;
+  padding: 10px 6px;
+  font-size: 12px;
   font-weight: 600;
   color: #374151;
   background: #f8f9fb;
@@ -341,7 +343,6 @@
   border-right: 1px solid #e5e7eb;
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
-  background-color: #fafafa;
   white-space: nowrap;
   position: sticky;
   left: 0;
@@ -373,15 +374,13 @@
   gap: 0;
   z-index: 3;
   cursor: default;
-  transition:
-    filter 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
   position: relative;
 }
 
 .grid-class-block:hover {
-  filter: brightness(0.93);
+  filter: brightness(0.92);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   z-index: 10;
 }
@@ -440,22 +439,22 @@
 }
 
 /* ── Hover Tooltip ──
-   Default position: above the block.
-   The primary fix is overflow:visible on the card/grid so it's no longer
-   clipped. The --top-row modifier flips it below when on the first row.  */
+   Renders ABOVE the block by default.
+   z-index:9999 ensures it sits above the card and surrounding layout.
+   The --top-row modifier flips it below when on the first grid row.  */
 .block-tooltip {
   display: none;
   position: absolute;
   bottom: calc(100% + 6px);
   top: auto;
   left: 0;
-  z-index: 100;
+  z-index: 9999;
   background: #1e293b;
   color: #ffffff;
   border-radius: 10px;
   padding: 10px 14px;
-  min-width: 180px;
-  max-width: 260px;
+  min-width: 160px;
+  max-width: 240px;
   flex-direction: column;
   gap: 4px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
@@ -501,6 +500,7 @@
   display: flex;
 }
 
+/* Arrow pointing down (toward the block) */
 .block-tooltip::before {
   content: "";
   position: absolute;
@@ -514,9 +514,7 @@
   border-radius: 2px;
 }
 
-/* ── Top-row tooltip flip ──
-   Applied via JS to compact blocks in the first visible grid row.
-   Renders the tooltip BELOW the block instead of above it.              */
+/* ── Top-row flip: tooltip renders BELOW ── */
 .grid-class-block--top-row .block-tooltip {
   bottom: auto;
   top: calc(100% + 6px);
@@ -528,23 +526,29 @@
 }
 
 /* ── Loading / Error States ── */
-.groups-loading,
+.groups-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6b7280;
+  font-size: 14px;
+  padding: 40px 0;
+}
+
 .groups-error {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 64px 24px;
-  color: #6b7280;
+  align-items: flex-start;
+  gap: 10px;
+  color: #b91c1c;
   font-size: 14px;
-}
-
-.groups-error {
-  color: #dc2626;
+  padding: 20px;
+  background: #fee2e2;
+  border-radius: 10px;
 }
 
 .btn-retry {
-  padding: 8px 20px;
+  padding: 7px 16px;
   font-size: 13px;
   font-weight: 600;
   color: #fff;
@@ -554,37 +558,42 @@
   cursor: pointer;
 }
 
+.btn-retry:hover {
+  background: #1d4ed8;
+}
+
 .spinner {
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* ── Modal ── */
+/* ── Modal Overlay ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 200;
   padding: 16px;
+  padding-top: 64px;
 }
 
+/* ── Modal ── */
 .modal {
   background: #ffffff;
   border-radius: 14px;
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
+  max-height: 88dvh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
 .modal--large {
@@ -595,11 +604,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 0;
+  padding: 18px 22px 0;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: #111827;
 }
@@ -611,10 +621,14 @@
   color: #6b7280;
   display: flex;
   align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
 }
 
 .modal-close:hover {
   color: #111827;
+  background: #f3f4f6;
 }
 
 /* ── Step Indicator ── */
@@ -622,13 +636,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 24px 0;
+  padding: 14px 22px 0;
+  flex-shrink: 0;
 }
 
 .step {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-size: 13px;
   color: #9ca3af;
   font-weight: 500;
@@ -638,17 +653,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #e5e7eb;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .step--active {
   color: #2563eb;
 }
+
 .step--active span {
   background: #2563eb;
   color: #fff;
@@ -660,21 +676,36 @@
   background: #e5e7eb;
 }
 
+/* ── Modal Error ── */
+.modal-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 22px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
 /* ── Modal Body ── */
 .modal-body {
-  padding: 20px 24px;
+  padding: 18px 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   overflow-y: auto;
+  flex: 1;
 }
 
 .modal-body--scroll {
-  max-height: 420px;
+  max-height: 400px;
 }
 
 .modal-body label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #374151;
 }
@@ -688,8 +719,8 @@
 .modal-body select,
 .modal-body textarea {
   width: 100%;
-  padding: 9px 12px;
-  font-size: 14px;
+  padding: 8px 11px;
+  font-size: 13px;
   color: #111827;
   border: 1.5px solid #d1d5db;
   border-radius: 8px;
@@ -701,12 +732,13 @@
 }
 
 .modal-body input:focus,
-.modal-body select:focus {
+.modal-body select:focus,
+.modal-body textarea:focus {
   border-color: #3b82f6;
 }
 
 .field-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: #9ca3af;
   margin-top: -4px;
 }
@@ -715,10 +747,10 @@
 .class-row {
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
-  padding: 14px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   background: #fafafa;
 }
 
@@ -729,14 +761,14 @@
 }
 
 .color-indicator {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .class-row-num {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #374151;
   flex: 1;
@@ -761,7 +793,7 @@
 .class-row-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .field-group {
@@ -771,15 +803,15 @@
 }
 
 .field-group label {
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 500 !important;
   color: #6b7280 !important;
 }
 
 .field-group input,
 .field-group select {
-  padding: 7px 10px !important;
-  font-size: 13px !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
 }
 
 /* ── Color Picker ── */
@@ -787,12 +819,12 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  padding: 4px 0;
+  padding: 3px 0;
 }
 
 .color-dot {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -815,12 +847,12 @@
   justify-content: center;
   gap: 6px;
   padding: 10px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1a3a6b;
   background: #eff6ff;
   border: 1.5px dashed #93c5fd;
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
   width: 100%;
   transition: background 0.15s;
@@ -834,20 +866,23 @@
 .modal-footer {
   display: flex;
   gap: 10px;
-  padding: 0 24px 20px;
+  padding: 12px 22px 18px;
   margin-top: auto;
+  flex-shrink: 0;
+  border-top: 1px solid #f3f4f6;
 }
 
 .btn-cancel {
   flex: 1;
-  padding: 10px;
-  font-size: 14px;
+  padding: 9px;
+  font-size: 13px;
   font-weight: 600;
   color: #374151;
   background: #fff;
   border: 1.5px solid #d1d5db;
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .btn-cancel:hover {
@@ -856,88 +891,128 @@
 
 .btn-submit {
   flex: 1;
-  padding: 10px;
-  font-size: 14px;
+  padding: 9px;
+  font-size: 13px;
   font-weight: 600;
   color: #fff;
   background: #1a3a6b;
   border: none;
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s;
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   background: #1d4ed8;
 }
 
-.modal-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 24px 0;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 8px;
+.btn-submit:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
 }
 
-/* ── Responsive ── */
+/* ── Checkbox (inside modal-body) ── */
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.checkbox-label input {
+  width: auto !important;
+  cursor: pointer;
+}
+
+/* ── Tablet (≤ 768px) ── */
 @media (max-width: 768px) {
+  .timetable-card-header {
+    padding: 12px 14px;
+  }
+
+  .btn-edit span,
+  .btn-delete span {
+    display: none;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    padding: 6px 8px;
+  }
+
   .class-row-fields {
     grid-template-columns: 1fr;
   }
+
   .grid-day-full {
     display: none;
   }
+
   .grid-day-short {
     display: block;
   }
+
   .block-subject {
     font-size: 10px;
     padding: 3px 5px 2px;
   }
+
   .block-location {
     font-size: 10px;
     padding: 0 5px 3px;
   }
+
   .grid-class-block {
     margin: 1px 2px;
   }
-  .btn-delete span {
-    display: none;
-  }
-  .btn-delete {
-    padding: 6px 8px;
-  }
-  .btn-edit span {
-    display: none;
-  }
-  .btn-edit {
-    padding: 6px 8px;
-  }
 }
 
-@media (max-width: 480px) {
-  .timetable-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .timetable-grid-wrapper {
+/* ── Mobile (≤ 520px) ── */
+@media (max-width: 520px) {
+  .modal-overlay {
+    align-items: flex-end;
     padding: 0;
   }
 
-  .btn-create {
-    width: 100%;
-    justify-content: center;
-  }
+  .modal,
   .modal--large {
     max-width: 100%;
+    max-height: 90dvh;
+    border-radius: 16px 16px 0 0;
   }
+
+  .timetable-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .timetable-header > div:last-child {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-create {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .timetable-grid-wrapper {
+    padding: 8px;
+    padding-bottom: 20px;
+  }
+
   .block-location {
     display: none;
   }
+
   .timetable-meta-row {
     flex-wrap: wrap;
   }
