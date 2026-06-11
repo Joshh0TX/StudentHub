@@ -41,9 +41,8 @@
   border-radius: 9px;
   cursor: pointer;
   transition: background 0.15s ease;
-  white-space: nowrap;
-  flex: 0 0 auto;
-  width: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .btn-create:hover {
