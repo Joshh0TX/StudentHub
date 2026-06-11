@@ -72,6 +72,7 @@
 .timetable-empty {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   gap: 14px;
   padding: 56px 24px;
