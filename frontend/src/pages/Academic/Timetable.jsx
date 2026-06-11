@@ -903,10 +903,8 @@ const Timetable = () => {
 
       {timetables.length === 0 ? (
         <div className="timetable-empty">
-          <div style={{ display:'flex', flexDirection:'column', gap:'10px'}}>
-            <Clock size={40} color="#d1d5db" />
-            <p>No timetables yet.</p>
-          </div>
+          <Clock size={40} color="#d1d5db" />
+          <p>No timetables yet.</p>
           <button className="btn-create" onClick={() => setShowModal(true)}>
             <Plus size={16} /> Create your first timetable
           </button>
