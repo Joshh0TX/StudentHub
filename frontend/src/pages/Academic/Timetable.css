@@ -29,6 +29,7 @@
 /* ── Buttons ── */
 .btn-create {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 7px;
   padding: 9px 18px;
@@ -935,10 +936,7 @@
   .timetable-card-header {
     padding: 12px 14px;
   }
-  .btn-create{
-    display: flex;
-    justify-content: center;
-  }
+  
   .btn-edit span,
   .btn-delete span {
     display: none;
