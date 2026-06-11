@@ -43,6 +43,7 @@
   transition: background 0.15s ease;
   margin-left: auto;
   margin-right: auto;
+  width: fit-content;
 }
 
 .btn-create:hover {
