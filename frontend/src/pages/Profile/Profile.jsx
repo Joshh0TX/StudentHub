@@ -206,7 +206,7 @@ const StudentProfile = () => {
   // Inside the StudentProfile component body, add this state bucket:
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   // Project list array configuration states
   const [projectsList, setProjectsList] = useState([]);
   // Project modal visibility routing flags
@@ -319,17 +319,7 @@ useEffect(() => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  if (profileLoading || !profileData) {
-  return (
-    <div className="profile-page-container fallback-loading-wrapper" data-theme={theme}>
-      <div className="profile-loading-minimal">
-        <div className="spinner-element" />
-        <h3>Loading Profile...</h3>
-        <p>Fetching your Stuudo dashboard layout records.</p>
-      </div>
-    </div>
-  );
-}
+
 
   return (
     <div className="profile-page-container" data-theme={theme}>
@@ -338,13 +328,15 @@ useEffect(() => {
       
       <div className="profile-content-layout">
         {/* 2. Passed isOwner and state handlers to the Sidebar Card */}
-        <ProfileInfoCard 
-  theme={theme} 
-  onToggleTheme={toggleTheme} 
-  isOwner={isOwner} 
-  setIsOwner={setIsOwner}
-  profileData={profileData} /* Pass down */
-/>
+        {profileData && (
+  <ProfileInfoCard 
+    theme={theme} 
+    onToggleTheme={toggleTheme} 
+    isOwner={isOwner} 
+    setIsOwner={setIsOwner}
+    profileData={profileData} 
+  />
+)}
         
         {/* Right Content Area */}
         <div className="profile-main-display-area">
@@ -355,49 +347,57 @@ useEffect(() => {
           {/* Main Context Display Box Container */}
           {/* Main Context Display Box Container */}
 <div className="profile-content-display-box">
-  {(() => {
-    switch (activeTab) {
-      case 'About':
-  return (
-    <AboutTab 
-      isOwner={isOwner} 
-      profileData={profileData} 
-      onOpenEdit={() => setIsModalOpen(true)} /* Send modal trigger down */
-    />
-  );
-      case 'Projects':
-  return (
-    <ProjectsTab 
-      isOwner={isOwner}
-      projectsData={projectsList}
-      onOpenAddModal={handleOpenAddProject}
-      onOpenEditModal={handleOpenEditProject}
-      onDeleteProject={handleDeleteProjectCard}
-    />
-  );
-      case 'Achievements':
-  return (
-    <AchievementsTab 
-      isOwner={isOwner}
-      achievementsData={achievementsList}
-      onOpenAddModal={handleOpenAddAchieve}
-      onOpenEditModal={handleOpenEditAchieve}
-      onDeleteAchievement={handleDeleteAchieveCard}
-    />
-  );
-      case 'My Shop':
-  return (
-    <MyShopTab 
-      isOwner={isOwner}
-      shopProductsData={shopProductsList}
-      storeData={storeData}
-      isLoading={shopLoading}
-    />
-  );
-      default:
-        return <AboutTab isOwner={isOwner} profileData={profileData} onOpenEdit={() => setIsModalOpen(true)} />;
-    }
-  })()}
+  {/* 🛠️ ADD THE SAFETY CHECK WRAPPER AROUND THE INNER MOUNT SWITCH HOOK */}
+  {profileData ? (
+    (() => {
+      switch (activeTab) {
+        case 'About':
+          return (
+            <AboutTab 
+              isOwner={isOwner} 
+              profileData={profileData} 
+              onOpenEdit={() => setIsModalOpen(true)} 
+            />
+          );
+        case 'Projects':
+          return (
+            <ProjectsTab 
+              isOwner={isOwner}
+              projectsData={projectsList}
+              onOpenAddModal={handleOpenAddProject}
+              onOpenEditModal={handleOpenEditProject}
+              onDeleteProject={handleDeleteProjectCard}
+            />
+          );
+        case 'Achievements':
+          return (
+            <AchievementsTab 
+              isOwner={isOwner}
+              achievementsData={achievementsList}
+              onOpenAddModal={handleOpenAddAchieve}
+              onOpenEditModal={handleOpenEditAchieve}
+              onDeleteAchievement={handleDeleteAchieveCard}
+            />
+          );
+        case 'My Shop':
+          return (
+            <MyShopTab 
+              isOwner={isOwner}
+              shopProductsData={shopProductsList}
+              storeData={storeData}
+              isLoading={shopLoading}
+            />
+          );
+        default:
+          return <AboutTab isOwner={isOwner} profileData={profileData} onOpenEdit={() => setIsModalOpen(true)} />;
+      }
+    })()
+  ) : (
+    /* 🛠️ ADD THIS MINIMALIST INSIDE-THE-BOX LOADING PLACEHOLDER */
+    <div className="placeholder-panel-text">
+      <h3>Loading Details...</h3>
+    </div>
+  )}
 </div>
 
         </div>

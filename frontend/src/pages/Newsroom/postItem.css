@@ -6,14 +6,33 @@
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: transform 0.2s ease;
+  
+  /* 🛠️ NEW: Set layout to a horizontal line grid across all screens */
+  display: flex;
+  gap: 12px;
+}
+/* --- OPTION A FLEX COLUMNS ENGINE --- */
+.post-avatar-column {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.post-content-main-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents long titles/code strings from exploding container boundaries */
 }
 
 /* Header */
 .post-header {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px; /* Slightly tighter text gap */
+  width: 100%;
 }
 
 .user-meta .user-name {
@@ -109,11 +128,12 @@
 /* --- UPDATE THIS BLOCK --- */
 .post-interactions {
   display: flex !important;
-  justify-content: flex-start !important; /* Force items to start on the left */
+  justify-content: flex-start !important;
   align-items: center !important;
-  gap: 12px !important;                   /* Sneak them close together */
+  gap: 12px !important;
   border-top: 1px solid #f1f5f9;
   padding-top: 12px;
+  margin-top: 4px;
   width: 100%;
 }
 

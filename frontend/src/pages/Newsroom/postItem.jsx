@@ -272,138 +272,145 @@ const PostItem = ({ post, currentUser }) => {
 
   return (
     <div className="amebo-post-item">
-  {/* Header */}
-  <div className="post-header">
-  <img
-    src={post.userImg}
-    alt={post.userName}
-    className="mini-avatar"
-    onClick={handleProfileClick}
-    style={{ cursor: 'pointer' }}
-  />
-  <div className="user-meta">
-    <h4 className="user-name" onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
-      {post.userName}
-    </h4>
-    <span className="post-time">{post.timestamp}</span>
-  </div>
-
-  {/* NEW WRAPPER BLOCK FOR THE OPTIONS AND DROPDOWN */}
-  <div className="post-menu-wrapper">
-    <button className="more-options" onClick={() => setShowMenu(!showMenu)}>
-      <MoreHorizontal size={18} />
-    </button>
-    
-    {showMenu && (
-      <div className="post-dropdown-menu">
-        {post.userId === storedUser?.id && (
-          <button 
-            className="dropdown-item delete-item" 
-            onClick={() => {
-              handleDeletePost();
-              setShowMenu(false);
-            }}
-          >
-            <Trash2 size={14} />
-            <span>Delete Post</span>
-          </button>
-        )}
-        {/* You can easily drop more options here in the future like Edit or Report */}
+      {/* 🚀 LEFT COLUMN: Dedicated exclusively to the profile avatar axis */}
+      <div className="post-avatar-column">
+        <img
+          src={post.userImg}
+          alt={post.userName}
+          className="mini-avatar"
+          onClick={handleProfileClick}
+          style={{ cursor: 'pointer' }}
+        />
       </div>
-    )}
-  </div>
-</div>
 
-      {/* Body */}
-      <div className="post-body">
-        {/* 🛠️ REPLACE YOUR ENTIRE EXISTING <p className="post-text"> CODE WITH THIS: */}
-        <p className="post-text">
-          {renderContentWithHashtags(getRenderedContent(), navigate) || ""}
-          
-          {isLongPost && (
-            <button 
-              type="button" 
-              className="text-expand-toggle-link"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? " Show Less" : " Read More"}
+      {/* 🚀 RIGHT COLUMN: Handles all text, menus, media, and comments in one unified stack */}
+      <div className="post-content-main-column">
+        
+        {/* Header Metadata Track */}
+        <div className="post-header">
+          <div className="user-meta">
+            <h4 className="user-name" onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
+              {post.userName}
+            </h4>
+            <span className="post-time">{post.timestamp}</span>
+          </div>
+
+          <div className="post-menu-wrapper">
+            <button className="more-options" onClick={() => setShowMenu(!showMenu)}>
+              <MoreHorizontal size={18} />
             </button>
+            
+            {showMenu && (
+              <div className="post-dropdown-menu">
+                {post.userId === storedUser?.id && (
+                  <button 
+                    className="dropdown-item delete-item" 
+                    onClick={() => {
+                      handleDeletePost();
+                      setShowMenu(false);
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    <span>Delete Post</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Post Text Body content area */}
+        <div className="post-body">
+          <p className="post-text">
+            {renderContentWithHashtags(getRenderedContent(), navigate) || ""}
+            
+            {isLongPost && (
+              <button 
+                type="button" 
+                className="text-expand-toggle-link"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded ? " Show Less" : " Read More"}
+              </button>
+            )}
+          </p>
+          
+          {post.postImage && (
+            <div className="post-media">
+              <img src={post.postImage} alt="Post content" loading="lazy" />
+            </div>
           )}
-        </p>
-        {post.postImage && (
-          <div className="post-media">
-            <img src={post.postImage} alt="Post content" loading="lazy" />
+
+          {post.postVideo && (
+            <div className="post-media">
+              <video src={post.postVideo} controls style={{ width: '100%', borderRadius: '12px' }} />
+            </div>
+          )}
+        </div>
+
+        {/* Action Interaction Buttons Toolbar */}
+        <div className="post-interactions">
+          <button
+            type="button"
+            className={`interact-btn ${isLiked ? 'active-like' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart size={18} fill={isLiked ? "#ef4444" : "none"} color={isLiked ? "#ef4444" : "currentColor"} />
+            <span>{likeCount}</span>
+          </button>
+
+          <button className="interact-btn" type="button" onClick={() => setShowComments(!showComments)}>
+            <MessageCircle size={18} /> <span>{comments.length || post.comments}</span>
+          </button>
+
+          <button className="interact-btn" type="button">
+            <Share2 size={18} /> <span>Share</span>
+          </button>
+        </div>
+
+        {/* Threaded Comments List wrapper */}
+        {showComments && (
+          <div className="comments-list">
+            {comments.map((c) => (
+              <CommentNode
+                key={c.id}
+                comment={c}
+                postId={post.id}
+                currentUserId={storedUser?.id}
+                depth={0}
+              />
+            ))}
           </div>
         )}
-      </div>
 
-      {post.postVideo && (
-  <div className="post-media">
-    <video src={post.postVideo} controls style={{ width: '100%', borderRadius: '12px' }} />
-  </div>
-)}
-
-      {/* Interactions */}
-      <div className="post-interactions">
-        <button
-          type="button"
-          className={`interact-btn ${isLiked ? 'active-like' : ''}`}
-          onClick={handleLike}
-        >
-          <Heart size={18} fill={isLiked ? "#ef4444" : "none"} color={isLiked ? "#ef4444" : "currentColor"} />
-          <span>{likeCount}</span>
-        </button>
-
-        <button className="interact-btn" type="button" onClick={() => setShowComments(!showComments)}>
-          <MessageCircle size={18} /> <span>{comments.length || post.comments}</span>
-        </button>
-
-        <button className="interact-btn" type="button">
-          <Share2 size={18} /> <span>Share</span>
-        </button>
-      </div>
-
-      {/* Comments Section */}
-        {showComments && (
-  <div className="comments-list">
-    {comments.map((c) => (
-      <CommentNode
-        key={c.id}
-        comment={c}
-        postId={post.id}
-        currentUserId={storedUser?.id}
-        depth={0}
-      />
-    ))}
-  </div>
-      )}
-
-      {/* Comment Input */}
-      <div className="post-comment-section">
-        <img
-          src={
-            storedUser?.profile_pic ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`
-          }
-          className="comment-avatar"
-          alt="User"
-          onError={(e) => {
-            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`;
-          }}
-        />
-        <form className="comment-form" onSubmit={handleSubmitComment}>
-          <input
-            type="text"
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
+        {/* Bottom Comment Input row alignment */}
+        <div className="post-comment-section">
+          <img
+            src={
+              storedUser?.profile_pic ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`
+            }
+            className="comment-avatar"
+            alt="User"
+            onError={(e) => {
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${storedUser?.f_name || ''} ${storedUser?.l_name || ''}`)}&background=random`;
+            }}
           />
-          {comment.trim() && (
-            <button type="submit" className="comment-send-btn">
-              <Send size={16} />
-            </button>
-          )}
-        </form>
+          <form className="comment-form" onSubmit={handleSubmitComment}>
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+            {comment.trim() && (
+              <button type="submit" className="comment-send-btn">
+                <Send size={16} />
+              </button>
+            )}
+          </form>
+        </div>
+
       </div>
     </div>
   );
