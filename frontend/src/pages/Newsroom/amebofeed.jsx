@@ -228,7 +228,7 @@ export default function AmeboFeed({ user }) {
           comments: p._count.comments || 0,
         }} currentUser={user} />
       ))}
-        <div className="feed-status">No more Gist for now.</div>
+        
       </div>
     </div>
   );

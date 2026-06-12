@@ -49,9 +49,23 @@
   overflow-y: auto;
 }
 
+/* 🚀 THE ULTIMATE SCROLLBAR WIDGET WIPEOUT TRACK */
+
+/* 1. Clear scrollbars for Safari, Chrome, and WebKit mobile browser views */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
 .column-left::-webkit-scrollbar,
-.column-center::-webkit-scrollbar, /* Added center here */
+.column-center::-webkit-scrollbar, 
 .column-right::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 2. Clear scrollbars for Firefox and Legacy Explorer web layouts */
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.mobile-floating-post-btn {
   display: none;
 }
 
@@ -83,5 +97,38 @@
     position: relative; /* Reverts sticky bounds so mobile feeds scroll natively */
     top: 0;
     height: auto;
+  }
+  /* Activate and format the floating action badge on mobile screen scales */
+  .mobile-floating-post-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* 📌 FIXED COORDINATES: Pins it to the bottom right of the phone screen */
+    position: fixed;
+    bottom: 90px; /* Kept at 90px so it sits cleanly ABOVE your floating bottom navigation pill track */
+    right: 24px;
+    z-index: 999; /* Ensures it floats above card texts and images */
+    
+    /* 🎨 MATERIAL DESIGN FAB STYLE */
+    width: 56px;
+    height: 56px;
+    background-color: #3b82f6; /* Stuudo signature blue accent */
+    color: #ffffff;
+    border: none;
+    outline: none;
+    border-radius: 50%; /* Forces a perfect interactive circle shape */
+    cursor: pointer;
+    
+    /* Solid premium application lift elevation drop-shadow */
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4), 
+                0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+  }
+
+  /* Micro-interaction scale bounce on thumb press down gestures */
+  .mobile-floating-post-btn:active {
+    transform: scale(0.92);
+    background-color: #2563eb; /* Slightly deepens blue on click feedback */
   }
 }

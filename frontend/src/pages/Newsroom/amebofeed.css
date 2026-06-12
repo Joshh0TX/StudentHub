@@ -141,33 +141,13 @@
   transform: translateY(-1px);
 }
 
-/* --- FEED STATUS --- */
-.feed-status {
-  width: 100%;
-  text-align: center;
-  padding: 60px 40px;
-  color: #94a3b8;
-  font-style: italic;
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #edf2f7;
-}
+
 /* ============================================================================
    MOBILE COMPACT POST BOX RULES
    ============================================================================ */
 @media (max-width: 768px) {
   .amebo-post-card {
-    background: #f9fafb !important;   /* Enforces full white canvas backdrop */
-    padding: 12px 4px !important;    /* Pulls layout flush toward the screen edges */
-    
-    /* 🛠️ THE CRUCIAL KILLS: Nukes all remaining desktop card structures */
-    border: none !important;         
-    box-shadow: none !important;     
-    border-radius: 0 !important;     
-    
-    /* 🎨 OPTIONAL: Adds a subtle, sleek bottom line divider to separate posts */
-    border-bottom: 1px solid #f1f5f9 !important; 
-    margin-bottom: 12px !important;
+    display:none !important; /* Hides the desktop post card entirely on mobile */
   }
   .post-input-row textarea{
     background: transparent !important; /* Strips the white box background for a more native mobile feel */

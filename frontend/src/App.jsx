@@ -16,6 +16,7 @@ import SearchPage from "./pages/Marketplace/SearchPage.jsx";
 import MyOrders from "./pages/Marketplace/MyOrders.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
 import NewsHome from "./pages/Newsroom/NewsHome.jsx";
+import CreatePost from './pages/Newsroom/CreatePost.jsx';
 import Timetable from "./pages/Academic/Timetable.jsx";
 import Landing from "./pages/Landing/Landing.jsx";
 import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
@@ -49,6 +50,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/notifications" element={<NotificationsPage/>} />
         <Route path="/newsroom" element={<NewsHome />} />
+        <Route path="/newsroom/create" element={<CreatePost />} />
       </Route>
     </Routes>
   );

@@ -301,6 +301,25 @@
   transform: scale(1.15);
 }
 
+/* --- SCROLLING ANIMATIONS CLASS ADDITIONS --- */
+
+/* Add transitions to the desktop header */
+.site-header {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Slide top header up out of view */
+.site-header.nav-hidden {
+  transform: translateY(-56px); 
+}
+
+/* Add transitions to the mobile bottom wrapper */
+.mobile-pill-bottom-nav {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
 /* ============================================================================
    MOBILE RESPONSIVE BREAKPOINT DEFINITIONS
    ============================================================================ */
@@ -377,5 +396,8 @@
     color: #3b82f6;
     transform: scale(1.2) translateY(-2px); /* Pops the active tab icon up slightly */
     background: transparent;
+  }
+  .mobile-pill-bottom-nav.nav-hidden {
+    transform: translateY(110px); 
   }
 }

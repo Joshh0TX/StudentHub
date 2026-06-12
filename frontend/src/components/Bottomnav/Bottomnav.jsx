@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Home, ShoppingBag, BookOpen, Bell, LogOut, Search, User } from 'lucide-react';
 import './Bottomnav.css';
@@ -37,9 +37,30 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isFocused, setIsFocused] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isNavHidden, setIsNavHidden] = useState(false);
+const lastScrollY = useRef(0);
   const searchRef = useRef(null);
 
   useEffect(() => {
+  const handleScroll = () => {
+  const currentScrollY = window.scrollY;
+
+  // Don't trigger if the user is bouncing at the very top of the page
+  if (currentScrollY < 10) {
+    setIsNavHidden(false);
+    return;
+  }
+
+  if (currentScrollY > lastScrollY.current) {
+    setIsNavHidden(true); // Scrolling Down -> Hide
+  } else {
+    setIsNavHidden(false); // Scrolling Up -> Show
+  }
+
+  lastScrollY.current = currentScrollY;
+};
+
+window.addEventListener("scroll", handleScroll, { passive: true });
   function handleClickOutside(event) {
     // If the click happened outside the search bar wrapper
     if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -53,6 +74,7 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
   return () => {
     // Clean up listener when component unmounts
     document.removeEventListener("mousedown", handleClickOutside);
+    window.removeEventListener("scroll", handleScroll);
   };
 }, []);
 
@@ -70,7 +92,7 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
 
   return (
   <>
-    <header className="site-header">
+    <header className={`site-header ${isNavHidden ? 'nav-hidden' : ''}`}>
       {/* 1. Left Section */}
       <div className="header-left">
         <Link to="/newsroom" className="logo-anchor">
@@ -149,7 +171,7 @@ export default function TopNav({ isDarkMode, toggleTheme}) {
         </Link> 
       </div>
     </header>
-    <nav className="mobile-pill-bottom-nav">
+    <nav className={`mobile-pill-bottom-nav ${isNavHidden ? 'nav-hidden' : ''}`}>
         <div className="mobile-pill-items-wrapper">
           <NavIcon to="/newsroom" Icon={Home} />
           <NavIcon to="/marketplace" Icon={ShoppingBag} />
