@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-
 const groupRoutes = require('./modules/academic/routes/groups.routes');
 const resourceRoutes = require('./modules/academic/routes/resources.routes');
 const userRoutes = require('./modules/users/routes');
@@ -10,7 +9,7 @@ const marketplaceRoutes = require("./modules/marketplace/marketplace.routes");
 const timetableRoutes = require("./modules/academic/routes/timetable.routes");
 const postRoutes = require('./modules/social/post.routes');
 const friendRoutes = require('./modules/social/friend.routes');
-
+const notificationRoutes = require('./modules/notifications/notification.routes'); // ← ADD
 
 const app = express();
 app.use(cors({
@@ -36,6 +35,7 @@ app.use("/api/products", marketplaceRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/posts', require('./modules/social/comment.routes'));
+app.use('/api/notifications', notificationRoutes); // ← ADD
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

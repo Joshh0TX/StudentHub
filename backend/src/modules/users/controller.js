@@ -60,3 +60,14 @@ exports.getUserProfile = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 1) return res.json([]);
+    const results = await userService.searchUsers(q.trim());
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

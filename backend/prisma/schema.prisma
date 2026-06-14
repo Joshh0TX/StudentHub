@@ -38,12 +38,12 @@ model User {
   createdCourses    Course[]       @relation("UserCreatedCourses")
 
   // Social
-  posts     Post[]
-  comments  Comment[]
+  posts        Post[]
+  comments     Comment[]
   commentLikes CommentLike[]
-  likes     Like[]
-  followers Follow[] @relation("followers")
-  following Follow[] @relation("following")
+  likes        Like[]
+  followers    Follow[] @relation("followers")
+  following    Follow[] @relation("following")
 
   // Existing features
   resources           Resource[]
@@ -65,6 +65,10 @@ model User {
   // Roles
   courseRepOf  CourseRep?
   assignedReps CourseRep[] @relation("AssignedBy")
+
+  // Notifications ← ADDED
+  notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsSent     Notification[] @relation("NotificationsSent")
 }
 
 model Course {
@@ -149,10 +153,10 @@ model Post {
   userId    String
   createdAt DateTime @default(now())
 
-  user     User      @relation(fields: [userId], references: [id])
+  user     User          @relation(fields: [userId], references: [id])
   comments Comment[]
-  likes     Like[]
-  hashtags  PostHashtag[]
+  likes    Like[]
+  hashtags PostHashtag[]
 }
 
 model Like {
@@ -237,17 +241,17 @@ model StudyGroup {
   createdBy    String
   createdAt    DateTime @default(now())
 
-  creator   User               @relation(fields: [createdBy], references: [id])
+  creator   User                 @relation(fields: [createdBy], references: [id])
   resources Resource[]
   members   StudyGroupMember[]
   schedules StudyGroupSchedule[]
 }
 
 model StudyGroupMember {
-  id       String     @id @default(cuid())
+  id       String   @id @default(cuid())
   groupId  String
   userId   String
-  joinedAt DateTime   @default(now())
+  joinedAt DateTime @default(now())
 
   group StudyGroup @relation(fields: [groupId], references: [id])
   user  User       @relation(fields: [userId], references: [id])
@@ -262,11 +266,9 @@ model StudyGroupSchedule {
   title       String
   date_time   DateTime
   location    String?
-
   is_online   Boolean  @default(false)
   meeting_url String?
   notes       String?
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -289,11 +291,10 @@ model Resource {
   uploadedBy  String
   createdAt   DateTime @default(now())
 
-  //for file uploads
-  isFile      Boolean  @default(false)
-  fileName    String?
-  fileSize    Int?
-  mimeType    String?
+  isFile    Boolean @default(false)
+  fileName  String?
+  fileSize  Int?
+  mimeType  String?
 
   group    StudyGroup? @relation(fields: [groupId], references: [id])
   uploader User        @relation(fields: [uploadedBy], references: [id])
@@ -406,4 +407,20 @@ model FriendRequest {
   receiver User @relation("RequestsReceived", fields: [receiverId], references: [id])
 
   @@unique([senderId, receiverId])
+}
+
+// ← ADDED
+model Notification {
+  id          String   @id @default(uuid())
+  recipientId String
+  senderId    String
+  type        String
+  message     String
+  isRead      Boolean  @default(false)
+  postId      String?
+  commentId   String?
+  createdAt   DateTime @default(now())
+
+  recipient User @relation("NotificationsReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender    User @relation("NotificationsSent", fields: [senderId], references: [id], onDelete: Cascade)
 }

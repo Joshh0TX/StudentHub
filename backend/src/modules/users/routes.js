@@ -13,6 +13,7 @@ router.put('/profile', authMiddleware, userController.updateProfile);
 router.post('/profile/image', authMiddleware, upload.single('image'), userController.uploadProfileImage);
 router.post('/profile/cover', authMiddleware, upload.single('image'), userController.uploadCoverImage);
 router.get('/suggested', authMiddleware, getSuggested); // ← moved up
+router.get('/search', authMiddleware, userController.searchUsers);
 router.get('/:userId', authMiddleware, userController.getUserProfile); // ← after
 router.post('/friend-request/:receiverId', authMiddleware, friendController.sendFriendRequest);
 router.get('/friends/inbound', authMiddleware, friendController.getInboundRequests);

@@ -1,6 +1,6 @@
 const prisma = require("../../config/prisma");
-
 const postService = require('./post.service');
+const { createNotification } = require('../notifications/notification.service');
 
 exports.createPost = async (req, res) => {
   try {
@@ -28,8 +28,7 @@ exports.deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
     const userId = req.user.id;
-
-    const post = await postService.deletePost(postId, userId);
+    await postService.deletePost(postId, userId);
     res.json({ message: 'Post deleted' });
   } catch (error) {
     console.error('Error deleting post:', error);
@@ -39,7 +38,7 @@ exports.deletePost = async (req, res) => {
 
 exports.getTrending = async (req, res) => {
   try {
-    const { period } = req.query; // '24h' or '7d'
+    const { period } = req.query;
     const trending = await postService.getTrending(period || '7d');
     res.json(trending);
   } catch (error) {
@@ -70,10 +69,24 @@ exports.toggleLike = async (req, res) => {
 
     if (existing) {
       await prisma.like.delete({ where: { postId_userId: { postId, userId } } });
-      res.json({ liked: false });
+      return res.json({ liked: false });
     } else {
       await prisma.like.create({ data: { postId, userId } });
-      res.json({ liked: true });
+
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        select: { userId: true }
+      });
+
+      await createNotification({
+        recipientId: post.userId,
+        senderId: userId,
+        type: 'like',
+        message: 'liked your post',
+        postId,
+      });
+
+      return res.json({ liked: true });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });

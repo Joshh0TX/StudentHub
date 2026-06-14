@@ -32,3 +32,27 @@ exports.updateProfile = async (userId, data) => {
     data: updateData,
   });
 };
+
+
+exports.searchUsers = async (query) => {
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        { f_name: { contains: query, mode: 'insensitive' } },
+        { l_name: { contains: query, mode: 'insensitive' } },
+        { email: { contains: query, mode: 'insensitive' } },
+        { course: { contains: query, mode: 'insensitive' } },
+        { department: { contains: query, mode: 'insensitive' } },
+      ]
+    },
+    select: {
+      id: true,
+      f_name: true,
+      l_name: true,
+      profileImage: true,
+      course: true,
+      department: true,
+    },
+    take: 8,
+  });
+};
